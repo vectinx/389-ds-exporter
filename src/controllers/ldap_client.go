@@ -47,6 +47,12 @@ func (c *LdapEntryController) Get() (map[string][]string, error) {
 		return nil, fmt.Errorf("creating ldap connection failed: %w", err)
 	}
 
+	defer func() {
+		if ldapConnection.Close() != nil {
+			log.Printf("Error closing LDAP connection: %s", err)
+		}
+	}()
+
 	err = ldapConnection.Bind(c.bindDn, c.bindPassword)
 	if err != nil {
 		return nil, fmt.Errorf("LDAP bind request failed with error: %w", err)
@@ -77,11 +83,6 @@ func (c *LdapEntryController) Get() (map[string][]string, error) {
 		}
 
 		returnValue[attr.Name] = attr.Values
-	}
-
-	err = ldapConnection.Close()
-	if err != nil {
-		log.Printf("Error closing LDAP connection: %s", err)
 	}
 
 	return returnValue, nil
