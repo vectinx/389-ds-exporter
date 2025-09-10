@@ -42,7 +42,7 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 func main() {
 	var (
 		configFilePath = kingpin.Flag("config", "Path to configuration file").
-				Default(":9389").
+				Default("config.yml").
 				String()
 		listenAddress = kingpin.Flag("http.listen-address", "Address to listen on").
 				Default(":9389").
@@ -62,8 +62,14 @@ func main() {
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
-	configuration := config.ReadConfig(*configFilePath)
-	log.Println(configuration)
+	configuration, err := config.ReadConfig(*configFilePath)
+	if err != nil {
+		log.Fatalf("Error reading configuration: %v", err)
+	}
+
+	log.Printf("Configuration read successfuly")
+	log.Printf("LDAP server URL: %v", configuration.LdapServerUrl)
+	log.Printf("LDAP bind DN: %v", configuration.LdapBindDn)
 
 	dsMetricsRegistry := prometheus.NewRegistry()
 
