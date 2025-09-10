@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -12,7 +13,12 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
+)
+
+var (
+	// This variables is filled via ldflags at build time
+	Version   = "dev"
+	BuildTime = "unknown"
 )
 
 // defaultHttpResponse function generates a standard HTML response for the exporter
@@ -52,7 +58,7 @@ func main() {
 				Default("120").Int()
 	)
 
-	kingpin.Version(version.Print("ds_exporter"))
+	kingpin.Version(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
