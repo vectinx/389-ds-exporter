@@ -108,7 +108,6 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 	ldapEntries, err := c.ldapEntryController.Get()
 	if err != nil {
 		log.Printf("Error getting values from ldap: %s", err)
-
 		return
 	}
 
