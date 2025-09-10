@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -15,18 +15,18 @@ type LdapConfiguration struct {
 }
 
 // ReadConfig function reads the configuration from the provided yaml file and returns it as a LdapConfiguration structure
-func ReadConfig(configFilePath string) LdapConfiguration {
+func ReadConfig(configFilePath string) (LdapConfiguration, error) {
 	yamlFile, err := os.ReadFile(configFilePath)
 	configuration := LdapConfiguration{}
 
 	if err != nil {
-		log.Println("Unable to open configuration file")
+		return LdapConfiguration{}, fmt.Errorf("unable to open configuration file: %w", err)
 	}
 
 	err = yaml.Unmarshal(yamlFile, &configuration)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		return LdapConfiguration{}, fmt.Errorf("error unmarshaling configuration: %w", err)
 	}
 
-	return configuration
+	return configuration, nil
 }
