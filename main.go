@@ -67,6 +67,11 @@ func main() {
 		log.Fatalf("Error reading configuration: %v", err)
 	}
 
+	err = configuration.Validate()
+	if err != nil {
+		log.Fatalf("Incorrect configuration provided: %v", err)
+	}
+
 	log.Printf("Configuration read successfuly")
 	log.Printf("LDAP server URL: %v", configuration.LdapServerUrl)
 	log.Printf("LDAP bind DN: %v", configuration.LdapBindDn)
