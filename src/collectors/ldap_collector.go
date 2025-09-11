@@ -112,14 +112,20 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 	}
 
 	for key, value := range c.attributes {
-		if len(ldapEntries[value.LdapName]) > 1 {
+		attributeValues, ok := ldapEntries[value.LdapName]
+		if !ok {
+			log.Printf("Attribute %v was not found in LDAP response. ", value.LdapName)
+			continue
+		}
+
+		if len(attributeValues) > 1 {
 			log.Printf("Attribute %s has more than one value, the first one will be used", key)
 		}
 
 		var converted float64
 
 		if value.LdapType == Iso8601CompactString {
-			parsedTime, err := time.Parse(dateTimeLayout, ldapEntries[value.LdapName][0])
+			parsedTime, err := time.Parse(dateTimeLayout, attributeValues[0])
 			if err != nil {
 				log.Printf("Error parsing date: %s", err)
 
