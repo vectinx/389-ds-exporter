@@ -75,6 +75,7 @@ func main() {
 	log.Printf("Configuration read successfuly")
 	log.Printf("LDAP server URL: %v", configuration.LdapServerUrl)
 	log.Printf("LDAP bind DN: %v", configuration.LdapBindDn)
+	log.Printf("389-ds backend type: %v", configuration.BackendType)
 
 	dsMetricsRegistry := prometheus.NewRegistry()
 
@@ -100,17 +101,6 @@ func main() {
 	),
 	)
 
-	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-		"ds_exporter",
-		configuration.LdapServerUrl,
-		configuration.LdapBindDn,
-		configuration.LdapBindPw,
-		"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
-		metrics.GetLdapServerCacheMetrics(),
-		prometheus.Labels{},
-	),
-	)
-
 	for _, backend := range configuration.Backends {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
@@ -120,6 +110,34 @@ func main() {
 			"cn=monitor,cn="+backend+",cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapBackendCaches(),
 			prometheus.Labels{"database": backend},
+		),
+		)
+	}
+
+	/*
+		Since 389-ds has a different set of monitoring metrics for different backends (a and b),
+		at the initialization stage we select the metrics that correspond to the selected backend
+	*/
+	if configuration.BackendType == config.BackendBDB {
+		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
+			"ds_exporter",
+			configuration.LdapServerUrl,
+			configuration.LdapBindDn,
+			configuration.LdapBindPw,
+			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+			metrics.GetLdapBDBServerCacheMetrics(),
+			prometheus.Labels{},
+		),
+		)
+	} else if configuration.BackendType == config.BackendMDB {
+		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
+			"ds_exporter",
+			configuration.LdapServerUrl,
+			configuration.LdapBindDn,
+			configuration.LdapBindPw,
+			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+			metrics.GetLdapMDBServerCacheMetrics(),
+			prometheus.Labels{},
 		),
 		)
 	}

@@ -8,12 +8,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type BackendType string
+
+const (
+	BackendBDB BackendType = "bdb"
+	BackendMDB BackendType = "mdb"
+)
+
 // ExporterConfiguration struct represents exporter configuration from YAML file
 type ExporterConfiguration struct {
 	LdapServerUrl string      `yaml:"ldapServerURL"`
 	LdapBindDn    string      `yaml:"ldapBindDn"`
 	LdapBindPw    string      `yaml:"ldapBindPw"`
 	Backends      []string    `yaml:"backends"`
+	BackendType   BackendType `yaml:"backendType"`
 }
 
 // Validate function cheks if provided configuration is valid
@@ -31,6 +39,16 @@ func (c *ExporterConfiguration) Validate() error {
 		return errors.New("configuration parameter LdapBindPw is required")
 	}
 
+	if c.BackendType == "" {
+		return errors.New("configuration parameter BackendType is required")
+	}
+
+	switch c.BackendType {
+	case BackendBDB, BackendMDB:
+		// valid value - pass
+	default:
+		return fmt.Errorf("invalid backend type: %q (must be 'bdb' or 'mdb')", c.BackendType)
+	}
 	return nil
 }
 
