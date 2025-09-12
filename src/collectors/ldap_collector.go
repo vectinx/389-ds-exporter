@@ -87,6 +87,9 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
 	}
 
+	if ldapConnection == nil {
+		log.Print("А соединение почему-то пустое ...")
+	}
 	var attributeList []string
 
 	for _, monitoredAttr := range c.attributes {

@@ -1,6 +1,102 @@
-ldapServerURL: ldap://localhost:3389
-ldapBindDn: cn=Directory manager
-ldapBindPw: Astra1234
-backendType: bdb
-backends:
-  - userRoot
+---
+# 'global' section defines general exporter parameters
+global:
+  # Backend database implementation used in 389-ds server.
+  # For more details see the docs:
+  # https://www.port389.org/docs/389ds/howto/howto-use-lmdb.html
+  # https://www.port389.org/docs/389ds/FAQ/Berkeley-DB-deprecation.html
+  # Can be bdb or mbd
+  #
+  ds_backend_implement: bdb
+
+  # List of 389-ds backend databases for which metrics will be collected
+  # For more details about backend databases see the docs:
+  # https://docs.redhat.com/en/documentation/red_hat_directory_server/11/html/administration_guide/configuring_directory_databases
+  #
+  ds_backend_databases:
+    - userRoot
+
+# 'http' section defines the parameters of the HTTP server that provides metrics.
+http:
+  # The address and port on which the server will wait for incoming connections. It is written in the format <server>:<port>. Examply:
+  # ":9389" will listen on port 9389 and available on all network interfaces.
+  # "0.0.0.0:9389" will listen on port 9389 and available on all IPv4 network interfaces.
+  # "192.168.0.10:9389" will listen on port 9389 and available on 192.168.0.10 address IPv4.
+  #
+  # listen_address: "127.0.0.1:9389"
+
+  # Http endpoint where the provided metrics are located.
+  #
+  # metrics_path: "/metrics"
+
+  # ReadTimeout is the maximum duration for reading the entire request, including the body.
+  # A zero or negative value means there will be no timeout.
+  #
+  # read_timeout: 10
+
+  # Maximum duration before timing out writes of the response. It is reset whenever a new request's header is read.
+  # A zero or negative value means there will be no timeout.
+  #
+  # write_timeout: 15
+
+  # Maximum amount of time to wait for the next request when keep-alives are enabled.
+  # If zero, the value of ReadTimeout is used. If negative, or if zero and ReadTimeout is zero or negative, there is no timeout.
+  #
+  # idle_timeout: 60
+
+# 'ldap' section defines the parameters of the connection to LDAP server
+ldap:
+  # LDAP server URL in RFC-2255 format. Examply:
+  # "ldap://localhost:3389" or "ldaps://remote-server"
+  #
+  server_url: "ldap://192.168.250.30:389"
+
+  # DN of the account on behalf of which authentication is performed on the LDAP server
+  #
+  bind_dn: "cn=directory manager"
+
+  # Password of the LDAP account
+  #
+  bind_pw: "12345678"
+
+  # 'ldap.connecion_pool' section describes the parameters for connecting to the LDAP server from which metrics will be received.
+  # In most cases, there is no need to configure these settings.
+  connection_pool:
+
+    # Maximum size of the LDAP connection pool
+    # Connections in the pool are created as needed, and deleted when the lifetime and idle time limits are reached.
+    # Recommended and default value is 4. If you specify a lower value,
+    # metric collectors will wait for resources in the pool to become available, which may slow down the exporter.
+    # Specifying a value greater than 4 does not make sense,
+    # since the current version of the exporter does not use more than 4 connections at a time, and more than this number of connections will not be created.
+    #
+    # connections_limit: 4
+
+    # Timeout in seconds for establishing a connection with ldap.
+    # It is necessary to avoid situations when the connection attempt "hangs".
+    # A zero or negative value means there will be no timeout.
+    # It may be worth increasing if the network connection is unstable or the ldap server is running slowly.
+    #
+    # dial_timeout: 1
+
+    # Number of attempts to connect to LDAP.
+    # When creating a connection, if the first connection fails,
+    # the specified number of repeated attempts will be performed at intervals of 'retry_delay'.
+    # A zero value means that no reconnection attempts will be made.
+    # It might be worth increasing this value if the network connection is unstable.
+    #
+    # retry_count: 0
+
+    # LDAP reconnection interval in seconds. Provides a delay between reconnection retries ('retry_count') when creating an LDAP connection.
+    # A zero value means there will be no delay.
+    # It might be worth increasing this value if the network connection is unstable.
+    #
+    # retry_delay: 1
+
+    # Connection alive check timeout in seconds.
+    # Before returning a connection, the pool checks its alive with a "dn='' scope='base' filter='(objectClass=*)' attrs='dn'" request.
+    # Parameter sets the timeout for this request.
+    # A zero or negative value means there will be no timeout.
+    # It might be worth increasing this value if the ldap directory is running slowly
+    #
+    # connection_alive_timeout: 1
