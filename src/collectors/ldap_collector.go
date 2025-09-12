@@ -4,13 +4,16 @@ The collectors package provides various structures implementing the prometheus.C
 package collectors
 
 import (
+	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
 
-	utils "389-ds-exporter/src/controllers"
+	"389-ds-exporter/src/backends"
 
+	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -40,20 +43,18 @@ type LdapMonitoredAttribute struct {
 
 // LdapCollector collects 389-ds metrics. It implements prometheus.Collector interface.
 type LdapEntryCollector struct {
-	ldapEntryController *utils.LdapEntryController
-	namespace           string
-	baseDn              string
-	attributes          map[string]LdapMonitoredAttribute
-	descriptors         map[string]*prometheus.Desc
-	mutex               sync.Mutex
+	connectionPool *backends.LdapConnectionPool
+	namespace      string
+	baseDn         string
+	attributes     map[string]LdapMonitoredAttribute
+	descriptors    map[string]*prometheus.Desc
+	mutex          sync.Mutex
 }
 
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameteres
 func NewLdapEntryCollector(
 	namespace string,
-	ldapServerURL string,
-	ldapBindDn string,
-	ldapBindPassword string,
+	connectionPool *backends.LdapConnectionPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,
@@ -69,27 +70,57 @@ func NewLdapEntryCollector(
 		)
 	}
 
-	ldapAttrsToBeMonitored := []string{}
+	return &LdapEntryCollector{
+		connectionPool: connectionPool,
+		namespace:      namespace,
+		baseDn:         entryBaseDn,
+		attributes:     attributes,
+		descriptors:    metricsDescriptors,
+	}
+}
 
-	for _, val := range attributes {
-		ldapAttrsToBeMonitored = append(ldapAttrsToBeMonitored, val.LdapName)
+func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
+	ldapConnection, err := c.connectionPool.Get(5 * time.Second)
+	defer c.connectionPool.Put(ldapConnection)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
 	}
 
-	ldapEntryController := utils.NewLdapEntryController(
-		ldapServerURL,
-		ldapBindDn,
-		ldapBindPassword,
-		entryBaseDn,
-		ldapAttrsToBeMonitored,
+	var attributeList []string
+
+	for _, monitoredAttr := range c.attributes {
+		attributeList = append(attributeList, monitoredAttr.LdapName)
+	}
+
+	searchAttributesRequest := ldap.NewSearchRequest(
+		c.baseDn,
+		ldap.ScopeBaseObject,
+		ldap.NeverDerefAliases,
+		1,
+		0,
+		false,
+		"(objectclass=*)",
+		attributeList,
+		nil,
 	)
 
-	return &LdapEntryCollector{
-		ldapEntryController: ldapEntryController,
-		namespace:           namespace,
-		baseDn:              entryBaseDn,
-		attributes:          attributes,
-		descriptors:         metricsDescriptors,
+	searchResult, err := ldapConnection.Conn.Search(searchAttributesRequest)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP Search request failed with error: %w", err)
 	}
+
+	returnValue := make(map[string][]string)
+
+	for _, attr := range searchResult.Entries[0].Attributes {
+		if !slices.Contains(attributeList, attr.Name) {
+			continue
+		}
+
+		returnValue[attr.Name] = attr.Values
+	}
+
+	return returnValue, nil
 }
 
 // Describe function sends the super-set of all possible descriptors of LDAP metrics
@@ -105,7 +136,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	ldapEntries, err := c.ldapEntryController.Get()
+	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
 		log.Printf("Error getting values from ldap: %s", err)
 		return

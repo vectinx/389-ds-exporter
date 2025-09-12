@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"389-ds-exporter/src/backends"
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/metrics"
@@ -79,11 +80,24 @@ func main() {
 
 	dsMetricsRegistry := prometheus.NewRegistry()
 
+	ldapConnPoolConfig := backends.LdapConnectionPoolConfig{
+		ServerURL:              configuration.LdapServerUrl,
+		BindDN:                 configuration.LdapBindDn,
+		BindPassword:           configuration.LdapBindPw,
+		ConnectionsLimit:       1,
+		MaxIdleTime:            600 * time.Second,
+		MaxLifeTime:            3600 * time.Second,
+		DialTimeout:            10 * time.Second,
+		RetryCount:             3,
+		RetryDelay:             2 * time.Second,
+		ConnectionAliveTimeout: 2 * time.Second,
+	}
+
+	ldapConnPool := backends.NewLdapConnectionPool(ldapConnPoolConfig)
+
 	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 		"ds_exporter",
-		configuration.LdapServerUrl,
-		configuration.LdapBindDn,
-		configuration.LdapBindPw,
+		ldapConnPool,
 		"cn=monitor",
 		metrics.GetLdapServerMetrics(),
 		prometheus.Labels{},
@@ -92,9 +106,7 @@ func main() {
 
 	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 		"ds_exporter",
-		configuration.LdapServerUrl,
-		configuration.LdapBindDn,
-		configuration.LdapBindPw,
+		ldapConnPool,
 		"cn=snmp,cn=monitor",
 		metrics.GetLdapServerSnmpMetrics(),
 		prometheus.Labels{},
@@ -104,9 +116,7 @@ func main() {
 	for _, backend := range configuration.Backends {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
-			configuration.LdapServerUrl,
-			configuration.LdapBindDn,
-			configuration.LdapBindPw,
+			ldapConnPool,
 			"cn=monitor,cn="+backend+",cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapBackendCaches(),
 			prometheus.Labels{"database": backend},
@@ -121,9 +131,7 @@ func main() {
 	if configuration.BackendType == config.BackendBDB {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
-			configuration.LdapServerUrl,
-			configuration.LdapBindDn,
-			configuration.LdapBindPw,
+			ldapConnPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapBDBServerCacheMetrics(),
 			prometheus.Labels{},
@@ -132,9 +140,7 @@ func main() {
 	} else if configuration.BackendType == config.BackendMDB {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
-			configuration.LdapServerUrl,
-			configuration.LdapBindDn,
-			configuration.LdapBindPw,
+			ldapConnPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapMDBServerCacheMetrics(),
 			prometheus.Labels{},
