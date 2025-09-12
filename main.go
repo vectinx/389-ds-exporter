@@ -45,18 +45,7 @@ func main() {
 		configFilePath = kingpin.Flag("config", "Path to configuration file").
 				Default("config.yml").
 				String()
-		listenAddress = kingpin.Flag("http.listen-address", "Address to listen on").
-				Default(":9389").
-				String()
-		metricsPath = kingpin.Flag("http.metrics-path", "Path to expose metrics").
-				Default("/metrics").
-				String()
-		httpReadTimeout = kingpin.Flag("http.read-timeout", "HTTP read timeout").
-				Default("5").Int()
-		httpWriteTimeout = kingpin.Flag("http.write-timeout", "HTTP write timeout").
-					Default("10").Int()
-		httpIdleimeout = kingpin.Flag("http.idle-timeout", "HTTP idle timeout").
-				Default("120").Int()
+		showConfig = kingpin.Flag("check-config", "Check current configuration and print it to stdout").Bool()
 	)
 
 	kingpin.Version(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
@@ -73,24 +62,27 @@ func main() {
 		log.Fatalf("Incorrect configuration provided: %v", err)
 	}
 
+	if *showConfig {
+		fmt.Print(configuration.String())
+		return
+	}
+
 	log.Printf("Configuration read successfuly")
-	log.Printf("LDAP server URL: %v", configuration.LdapServerUrl)
-	log.Printf("LDAP bind DN: %v", configuration.LdapBindDn)
-	log.Printf("389-ds backend type: %v", configuration.BackendType)
+	log.Printf("LDAP server URL: %v", configuration.LDAP.ServerURL)
+	log.Printf("LDAP bind DN: %v", configuration.LDAP.BindDN)
+	log.Printf("389-ds backend type: %v", configuration.Global.BackendImplement)
 
 	dsMetricsRegistry := prometheus.NewRegistry()
 
 	ldapConnPoolConfig := backends.LdapConnectionPoolConfig{
-		ServerURL:              configuration.LdapServerUrl,
-		BindDN:                 configuration.LdapBindDn,
-		BindPassword:           configuration.LdapBindPw,
-		ConnectionsLimit:       1,
-		MaxIdleTime:            600 * time.Second,
-		MaxLifeTime:            3600 * time.Second,
-		DialTimeout:            10 * time.Second,
-		RetryCount:             3,
-		RetryDelay:             2 * time.Second,
-		ConnectionAliveTimeout: 2 * time.Second,
+		ServerURL:              configuration.LDAP.ServerURL,
+		BindDN:                 configuration.LDAP.BindDN,
+		BindPw:                 configuration.LDAP.BindPw,
+		MaxConnections:         configuration.LDAP.ConnectionPool.GetConnectionsLimit(),
+		DialTimeout:            time.Duration(configuration.LDAP.ConnectionPool.GetDialTimeout()) * time.Second,
+		RetryCount:             configuration.LDAP.ConnectionPool.GetRetryCount(),
+		RetryDelay:             time.Duration(configuration.LDAP.ConnectionPool.GetRetryDelay()) * time.Second,
+		ConnectionAliveTimeout: time.Duration(configuration.LDAP.ConnectionPool.GetConnectionAliveTimeout()) * time.Second,
 	}
 
 	ldapConnPool := backends.NewLdapConnectionPool(ldapConnPoolConfig)
@@ -113,7 +105,7 @@ func main() {
 	),
 	)
 
-	for _, backend := range configuration.Backends {
+	for _, backend := range configuration.Global.Backends {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			ldapConnPool,
@@ -128,7 +120,7 @@ func main() {
 		Since 389-ds has a different set of monitoring metrics for different backends (a and b),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
-	if configuration.BackendType == config.BackendBDB {
+	if configuration.Global.BackendImplement == config.BackendBDB {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			ldapConnPool,
@@ -137,7 +129,7 @@ func main() {
 			prometheus.Labels{},
 		),
 		)
-	} else if configuration.BackendType == config.BackendMDB {
+	} else if configuration.Global.BackendImplement == config.BackendMDB {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			ldapConnPool,
@@ -148,15 +140,15 @@ func main() {
 		)
 	}
 
-	http.Handle(*metricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
-	http.HandleFunc("/", defaultHttpResponse(*metricsPath))
+	http.Handle(configuration.HTTP.GetMetricsPath(), promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
+	http.HandleFunc("/", defaultHttpResponse(configuration.HTTP.GetMetricsPath()))
 
 	server := &http.Server{
-		Addr:         *listenAddress,
+		Addr:         configuration.HTTP.GetListenAddress(),
 		Handler:      http.DefaultServeMux,
-		ReadTimeout:  time.Duration(*httpReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(*httpWriteTimeout) * time.Second,
-		IdleTimeout:  time.Duration(*httpIdleimeout) * time.Second,
+		ReadTimeout:  time.Duration(configuration.HTTP.GetReadTimeout()) * time.Second,
+		WriteTimeout: time.Duration(configuration.HTTP.GetWriteTimeout()) * time.Second,
+		IdleTimeout:  time.Duration(configuration.HTTP.GetIdleTimeout()) * time.Second,
 	}
 
 	log.Fatal(server.ListenAndServe())
