@@ -1,0 +1,6 @@
+ldapServerURL: ldap://localhost:3389
+ldapBindDn: cn=Directory manager
+ldapBindPw: Astra1234
+backendType: bdb
+backends:
+  - userRoot
