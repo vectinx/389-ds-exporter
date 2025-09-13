@@ -33,6 +33,7 @@ const (
 	Iso8601CompactString
 )
 
+// LdapMonitoredAttribute implements a container for storing the necessary information about an attribute used in metrics.
 type LdapMonitoredAttribute struct {
 	LdapName string
 	LdapType LdapValueType
@@ -51,7 +52,7 @@ type LdapEntryCollector struct {
 	mutex          sync.Mutex
 }
 
-// NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameteres
+// NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameteres.
 func NewLdapEntryCollector(
 	namespace string,
 	connectionPool *backends.LdapConnectionPool,

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"389-ds-exporter/src/backends"
@@ -117,7 +121,7 @@ func main() {
 	}
 
 	/*
-		Since 389-ds has a different set of monitoring metrics for different backends (a and b),
+		Since 389-ds has a different set of monitoring metrics for different backends (Berkley DB and LMDB),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
 	if configuration.Global.BackendImplement == config.BackendBDB {
@@ -151,5 +155,35 @@ func main() {
 		IdleTimeout:  time.Duration(configuration.HTTP.GetIdleTimeout()) * time.Second,
 	}
 
-	log.Fatal(server.ListenAndServe())
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Printf("Starting HTTP server at %s", configuration.HTTP.GetListenAddress())
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	signal := <-stop
+	switch signal {
+	case syscall.SIGINT:
+		log.Println("SIGINT signal received")
+	case syscall.SIGTERM:
+		log.Println("SIGTREM signal received")
+	}
+
+	log.Println("Shutting down gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("HTTP server Shutdown failed: %v", err)
+	}
+
+	if err = ldapConnPool.Close(ctx); err != nil {
+		log.Printf("Error closing ldap pool: %v", err)
+	}
+	log.Println("Exporter stopped")
 }
