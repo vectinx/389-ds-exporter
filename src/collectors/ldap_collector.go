@@ -80,6 +80,7 @@ func NewLdapEntryCollector(
 	}
 }
 
+// getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap
 func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
 	ldapConnection, err := c.connectionPool.Get(5 * time.Second)
 	defer c.connectionPool.Put(ldapConnection)
@@ -88,9 +89,6 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
 	}
 
-	if ldapConnection == nil {
-		log.Print("А соединение почему-то пустое ...")
-	}
 	var attributeList []string
 
 	for _, monitoredAttr := range c.attributes {
@@ -109,7 +107,7 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		nil,
 	)
 
-	searchResult, err := ldapConnection.Conn.Search(searchAttributesRequest)
+	searchResult, err := ldapConnection.Search(searchAttributesRequest)
 	if err != nil {
 		return nil, fmt.Errorf("LDAP Search request failed with error: %w", err)
 	}

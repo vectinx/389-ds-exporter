@@ -26,14 +26,11 @@ type LdapConnectionPoolConfig struct {
 // LdapConnectionPool implements a pool that manages ldap connections.
 type LdapConnectionPool struct {
 	config           LdapConnectionPoolConfig
-	connectionsCh    chan *PooledConnection
+	connectionsCh    chan *ldap.Conn
 	totalConnections uint
 	mu               sync.Mutex
-}
-
-type PooledConnection struct {
-	Conn     *ldap.Conn
-	lastUsed time.Time
+	closing          bool
+	doneCh           chan struct{}
 }
 
 // ldapConnIsAlive function checks if specified connection is alive.
@@ -48,9 +45,9 @@ func ldapConnIsAlive(conn *ldap.Conn, timeout time.Duration) bool {
 		nil,
 	)
 
-	conn.Conn.SetTimeout(timeout)
-	_, err := conn.Conn.Search(req)
-	conn.Conn.SetTimeout(ldap.DefaultTimeout)
+	conn.SetTimeout(timeout)
+	_, err := conn.Search(req)
+	conn.SetTimeout(ldap.DefaultTimeout)
 
 	return err == nil
 }
@@ -59,7 +56,8 @@ func ldapConnIsAlive(conn *ldap.Conn, timeout time.Duration) bool {
 func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
 	pool := &LdapConnectionPool{
 		config:           cfg,
-		connectionsCh:    make(chan *PooledConnection, cfg.MaxConnections),
+		connectionsCh:    make(chan *ldap.Conn, cfg.MaxConnections),
+		doneCh:           make(chan struct{}),
 		totalConnections: 0,
 	}
 	return pool
@@ -122,11 +120,16 @@ func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
 	if conn == nil {
 		return
 	}
-	conn.lastUsed = time.Now()
+
 	select {
 	case pool.connectionsCh <- conn:
+		pool.mu.Lock()
+		if len(pool.connectionsCh) == int(pool.totalConnections) && pool.closing {
+			close(pool.doneCh)
+		}
+		pool.mu.Unlock()
 	default:
-		conn.Conn.Close()
+		conn.Close()
 		pool.mu.Lock()
 		pool.totalConnections--
 		pool.mu.Unlock()
@@ -136,8 +139,34 @@ func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
 // Close function prevents receiving connections from the pool, waits until all connections are returned to the pool and closes them
 func (pool *LdapConnectionPool) Close(ctx context.Context) error {
 	pool.mu.Lock()
-	defer pool.mu.Unlock()
 
+	pool.closing = true
+	canCloseImideatly := len(pool.connectionsCh) == int(pool.totalConnections)
+	pool.mu.Unlock()
+
+	if !canCloseImideatly {
+		select {
+		case <-pool.doneCh:
+			// all connections returned to pool
+		case <-ctx.Done():
+			return fmt.Errorf("timeout while waiting for connections to return: %w", ctx.Err())
+		}
+	}
+
+	close(pool.connectionsCh)
+
+	hasCloseErrors := false
+	errorsCount := 0
+	for conn := range pool.connectionsCh {
+		if conn.Close() != nil {
+			hasCloseErrors = true
+			errorsCount++
+		}
+	}
+
+	if hasCloseErrors {
+		return fmt.Errorf("pool closed incorrectly - failed to close %v connections", errorsCount)
+	}
 	return nil
 }
 
@@ -153,16 +182,15 @@ func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
 	// we add this first attempt
 	attempts := int(pool.config.RetryCount) + 1
 	for range attempts {
-		conn.Conn, err = ldap.DialURL(pool.config.ServerURL, ldap.DialWithDialer(dialer))
+		conn, err = ldap.DialURL(pool.config.ServerURL, ldap.DialWithDialer(dialer))
 		if err == nil {
-			err = conn.Conn.Bind(pool.config.BindDN, pool.config.BindPw)
+			err = conn.Bind(pool.config.BindDN, pool.config.BindPw)
 			if err == nil {
 				return conn, nil
 			}
-			conn.Conn.Close()
+			conn.Close()
 		}
 		time.Sleep(pool.config.RetryDelay)
 	}
-
 	return nil, err
 }
