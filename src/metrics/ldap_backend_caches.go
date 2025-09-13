@@ -14,62 +14,63 @@ func GetLdapBackendCaches() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"dncachehits": {
 			LdapName: "dncachehits",
-			Help:     "Some Help For This",
-			Type:     prometheus.GaugeValue,
+			Help: `The number of times the server could process a request by
+obtaining a normalized distinguished name (DN) from the DN cache rather than normalizing it again`,
+			Type: prometheus.GaugeValue,
 		},
 		"dncachetries": {
 			LdapName: "dncachetries",
-			Help:     "Another Help For This",
+			Help:     "The total number of DN cache accesses since you started the instance",
 			Type:     prometheus.GaugeValue,
 		},
 		"dncachehitratio": {
 			LdapName: "dncachehitratio",
-			Help:     "Another Help For This",
+			Help:     "The ratio of cache tries to successful DN cache hits. The closer this value is to 100%, the better",
 			Type:     prometheus.GaugeValue,
 		},
 		"currentdncachesize": {
 			LdapName: "currentdncachesize",
-			Help:     "Another Help For This",
+			Help:     "The total size, in bytes, of DN currently present in the DN cache",
 			Type:     prometheus.GaugeValue,
 		},
 		"maxdncachesize": {
 			LdapName: "maxdncachesize",
-			Help:     "Another Help For This",
+			Help:     "The maximum size, in bytes, of DNs that DS can maintain in the DN cache",
 			Type:     prometheus.GaugeValue,
 		},
 		"currentdncachecount": {
 			LdapName: "currentdncachecount",
-			Help:     "Another Help For This",
+			Help:     "The number of DNs currently present in the DN cache",
 			Type:     prometheus.GaugeValue,
 		},
 		"entrycachehits": {
 			LdapName: "entrycachehits",
-			Help:     "Some Help For This",
+			Help:     "The total number of successful entry cache lookups",
 			Type:     prometheus.GaugeValue,
 		},
 		"entrycachetries": {
 			LdapName: "entrycachetries",
-			Help:     "Another Help For This",
+			Help:     "The total number of entry cache lookups since you started the instance",
 			Type:     prometheus.GaugeValue,
 		},
 		"entrycachehitratio": {
 			LdapName: "entrycachehitratio",
-			Help:     "Another Help For This",
+			Help:     "The number of entry cache tries to successful entry cache lookups",
 			Type:     prometheus.GaugeValue,
 		},
 		"currententrycachesize": {
 			LdapName: "currententrycachesize",
-			Help:     "Another Help For This",
+			Help:     "The total size, in bytes, of directory entries currently present in the entry cache",
 			Type:     prometheus.GaugeValue,
 		},
 		"maxentrycachesize": {
 			LdapName: "maxentrycachesize",
-			Help:     "Another Help For This",
+			Help:     "The maximum size, in bytes, of directory entries that {DS} can maintain in the entry cache",
 			Type:     prometheus.GaugeValue,
 		},
 		"currententrycachecount": {
 			LdapName: "currententrycachecount",
-			Help:     "Another Help For This",
+			Help:     "The current number of entries stored in the entry cache of a given backend",
 			Type:     prometheus.GaugeValue,
 		},
 	}

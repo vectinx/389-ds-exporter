@@ -1,6 +1,8 @@
 package backends
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -21,6 +23,7 @@ type LdapConnectionPoolConfig struct {
 	ConnectionAliveTimeout time.Duration // Connection alive check timeout
 }
 
+// LdapConnectionPool implements a pool that manages ldap connections.
 type LdapConnectionPool struct {
 	config           LdapConnectionPoolConfig
 	connectionsCh    chan *PooledConnection
@@ -33,7 +36,8 @@ type PooledConnection struct {
 	lastUsed time.Time
 }
 
-func (conn *PooledConnection) IsActive(timeout time.Duration) bool {
+// ldapConnIsAlive function checks if specified connection is alive.
+func ldapConnIsAlive(conn *ldap.Conn, timeout time.Duration) bool {
 	req := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
@@ -51,6 +55,7 @@ func (conn *PooledConnection) IsActive(timeout time.Duration) bool {
 	return err == nil
 }
 
+// NewLdapConnectionPool function creates and returns new LdapConnectionPool object with specified config.
 func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
 	pool := &LdapConnectionPool{
 		config:           cfg,
@@ -60,12 +65,20 @@ func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
 	return pool
 }
 
-func (pool *LdapConnectionPool) Get(timeout time.Duration) (*PooledConnection, error) {
+// Get function gives a connection from the pool. If specified timeout expires, returns an error.
+func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
+
+	pool.mu.Lock()
+	if pool.closing {
+		pool.mu.Unlock()
+		return nil, errors.New("pool is currently closing")
+	}
+	pool.mu.Unlock()
 	for {
 		select {
 		case conn := <-pool.connectionsCh:
-			if !conn.IsActive(pool.config.ConnectionAliveTimeout) {
-				conn.Conn.Close()
+			if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
+				conn.Close()
 				pool.mu.Lock()
 				pool.totalConnections--
 				pool.mu.Unlock()
@@ -89,8 +102,8 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*PooledConnection, e
 			pool.mu.Unlock()
 			select {
 			case conn := <-pool.connectionsCh:
-				if !conn.IsActive(pool.config.ConnectionAliveTimeout) {
-					conn.Conn.Close()
+				if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
+					conn.Close()
 					pool.mu.Lock()
 					pool.totalConnections--
 					pool.mu.Unlock()
@@ -104,7 +117,8 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*PooledConnection, e
 	}
 }
 
-func (pool *LdapConnectionPool) Put(conn *PooledConnection) {
+// Put function returns specified connection to pool
+func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
 	if conn == nil {
 		return
 	}
@@ -119,17 +133,17 @@ func (pool *LdapConnectionPool) Put(conn *PooledConnection) {
 	}
 }
 
-func (pool *LdapConnectionPool) Close() error {
+// Close function prevents receiving connections from the pool, waits until all connections are returned to the pool and closes them
+func (pool *LdapConnectionPool) Close(ctx context.Context) error {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 
 	return nil
 }
 
-func (pool *LdapConnectionPool) newConnection() (*PooledConnection, error) {
-	conn := &PooledConnection{
-		lastUsed: time.Now(),
-	}
+// newConnection function creates a new connection to ldap with the specified number of retries
+func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
+	var conn *ldap.Conn
 
 	dialer := &net.Dialer{Timeout: pool.config.DialTimeout}
 
@@ -151,10 +165,4 @@ func (pool *LdapConnectionPool) newConnection() (*PooledConnection, error) {
 	}
 
 	return nil, err
-}
-
-func (pool *LdapConnectionPool) TotalConnections() uint {
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
-	return pool.totalConnections
 }
