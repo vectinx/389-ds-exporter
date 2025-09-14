@@ -235,7 +235,7 @@ func main() {
 
 	if *checkConfig {
 		fmt.Print(cfg.String())
-		return
+		os.Exit(0)
 	}
 
 	logger, logFile, err := setupLogger(cfg)
