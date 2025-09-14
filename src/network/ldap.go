@@ -1,4 +1,4 @@
-package backends
+package network
 
 import (
 	"context"
