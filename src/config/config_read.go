@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 
 	"gopkg.in/yaml.v2"
 )
@@ -24,18 +25,37 @@ func (c *ExporterConfiguration) Validate() error {
 	}
 
 	if c.Global.BackendImplement == "" {
-		return errors.New("configuration parameter global.backend_type is required")
+		return errors.New("configuration parameter global.ds_backend_implement is required")
 	}
 
 	switch c.Global.BackendImplement {
 	case BackendBDB, BackendMDB:
 		// valid value - pass
 	default:
-		return fmt.Errorf("invalid global.backend_type: %q (must be 'bdb' or 'mdb')", c.Global.BackendImplement)
+		return fmt.Errorf("invalid global.ds_backend_implement: '%q' (must be 'bdb' or 'mdb')", c.Global.BackendImplement)
 	}
 
 	if c.LDAP.ConnectionPool.GetConnectionsLimit() <= 0 {
 		return errors.New("invalid ldap.connection_pool.connections_limit: must be greater than 0")
+	}
+
+	logLevels := []string{"DEBUG", "INFO", "WARNING", "ERROR"}
+	if !slices.Contains(logLevels, c.Logging.GetLevel()) {
+		return fmt.Errorf("invalid log.level: '%s' (must be 'DEBUG', 'INFO', 'WARNING' or 'ERROR')", c.Logging.GetLevel())
+	}
+
+	logHandlers := []string{"stdout", "file", "both"}
+	if !slices.Contains(logHandlers, c.Logging.GetHandler()) {
+		return fmt.Errorf("invalid log.handler: '%s' (must be 'stdout', 'file' or 'both')", c.Logging.GetHandler())
+	}
+
+	logFormats := []string{"text", "json"}
+
+	if !slices.Contains(logFormats, c.Logging.GetStdoutFormat()) {
+		return fmt.Errorf("invalid log.stdout_foramt: '%s' (must be 'text' or 'json')", c.Logging.GetStdoutFormat())
+	}
+	if !slices.Contains(logFormats, c.Logging.GetFileFormat()) {
+		return fmt.Errorf("invalid log.file_format: '%s' (must be 'text' or 'json')", c.Logging.GetFileFormat())
 	}
 
 	return nil

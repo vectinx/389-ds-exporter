@@ -44,6 +44,11 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 	}
 }
 
+// func initializeLogger(cfg *config.ExporterConfiguration) (*slog.Logger, error) {
+// 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+// 	return nil, errors.New("Not implemented")
+// }
+
 func main() {
 	var (
 		configFilePath = kingpin.Flag("config", "Path to configuration file").
