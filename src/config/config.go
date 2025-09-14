@@ -23,14 +23,16 @@ type ExporterConfiguration struct {
 type GlobalConfig struct {
 	BackendImplement BackendType `yaml:"ds_backend_implement"`
 	Backends         []string    `yaml:"ds_backends"`
+	ShutdownTimeout  *uint       `yaml:"shutdown_timeout"`
 }
 
 type HTTPConfig struct {
-	ListenAddress *string `yaml:"listen_address"` // Don't use these field directly. Access them via the Get function
-	MetricsPath   *string `yaml:"metrics_path"`   // Don't use these field directly. Access them via the Get function
-	ReadTimeout   *int    `yaml:"read_timeout"`   // Don't use these field directly. Access them via the Get function
-	WriteTimeout  *int    `yaml:"write_timeout"`  // Don't use these field directly. Access them via the Get function
-	IdleTimeout   *int    `yaml:"idle_timeout"`   // Don't use these field directly. Access them via the Get function
+	ListenAddress      *string `yaml:"listen_address"`       // Don't use these field directly. Access them via the Get function
+	MetricsPath        *string `yaml:"metrics_path"`         // Don't use these field directly. Access them via the Get function
+	ReadTimeout        *int    `yaml:"read_timeout"`         // Don't use these field directly. Access them via the Get function
+	WriteTimeout       *int    `yaml:"write_timeout"`        // Don't use these field directly. Access them via the Get function
+	IdleTimeout        *int    `yaml:"idle_timeout"`         // Don't use these field directly. Access them via the Get function
+	InitialReadTimeout *uint   `yaml:"initial_read_timeout"` // Don't use these field directly. Access them via the Get function
 }
 
 type LDAPConfig struct {
@@ -62,11 +64,13 @@ func (c *ExporterConfiguration) String() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("global.ds_backend_implemet: %s\n", c.Global.BackendImplement))
 	b.WriteString(fmt.Sprintf("global.ds_backends: %v\n", c.Global.Backends))
+	b.WriteString(fmt.Sprintf("global.shutdown_timeout: %v\n", c.Global.GetShutdownTimeout()))
 	b.WriteString(fmt.Sprintf("http.listen_address: %s\n", c.HTTP.GetListenAddress()))
 	b.WriteString(fmt.Sprintf("http.metrics_path: %s\n", c.HTTP.GetMetricsPath()))
 	b.WriteString(fmt.Sprintf("http.read_timeout: %d\n", c.HTTP.GetReadTimeout()))
 	b.WriteString(fmt.Sprintf("http.write_timeout: %d\n", c.HTTP.GetWriteTimeout()))
 	b.WriteString(fmt.Sprintf("http.idle_timeout: %d\n", c.HTTP.GetIdleTimeout()))
+	b.WriteString(fmt.Sprintf("http.initial_read_timeout: %d\n", c.HTTP.GetInitialReadTimeout()))
 	b.WriteString(fmt.Sprintf("ldap.server_url: %s\n", c.LDAP.ServerURL))
 	b.WriteString(fmt.Sprintf("ldap.bind_dn: %s\n", c.LDAP.BindDN))
 	b.WriteString(fmt.Sprintf("ldap.bind_pw: %s\n", "*****"))
@@ -81,6 +85,16 @@ func (c *ExporterConfiguration) String() string {
 	b.WriteString(fmt.Sprintf("log.stdout_foramt: %s\n", c.Logging.GetStdoutFormat()))
 	b.WriteString(fmt.Sprintf("log.file_format: %s\n", c.Logging.GetFileFormat()))
 	return b.String()
+}
+
+// GetShutdownTimeout func return GlobalConfig.ShutdownTimeout if it defined.
+// Else returns config.DefaultGlobalShutdownTimeout constant.
+func (c *GlobalConfig) GetShutdownTimeout() uint {
+
+	if c.ShutdownTimeout == nil {
+		return DefaultGlobalShutdownTimeout
+	}
+	return *c.ShutdownTimeout
 }
 
 // GetConnectionsLimit func return LDAPConnectionPoolConfig.ConnectionsLimit if it defined.
@@ -176,6 +190,15 @@ func (c *HTTPConfig) GetIdleTimeout() int {
 		return DefaultHTTPIdleTimeout
 	}
 	return *c.IdleTimeout
+}
+
+// GetInitialReadTimeout func return HTTPConfig.InitialReadTimeout if it defined.
+// Else returns config.DefaultHTTPInitialReadTimeout constant.
+func (c *HTTPConfig) GetInitialReadTimeout() uint {
+	if c.InitialReadTimeout == nil {
+		return DefaultHTTPInitialReadTimeout
+	}
+	return *c.InitialReadTimeout
 }
 
 // GetLevel func return LoggingConfig.Level if it defined.

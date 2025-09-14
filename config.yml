@@ -16,6 +16,13 @@ global:
   ds_backends:
     - userRoot
 
+  # The maximum duration the server will wait for a graceful shutdown of all resources when the application is stopping.
+  # During this period, the server stops accepting new connections, attempts to finish processing ongoing requests, and properly closes the HTTP server, LDAP connection pools, and other active resources.
+  # If the timeout is exceeded, any remaining open connections or resources will be forcibly closed to prevent the application from hanging.
+  # If the value is 0, it is assumed that the timeout has already expired and graceful completion will be aborted.
+  #
+  # shutdown_timeout: 5
+
 # 'http' section defines the parameters of the HTTP server that provides metrics.
 http:
   # The address and port on which the server will wait for incoming connections. It is written in the format <server>:<port>. Examply:
@@ -43,6 +50,13 @@ http:
   # If zero, the value of ReadTimeout is used. If negative, or if zero and ReadTimeout is zero or negative, there is no timeout.
   #
   # idle_timeout: 60
+
+  # Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
+  # If the client doesn't send any data within this time, the connection will be closed automatically.
+  # If set to 0, the timeout is disabled, meaning the server will wait indefinitely for the initial read without timing out.
+  # This helps avoid hanging connections from tools like telnet or slow clients.
+  #
+  # initial_read_timeout: 3
 
 # 'ldap' section defines the parameters of the connection to LDAP server
 ldap:
