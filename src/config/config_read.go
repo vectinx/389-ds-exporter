@@ -72,7 +72,7 @@ func ReadConfig(configFilePath string) (ExporterConfiguration, error) {
 
 	err = yaml.Unmarshal(yamlFile, &configuration)
 	if err != nil {
-		return ExporterConfiguration{}, fmt.Errorf("error unmarshaling configuration: %w", err)
+		return ExporterConfiguration{}, fmt.Errorf("yaml unmarshal error: %w", err)
 	}
 
 	return configuration, nil
