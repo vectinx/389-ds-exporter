@@ -14,9 +14,10 @@ const (
 
 // ExporterConfiguration represents exporter configuration top level struct
 type ExporterConfiguration struct {
-	Global GlobalConfig `yaml:"global"`
-	HTTP   HTTPConfig   `yaml:"http"`
-	LDAP   LDAPConfig   `yaml:"ldap"`
+	Global  GlobalConfig  `yaml:"global"`
+	HTTP    HTTPConfig    `yaml:"http"`
+	LDAP    LDAPConfig    `yaml:"ldap"`
+	Logging LoggingConfig `yaml:"log"`
 }
 
 type GlobalConfig struct {
@@ -47,6 +48,14 @@ type LDAPConnectionPoolConfig struct {
 	ConnectionAliveTimeout *uint `yaml:"connection_alive_timeout"` // Don't use these field directly. Access them via the Get function
 }
 
+type LoggingConfig struct {
+	Level        *string `yaml:"level"`         // Don't use these field directly. Access them via the Get function
+	Handler      *string `yaml:"handler"`       // Don't use these field directly. Access them via the Get function
+	File         *string `yaml:"file"`          // Don't use these field directly. Access them via the Get function
+	StdoutFormat *string `yaml:"stdout_foramt"` // Don't use these field directly. Access them via the Get function
+	FileFormat   *string `yaml:"file_format"`   // Don't use these field directly. Access them via the Get function
+}
+
 // String returns string describing config with default values
 func (c *ExporterConfiguration) String() string {
 
@@ -66,11 +75,15 @@ func (c *ExporterConfiguration) String() string {
 	b.WriteString(fmt.Sprintf("ldap.connection_pool.retry_count: %d\n", c.LDAP.ConnectionPool.GetRetryCount()))
 	b.WriteString(fmt.Sprintf("ldap.connection_pool.retry_delay: %d\n", c.LDAP.ConnectionPool.GetRetryDelay()))
 	b.WriteString(fmt.Sprintf("ldap.connection_pool.connection_alive_timeout: %d\n", c.LDAP.ConnectionPool.GetConnectionAliveTimeout()))
-
+	b.WriteString(fmt.Sprintf("log.level: %s\n", c.Logging.GetLevel()))
+	b.WriteString(fmt.Sprintf("log.handler: %s\n", c.Logging.GetHandler()))
+	b.WriteString(fmt.Sprintf("log.file: %s\n", c.Logging.GetFile()))
+	b.WriteString(fmt.Sprintf("log.stdout_foramt: %s\n", c.Logging.GetStdoutFormat()))
+	b.WriteString(fmt.Sprintf("log.file_format: %s\n", c.Logging.GetFileFormat()))
 	return b.String()
 }
 
-// GetConnectionsLimit func return LDAPConnectionPoolConfig.connectionsLimit if it defined.
+// GetConnectionsLimit func return LDAPConnectionPoolConfig.ConnectionsLimit if it defined.
 // Else returns config.DefaultPoolConnectionsLimit constant.
 func (c *LDAPConnectionPoolConfig) GetConnectionsLimit() uint {
 
@@ -80,7 +93,7 @@ func (c *LDAPConnectionPoolConfig) GetConnectionsLimit() uint {
 	return *c.ConnectionsLimit
 }
 
-// GetDialTimeout func return LDAPConnectionPoolConfig.dialTimeout if it defined.
+// GetDialTimeout func return LDAPConnectionPoolConfig.DialTimeout if it defined.
 // Else returns config.DefaultPoolDialTimeout constant.
 func (c *LDAPConnectionPoolConfig) GetDialTimeout() uint {
 
@@ -90,7 +103,7 @@ func (c *LDAPConnectionPoolConfig) GetDialTimeout() uint {
 	return *c.DialTimeout
 }
 
-// GetRetryCount func return LDAPConnectionPoolConfig.retryCount if it defined.
+// GetRetryCount func return LDAPConnectionPoolConfig.RetryCount if it defined.
 // Else returns config.DefaultPoolRetryCount constant.
 func (c *LDAPConnectionPoolConfig) GetRetryCount() uint {
 
@@ -100,7 +113,7 @@ func (c *LDAPConnectionPoolConfig) GetRetryCount() uint {
 	return *c.RetryCount
 }
 
-// GetRetryDelay func return LDAPConnectionPoolConfig.retryDelay if it defined.
+// GetRetryDelay func return LDAPConnectionPoolConfig.RetryDelay if it defined.
 // Else returns config.DefaultPoolRetryDelay constant.
 func (c *LDAPConnectionPoolConfig) GetRetryDelay() uint {
 
@@ -110,7 +123,7 @@ func (c *LDAPConnectionPoolConfig) GetRetryDelay() uint {
 	return *c.RetryDelay
 }
 
-// GetConnectionAliveTimeout func return LDAPConnectionPoolConfig.connectionAliveTimeout if it defined.
+// GetConnectionAliveTimeout func return LDAPConnectionPoolConfig.ConnectionAliveTimeout if it defined.
 // Else returns config.DefaultLDAPPoolConnectionAliveTimeout constant.
 func (c *LDAPConnectionPoolConfig) GetConnectionAliveTimeout() uint {
 
@@ -120,7 +133,7 @@ func (c *LDAPConnectionPoolConfig) GetConnectionAliveTimeout() uint {
 	return *c.ConnectionAliveTimeout
 }
 
-// GetListenAddress func return HTTPConfig.listenAddress if it defined.
+// GetListenAddress func return HTTPConfig.ListenAddress if it defined.
 // Else returns config.DefaultHTTPListenAdderss constant.
 func (c *HTTPConfig) GetListenAddress() string {
 	if c.ListenAddress == nil {
@@ -129,7 +142,7 @@ func (c *HTTPConfig) GetListenAddress() string {
 	return *c.ListenAddress
 }
 
-// GetMetricsPath func return HTTPConfig.metricsPath if it defined.
+// GetMetricsPath func return HTTPConfig.MetricsPath if it defined.
 // Else returns config.DefaultHTTPMetricsPath constant.
 func (c *HTTPConfig) GetMetricsPath() string {
 	if c.MetricsPath == nil {
@@ -138,7 +151,7 @@ func (c *HTTPConfig) GetMetricsPath() string {
 	return *c.MetricsPath
 }
 
-// GetReadTimeout func return HTTPConfig.readTimeout if it defined.
+// GetReadTimeout func return HTTPConfig.ReadTimeout if it defined.
 // Else returns config.DefaultHTTPReadTimeout constant.
 func (c *HTTPConfig) GetReadTimeout() int {
 	if c.ReadTimeout == nil {
@@ -147,7 +160,7 @@ func (c *HTTPConfig) GetReadTimeout() int {
 	return *c.ReadTimeout
 }
 
-// GetWriteTimeout func return HTTPConfig.writeTimeout if it defined.
+// GetWriteTimeout func return HTTPConfig.WriteTimeout if it defined.
 // Else returns config.DefaultHTTPWriteTimeout constant.
 func (c *HTTPConfig) GetWriteTimeout() int {
 	if c.WriteTimeout == nil {
@@ -156,11 +169,56 @@ func (c *HTTPConfig) GetWriteTimeout() int {
 	return *c.WriteTimeout
 }
 
-// GetIdleTimeout func return HTTPConfig.idleTimeout if it defined.
+// GetIdleTimeout func return HTTPConfig.IdleTimeout if it defined.
 // Else returns config.DefaultHTTPIdleTimeout constant.
 func (c *HTTPConfig) GetIdleTimeout() int {
 	if c.IdleTimeout == nil {
 		return DefaultHTTPIdleTimeout
 	}
 	return *c.IdleTimeout
+}
+
+// GetLevel func return LoggingConfig.Level if it defined.
+// Else returns config.DefaultLogLevel constant.
+func (c *LoggingConfig) GetLevel() string {
+	if c.Level == nil {
+		return DefaultLogLevel
+	}
+	return *c.Level
+}
+
+// GetHandler func return LoggingConfig.Handler if it defined.
+// Else returns config.DefaultLogHandler constant.
+func (c *LoggingConfig) GetHandler() string {
+	if c.Handler == nil {
+		return DefaultLogHandler
+	}
+	return *c.Handler
+}
+
+// GetFile func return LoggingConfig.File if it defined.
+// Else returns config.DefaultLogFile constant.
+func (c *LoggingConfig) GetFile() string {
+	if c.File == nil {
+		return DefaultLogFile
+	}
+	return *c.File
+}
+
+// GetStdoutFormat func return LoggingConfig.StdoutFormat if it defined.
+// Else returns config.DefaultLogStdoutFormat constant.
+func (c *LoggingConfig) GetStdoutFormat() string {
+	if c.StdoutFormat == nil {
+		return DefaultLogStdoutFormat
+	}
+	return *c.StdoutFormat
+}
+
+// GetFileFormat func return LoggingConfig.FileFormat if it defined.
+// Else returns config.DefaultLogFileFormat constant.
+func (c *LoggingConfig) GetFileFormat() string {
+	if c.FileFormat == nil {
+		return DefaultLogFileFormat
+	}
+	return *c.FileFormat
 }
