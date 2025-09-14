@@ -77,9 +77,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 		case conn := <-pool.connectionsCh:
 			if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
 				conn.Close()
-				pool.mu.Lock()
-				pool.totalConnections--
-				pool.mu.Unlock()
+				pool.decreaseTotalConnections()
 				continue
 			}
 			return conn, nil
@@ -90,9 +88,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 				pool.mu.Unlock()
 				conn, err := pool.newConnection()
 				if err != nil {
-					pool.mu.Lock()
-					pool.totalConnections--
-					pool.mu.Unlock()
+					pool.decreaseTotalConnections()
 					return nil, err
 				}
 				return conn, nil
@@ -102,9 +98,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 			case conn := <-pool.connectionsCh:
 				if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
 					conn.Close()
-					pool.mu.Lock()
-					pool.totalConnections--
-					pool.mu.Unlock()
+					pool.decreaseTotalConnections()
 					continue
 				}
 				return conn, nil
@@ -130,9 +124,7 @@ func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
 		pool.mu.Unlock()
 	default:
 		conn.Close()
-		pool.mu.Lock()
-		pool.totalConnections--
-		pool.mu.Unlock()
+		pool.decreaseTotalConnections()
 	}
 }
 
@@ -193,4 +185,11 @@ func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
 		time.Sleep(pool.config.RetryDelay)
 	}
 	return nil, err
+}
+
+// decreaseTotalConnections function decreases count of connections, managed by pool
+func (pool *LdapConnectionPool) decreaseTotalConnections() {
+	pool.mu.Lock()
+	pool.totalConnections--
+	pool.mu.Unlock()
 }
