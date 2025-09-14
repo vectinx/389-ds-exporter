@@ -1,1 +1,3 @@
 389-ds-exporter
+build/
+pakage/deb/build

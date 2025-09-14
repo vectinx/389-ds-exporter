@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus exporter for 389-ds server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/389-ds-exporter --config /etc/389-ds-exporter/config.yml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=no
+
+User=ds-exporter
+Group=ds-exporter
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
