@@ -43,10 +43,12 @@ type appResources struct {
 func (r *appResources) Shutdown(ctx context.Context) error {
 	slog.Info("Shutting down gracefully...")
 
+	var errs []error
 	if r.HttpServer != nil {
 		slog.Debug("Stopping HTTP server ...")
+		r.HttpServer.SetKeepAlivesEnabled(false)
 		if err := r.HttpServer.Shutdown(ctx); err != nil {
-			return fmt.Errorf("HTTP server Shutdown failed: %v", err)
+			errs = append(errs, fmt.Errorf("HTTP server Shutdown failed: %v", err))
 		}
 		slog.Debug("HTTP server stopped")
 	}
@@ -54,15 +56,12 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 	if r.ConnPool != nil {
 		slog.Debug("Closing LDAP connection pool ...")
 		if err := r.ConnPool.Close(ctx); err != nil {
-			return fmt.Errorf("error closing ldap pool: %v", err)
+			errs = append(errs, fmt.Errorf("error closing ldap pool: %v", err))
 		}
 		slog.Debug("LDAP connection closed")
 	}
-
-	if r.LogFile != nil {
-		if err := r.LogFile.Close(); err != nil {
-			return fmt.Errorf("error closing log file: %v", err)
-		}
+	if len(errs) > 0 {
+		return errors.Join(errs...)
 	}
 	slog.Info("All resources shut down successfully")
 	return nil
@@ -226,32 +225,38 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *backend
 	return dsMetricsRegistry
 }
 
-func main() {
+func run() int {
 	var (
-		shutdownContext, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-		applicationResources    = appResources{}
-		args                    = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
+		applicationResources = appResources{}
+		args                 = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
 
 		signalCh    = make(chan os.Signal, 1)
 		serverErrCh = make(chan error)
 	)
 
-	defer cancel()
 	defer func() {
+		shutdownContext, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
 		if err := applicationResources.Shutdown(shutdownContext); err != nil {
 			slog.Error("Shutdown error", "err", err)
+		}
+		if applicationResources.LogFile != nil {
+			// We close the log file last, because we expect logs to be written to it until the very end
+			if err := applicationResources.LogFile.Close(); err != nil {
+				slog.Error("Error closing log file", "err", err)
+			}
 		}
 	}()
 
 	cfg, err := readConfig(args.ConfigFile)
 	if err != nil {
-		slog.Error("Error loading config: %v", "err", err)
-		os.Exit(1)
+		slog.Error("Error loading config", "err", err)
+		return 1
 	}
 
 	if args.IsConfigCheck {
 		fmt.Print(cfg.String())
-		os.Exit(0)
+		return 0
 	}
 
 	logger, logFile, err := setupLogger(cfg)
@@ -259,7 +264,7 @@ func main() {
 
 	if err != nil {
 		slog.Error("Error initializing logging", "err", err)
-		return
+		return 1
 	}
 	slog.SetDefault(logger)
 
@@ -333,4 +338,9 @@ func main() {
 			running = false
 		}
 	}
+	return 0
+}
+
+func main() {
+	os.Exit(run())
 }
