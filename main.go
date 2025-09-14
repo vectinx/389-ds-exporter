@@ -133,6 +133,28 @@ func setupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 	return logger, logFile, nil
 }
 
+func reopenLogFile(cfg *config.ExporterConfiguration, resources *appResources) error {
+	if resources.LogFile != nil {
+		_ = resources.LogFile.Close()
+	}
+
+	logFile, err := os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open new log file: %w", err)
+	}
+
+	newLogger, _, err := setupLogger(cfg)
+	if err != nil {
+		logFile.Close()
+		return fmt.Errorf("failed to set up new logger: %w", err)
+	}
+
+	slog.SetDefault(newLogger)
+	resources.LogFile = logFile
+
+	return nil
+}
+
 func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 	configuration, err := config.ReadConfig(configFilePath)
 	if err != nil {
@@ -233,7 +255,6 @@ func main() {
 	}
 
 	logger, logFile, err := setupLogger(cfg)
-
 	applicationResources.LogFile = logFile
 
 	if err != nil {
@@ -241,6 +262,8 @@ func main() {
 		return
 	}
 	slog.SetDefault(logger)
+
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	slog.Info("Starting 389-ds-exporter", "version", Version, "build_time", BuildTime)
 	slog.Info("Configuration read successfuly")
@@ -262,7 +285,6 @@ func main() {
 	}
 
 	ldapConnPool := backends.NewLdapConnectionPool(ldapConnPoolConfig)
-
 	applicationResources.ConnPool = ldapConnPool
 
 	dsMetricsRegistry := setupPrometheusMetrics(cfg, ldapConnPool)
@@ -287,17 +309,28 @@ func main() {
 		}
 	}()
 
-	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+	running := true
 
-	select {
-	case signal := <-signalCh:
-		switch signal {
-		case syscall.SIGINT:
-			slog.Info("SIGINT signal received")
-		case syscall.SIGTERM:
-			slog.Info("SIGTERM signal received")
+	for running {
+		select {
+		case signal := <-signalCh:
+			switch signal {
+			case syscall.SIGINT:
+				slog.Info("SIGINT signal received")
+				running = false
+			case syscall.SIGTERM:
+				slog.Info("SIGTERM signal received")
+				running = false
+			case syscall.SIGHUP:
+				slog.Info("SIGHUP signal received - reopening log file")
+				if reopenLogFile(cfg, &applicationResources) != nil {
+					slog.Error("Error reopening log file")
+					running = false
+				}
+			}
+		case err := <-serverErrCh:
+			slog.Error(fmt.Sprintf("HTTP server failed with error: %v", err))
+			running = false
 		}
-	case err := <-serverErrCh:
-		slog.Error(fmt.Sprintf("HTTP server failed with error: %v", err))
 	}
 }
