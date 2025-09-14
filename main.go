@@ -235,8 +235,19 @@ func run() int {
 		serverErrCh = make(chan error)
 	)
 
+	cfg, err := readConfig(args.ConfigFile)
+	if err != nil {
+		slog.Error("Error loading config", "err", err)
+		return 1
+	}
+
+	if args.IsConfigCheck {
+		fmt.Print(cfg.String())
+		return 0
+	}
+
 	defer func() {
-		shutdownContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownContext, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Global.GetShutdownTimeout()*uint(time.Second)))
 		defer cancel()
 		if err := applicationResources.Shutdown(shutdownContext); err != nil {
 			slog.Error("Shutdown error", "err", err)
@@ -248,17 +259,6 @@ func run() int {
 			}
 		}
 	}()
-
-	cfg, err := readConfig(args.ConfigFile)
-	if err != nil {
-		slog.Error("Error loading config", "err", err)
-		return 1
-	}
-
-	if args.IsConfigCheck {
-		fmt.Print(cfg.String())
-		return 0
-	}
 
 	logger, logFile, err := setupLogger(cfg)
 	applicationResources.LogFile = logFile
@@ -308,7 +308,7 @@ func run() int {
 
 	applicationResources.HttpServer = server
 	ln, _ := net.Listen("tcp", cfg.HTTP.GetListenAddress())
-	timeoutListener := network.NewTimeoutListener(ln, 1*time.Second)
+	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout()*uint(time.Second)))
 
 	go func() {
 		slog.Info(fmt.Sprintf("Starting HTTP server at %s", cfg.HTTP.GetListenAddress()))
