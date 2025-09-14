@@ -17,11 +17,11 @@ import (
 	slogmulti "github.com/samber/slog-multi"
 
 	"389-ds-exporter/src/backends"
+	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/metrics"
 
-	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -206,14 +206,12 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *backend
 
 func main() {
 	var (
-		configFilePath = kingpin.Flag("config", "Path to configuration file").
-				Default("config.yml").
-				String()
-		checkConfig             = kingpin.Flag("check-config", "Check current configuration and print it to stdout").Bool()
 		shutdownContext, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 		applicationResources    = appResources{}
-		signalCh                = make(chan os.Signal, 1)
-		serverErrCh             = make(chan error)
+		args                    = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
+
+		signalCh    = make(chan os.Signal, 1)
+		serverErrCh = make(chan error)
 	)
 
 	defer cancel()
@@ -223,17 +221,13 @@ func main() {
 		}
 	}()
 
-	kingpin.Version(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
-	kingpin.HelpFlag.Short('h')
-	kingpin.Parse()
-
-	cfg, err := readConfig(*configFilePath)
+	cfg, err := readConfig(args.ConfigFile)
 	if err != nil {
 		slog.Error("Error loading config: %v", "err", err)
 		os.Exit(1)
 	}
 
-	if *checkConfig {
+	if args.IsConfigCheck {
 		fmt.Print(cfg.String())
 		os.Exit(0)
 	}
