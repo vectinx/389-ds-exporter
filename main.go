@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,11 +17,11 @@ import (
 
 	slogmulti "github.com/samber/slog-multi"
 
-	"389-ds-exporter/src/backends"
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/metrics"
+	"389-ds-exporter/src/network"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -36,7 +37,7 @@ var (
 // Resources must be added to the structure as they are initialized
 type appResources struct {
 	LogFile    *os.File
-	ConnPool   *backends.LdapConnectionPool
+	ConnPool   *network.LdapConnectionPool
 	HttpServer *http.Server
 }
 
@@ -167,7 +168,7 @@ func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 	return &configuration, nil
 }
 
-func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *backends.LdapConnectionPool) *prometheus.Registry {
+func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network.LdapConnectionPool) *prometheus.Registry {
 	dsMetricsRegistry := prometheus.NewRegistry()
 
 	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
@@ -235,7 +236,7 @@ func run() int {
 	)
 
 	defer func() {
-		shutdownContext, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		shutdownContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := applicationResources.Shutdown(shutdownContext); err != nil {
 			slog.Error("Shutdown error", "err", err)
@@ -278,7 +279,7 @@ func run() int {
 		"backend", cfg.Global.BackendImplement,
 	)
 
-	ldapConnPoolConfig := backends.LdapConnectionPoolConfig{
+	ldapConnPoolConfig := network.LdapConnectionPoolConfig{
 		ServerURL:              cfg.LDAP.ServerURL,
 		BindDN:                 cfg.LDAP.BindDN,
 		BindPw:                 cfg.LDAP.BindPw,
@@ -289,7 +290,7 @@ func run() int {
 		ConnectionAliveTimeout: time.Duration(cfg.LDAP.ConnectionPool.GetConnectionAliveTimeout()) * time.Second,
 	}
 
-	ldapConnPool := backends.NewLdapConnectionPool(ldapConnPoolConfig)
+	ldapConnPool := network.NewLdapConnectionPool(ldapConnPoolConfig)
 	applicationResources.ConnPool = ldapConnPool
 
 	dsMetricsRegistry := setupPrometheusMetrics(cfg, ldapConnPool)
@@ -306,10 +307,12 @@ func run() int {
 	}
 
 	applicationResources.HttpServer = server
+	ln, _ := net.Listen("tcp", cfg.HTTP.GetListenAddress())
+	timeoutListener := network.NewTimeoutListener(ln, 1*time.Second)
 
 	go func() {
 		slog.Info(fmt.Sprintf("Starting HTTP server at %s", cfg.HTTP.GetListenAddress()))
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.Serve(timeoutListener); err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err
 		}
 	}()
