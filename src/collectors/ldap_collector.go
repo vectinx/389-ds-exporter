@@ -5,7 +5,7 @@ package collectors
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"slices"
 	"strconv"
 	"sync"
@@ -18,15 +18,15 @@ import (
 )
 
 /*
-LdapValueType type defines the format
+LdapAttrValueType type defines the format
 in which the attribute value is stored in the LDAP and how it will be converted to float64.
 */
-type LdapValueType int
+type LdapAttrValueType int
 
 const dateTimeLayout string = "20060102150405Z"
 
 const (
-	_ LdapValueType = iota
+	_ LdapAttrValueType = iota
 	// NumericValue type corresponds a simple numeric value.
 	NumericValue
 	// Iso8601CompactString type corresponds a string containing the date and time in the 'YYYYMMDDThhmmssZ' format.
@@ -36,7 +36,7 @@ const (
 // LdapMonitoredAttribute implements a container for storing the necessary information about an attribute used in metrics.
 type LdapMonitoredAttribute struct {
 	LdapName string
-	LdapType LdapValueType
+	LdapType LdapAttrValueType
 	Help     string
 	Type     prometheus.ValueType
 	Labels   prometheus.Labels
@@ -140,19 +140,19 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 
 	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
-		log.Printf("Error getting values from ldap: %s", err)
+		slog.Error("Error getting attrs from ldap", "err", err)
 		return
 	}
 
 	for key, value := range c.attributes {
 		attributeValues, ok := ldapEntries[value.LdapName]
 		if !ok {
-			log.Printf("Attribute %v was not found in LDAP response. ", value.LdapName)
+			slog.Debug("Attribute was not found in LDAP response. ", "attr_name", value.LdapName)
 			continue
 		}
 
 		if len(attributeValues) > 1 {
-			log.Printf("Attribute %s has more than one value, the first one will be used", key)
+			slog.Debug("Attribute has more than one value, the first one will be used", "attr_name", key)
 		}
 
 		var converted float64
@@ -160,7 +160,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		if value.LdapType == Iso8601CompactString {
 			parsedTime, err := time.Parse(dateTimeLayout, attributeValues[0])
 			if err != nil {
-				log.Printf("Error parsing date: %s", err)
+				slog.Error("Error parsing date from ldap", "attr_name", key, "attr_value", attributeValues[0], "err", err)
 
 				continue
 			}
@@ -169,7 +169,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		} else {
 			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
 			if err != nil {
-				log.Printf("Unable to convert attribute \"%s\" value \"%s\" to type float64", key, ldapEntries[value.LdapName])
+				slog.Error("Unable to convert attribute value to type float64", "attr_name", key, "attr_value", ldapEntries[value.LdapName])
 
 				continue
 			}
