@@ -13,7 +13,7 @@ const (
 	DefaultLDAPPoolConnectionAliveTimeout uint   = 1
 	DefaultLogLevel                       string = "INFO"
 	DefaultLogHandler                     string = "both"
-	DefaultLogFile                        string = "/var/log/389-ds-exporter.log"
+	DefaultLogFile                        string = "/var/log/389-ds-exporter/exporter.log"
 	DefaultLogStdoutFormat                string = "text"
 	DefaultLogFileFormat                  string = "json"
 )
