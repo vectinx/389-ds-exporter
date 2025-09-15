@@ -190,6 +190,17 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 	),
 	)
 
+	for _, entry := range cfg.Global.NumSubordinatesRecords {
+		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
+			"ds_exporter",
+			connPool,
+			entry,
+			metrics.GetEntryCountAttr(),
+			prometheus.Labels{"entry": entry},
+		),
+		)
+	}
+
 	for _, backend := range cfg.Global.Backends {
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
