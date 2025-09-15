@@ -7,6 +7,8 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.10
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/common v0.62.0
+	github.com/samber/slog-multi v1.5.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -35,7 +37,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.51.0 // indirect
 	github.com/samber/slog-common v0.19.0 // indirect
-	github.com/samber/slog-multi v1.5.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.gitflic.ru/vectinx/parsecsn v0.0.0-20250720100844-701d97f1a1ae // indirect
@@ -49,7 +50,6 @@ require (
 	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	google.golang.org/protobuf v1.36.1 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
 )

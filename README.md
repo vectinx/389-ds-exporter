@@ -1,5 +1,97 @@
 # 389-ds-exporter
 
+A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol and exposes them in Prometheus format.
+
+## Features
+- Collects metrics from LDAP entry attributes in various formats
+- Counts subordinates of LDAP entries
+- Configurable via YAML configuration file
+- Supports 389-ds version 2.3 and higher
+- Supports Berkeley DB and LMDB backends of the 389-ds server
+
+## Quick Start
+
+### Build from Source
+
+Requirements:
+
+- Go >= 1.24.3
+- make
+- fakeroot
+
+```bash
+# Clone project repository
+git clone git@github.com:vectinx/389-ds-exporter.git
+cd 389-ds-exporter
+
+# Build the 389-ds-exporter binary
+make build
+
+# Build a Debian package
+make deb
+```
+
+### Run with Docker
+
+Pull the Docker image
+```bash
+docker pull vectinx/389-ds-exporter
+```
+
+Prepare the configuration file according to the [documentation](docs/config.md). Then run the container and pass it the generated config:
+```bash
+docker run -d --name 389-ds-exporter \
+    -v $PWD/config.yml:/etc/config.yml:ro \
+    -p 9389:9389 vectinx/389-ds-exporter \
+    --config /etc/config.yml
+```
+
+To test the exporter:
+```bash
+curl localhost:9389/metrics
+```
+
+If something goes wrong, check the logs:
+```bash
+docker logs 389-ds-exporter
+```
+
+### Install from debian package
+
+Go to the project's [releases](https://github.com/vectinx/389-ds-exporter/releases) page and download the .deb file from the latest release.
+Then install it using the following command:
+```
+sudo apt install ./389-ds-exporter_0.0.1_amd64.deb
+```
+
+Prepare `/etc/389-ds-exporter/config.yml` file according to [documentation](docs/config.md). Then start the 389-ds-exporter unit:
+```bash
+sudo systemctl start 389-ds-exporter
+```
+
+To test the exporter:
+```bash
+curl localhost:9389/metrics
+```
+
+If something goes wrong, check the logs:
+```bash
+cat /var/log/389-ds-exporter/exporter.log
+```
+
+## Command-Line Interface
+
+The command-line interface is self-documented and available via the `-h` (`--help`) option:
+```bash
+bash$ 389-ds-exporter --help
+usage: 389-ds-exporter [<flags>]
+
+Flags:
+  -h, --[no-]help            Show context-sensitive help (also try --help-long and --help-man).
+      --config="config.yml"  Path to configuration file
+      --[no-]check-config    Check current configuration and print it to stdout
+      --[no-]version         Show application version.
+```
 
 ##  Based on
 
