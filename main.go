@@ -309,7 +309,11 @@ func run() int {
 	}
 
 	applicationResources.HttpServer = server
-	ln, _ := net.Listen("tcp", cfg.HTTP.GetListenAddress())
+	ln, err := net.Listen("tcp", cfg.HTTP.GetListenAddress())
+	if err != nil {
+		slog.Error("Failed to start TCP listener", "err", err)
+		return 1
+	}
 	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout()*uint(time.Second)))
 
 	go func() {
