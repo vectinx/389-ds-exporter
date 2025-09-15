@@ -109,7 +109,7 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 
 	searchResult, err := ldapConnection.Search(searchAttributesRequest)
 	if err != nil {
-		return nil, fmt.Errorf("LDAP Search request failed with error: %w", err)
+		return nil, fmt.Errorf("LDAP Search request (dn='%v', attrs='%v') failed with error: %w", searchAttributesRequest.BaseDN, searchAttributesRequest.Attributes, err)
 	}
 
 	returnValue := make(map[string][]string)

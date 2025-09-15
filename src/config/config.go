@@ -21,9 +21,10 @@ type ExporterConfiguration struct {
 }
 
 type GlobalConfig struct {
-	BackendImplement BackendType `yaml:"ds_backend_implement"`
-	Backends         []string    `yaml:"ds_backends"`
-	ShutdownTimeout  *uint       `yaml:"shutdown_timeout"`
+	BackendImplement       BackendType `yaml:"ds_backend_implement"`
+	Backends               []string    `yaml:"ds_backends"`
+	ShutdownTimeout        *uint       `yaml:"shutdown_timeout"`
+	NumSubordinatesRecords []string    `yaml:"ds_numsubordinate_records"`
 }
 
 type HTTPConfig struct {
@@ -65,6 +66,7 @@ func (c *ExporterConfiguration) String() string {
 	b.WriteString(fmt.Sprintf("global.ds_backend_implemet: %s\n", c.Global.BackendImplement))
 	b.WriteString(fmt.Sprintf("global.ds_backends: %v\n", c.Global.Backends))
 	b.WriteString(fmt.Sprintf("global.shutdown_timeout: %v\n", c.Global.GetShutdownTimeout()))
+	b.WriteString(fmt.Sprintf("global.ds_numsubordinate_records: %v\n", c.Global.NumSubordinatesRecords))
 	b.WriteString(fmt.Sprintf("http.listen_address: %s\n", c.HTTP.GetListenAddress()))
 	b.WriteString(fmt.Sprintf("http.metrics_path: %s\n", c.HTTP.GetMetricsPath()))
 	b.WriteString(fmt.Sprintf("http.read_timeout: %d\n", c.HTTP.GetReadTimeout()))
