@@ -1,5 +1,5 @@
 Package: 389-ds-exporter
-Version: 0-@VERSION@
+Version: @VERSION@
 Section: utils
 Priority: optional
 Architecture: amd64
