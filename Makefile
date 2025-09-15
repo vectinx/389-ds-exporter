@@ -23,13 +23,13 @@ deb: build
 	chmod 755 package/deb/$(PKG_DIR)/usr/local/bin
 
 	cp config.yml package/deb/$(PKG_DIR)/etc/389-ds-exporter/config.yml
-	chmod 644 package/deb/$(PKG_DIR)/etc/389-ds-exporter/config.yml
+	chmod 600 package/deb/$(PKG_DIR)/etc/389-ds-exporter/config.yml
 
 	cp package/deb/389-ds-exporter.service package/deb/$(PKG_DIR)/etc/systemd/system/389-ds-exporter.service
 	chmod 644 package/deb/$(PKG_DIR)/etc/systemd/system/389-ds-exporter.service
 
 	cp package/deb/389-ds-exporter.logrotate package/deb/$(PKG_DIR)/etc/logrotate.d/389-ds-exporter
-	chmod 644 package/deb/$(PKG_DIR)/etc/logrotate.d/389-ds-exporter
+	chmod 600 package/deb/$(PKG_DIR)/etc/logrotate.d/389-ds-exporter
 
 	cp package/deb/postinst package/deb/$(PKG_DIR)/DEBIAN/postinst
 	chmod 755 package/deb/$(PKG_DIR)/DEBIAN/postinst

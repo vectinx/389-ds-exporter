@@ -72,15 +72,15 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 // defaultHttpResponse function generates a standard HTML response for the exporter
 func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := fmt.Fprintf(w, `
-		<html>
-			<head>
-				<title>389-ds-exporter</title>
-			</head>
-			<body>
-				<p>Metrics are <a href="%s">here</a></p>
-			</body>
-		</html>`, html.EscapeString(metricsPath))
+		_, err := fmt.Fprintf(w, `<html>
+	<head>
+		<title>389-ds-exporter</title>
+	</head>
+	<body>
+		<p>Metrics are <a href="%s">here</a></p>
+	</body>
+</html>
+`, html.EscapeString(metricsPath))
 		if err != nil {
 			log.Printf("Error writing HTTP answer: %s", err)
 		}

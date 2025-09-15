@@ -4,6 +4,7 @@ set -e
 USER="ds-exporter"
 GROUP="ds-exporter"
 LOGDIR="/var/log/389-ds-exporter"
+CONFIG="/etc/389-ds-exporter/config.yml"
 
 echo "Post-install script running..."
 
@@ -23,6 +24,11 @@ else
     echo "Log directory $LOGDIR already exists, set permissions."
     chown "$USER:$GROUP" "$LOGDIR"
     chmod 755 "$LOGDIR"
+fi
+
+if [ -f "$CONFIG" ]; then
+    echo "Set config file owner"
+    chown "$USER:$GROUP" "$CONFIG"
 fi
 
 if command -v systemctl >/dev/null 2>&1; then

@@ -14,7 +14,7 @@
     # Compress logs starting from the second rotation (delays compression by one rotation cycle)
     delaycompress
     # After rotation, create new log file with specified permissions and ownership
-    create 0640 ds-exporter ds-exporter
+    create 0644 ds-exporter ds-exporter
     # Run postrotate script only once, even if multiple logs are rotated
     sharedscripts
 
