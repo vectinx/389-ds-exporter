@@ -29,8 +29,9 @@ import (
 
 var (
 	// This variables is filled via ldflags at build time
-	Version   = "dev"
-	BuildTime = "unknown"
+	Version    = "dev"
+	BuildTime  = "unknown"
+	CommitHash = "unknown"
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
@@ -229,7 +230,7 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 func run() int {
 	var (
 		applicationResources = appResources{}
-		args                 = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nBuild time: %s", Version, BuildTime))
+		args                 = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nCommit: %s\nBuild time: %s", Version, CommitHash, BuildTime))
 
 		signalCh    = make(chan os.Signal, 1)
 		serverErrCh = make(chan error)
@@ -245,6 +246,8 @@ func run() int {
 		fmt.Print(cfg.String())
 		return 0
 	}
+
+	slog.Info("Configuration read successfuly")
 
 	defer func() {
 		shutdownContext, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Global.GetShutdownTimeout()*uint(time.Second)))
@@ -271,8 +274,7 @@ func run() int {
 
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	slog.Info("Starting 389-ds-exporter", "version", Version, "build_time", BuildTime)
-	slog.Info("Configuration read successfuly")
+	slog.Info("Starting 389-ds-exporter", "version", Version, "commit", CommitHash, "build_time", BuildTime)
 	slog.Info("LDAP server info",
 		"url", cfg.LDAP.ServerURL,
 		"bind_dn", cfg.LDAP.BindDN,
