@@ -1,157 +1,149 @@
 ---
-# 'global' section defines general exporter parameters.
+# The 'global' section defines general exporter parameters.
 global:
-  # Backend database implementation used in 389-ds server.
-  # For more details see the docs:
+  # The backend database implementation used in the 389-ds server.
+  # For more details, see the documentation:
   # https://www.port389.org/docs/389ds/howto/howto-use-lmdb.html
   # https://www.port389.org/docs/389ds/FAQ/Berkeley-DB-deprecation.html
-  # Can be bdb or mbd
+  # Can be either 'bdb' or 'mbd'
   #
   ds_backend_implement: bdb
 
-  # List of 389-ds backend databases for which metrics will be collected
-  # For more details about backend databases see the docs:
+  # List of 389-ds backend databases for which metrics will be collected.
+  # For more details about backend databases, see the documentation:
   # https://docs.redhat.com/en/documentation/red_hat_directory_server/11/html/administration_guide/configuring_directory_databases
   #
   # ds_backends: []
 
-  # List of ldap entries for which information about the number of subrecords (numsubordinates) will be collected
+  # List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
   #
   # ds_numsubordinate_records: []
 
   # The maximum duration the server will wait for a graceful shutdown of all resources when the application is stopping.
-  # During this period, the server stops accepting new connections, attempts to finish processing ongoing requests, and properly closes the HTTP server, LDAP connection pools, and other active resources.
+  # During this period, the server stops accepting new connections, attempts to finish processing ongoing requests,
+  # and properly closes the HTTP server, LDAP connection pools, and other active resources.
   # If the timeout is exceeded, any remaining open connections or resources will be forcibly closed to prevent the application from hanging.
-  # If the value is 0, it is assumed that the timeout has already expired and graceful completion will be aborted.
+  # If the value is 0, it is assumed that the timeout has already expired and graceful shutdown will be skipped.
   #
   # shutdown_timeout: 5
 
-# 'http' section defines the parameters of the HTTP server that provides metrics.
+# The 'http' section defines the parameters of the HTTP server that provides metrics.
 http:
-  # The address and port on which the server will wait for incoming connections. It is written in the format <server>:<port>. Examply:
-  # ":9389" will listen on port 9389 and available on all network interfaces.
-  # "0.0.0.0:9389" will listen on port 9389 and available on all IPv4 network interfaces.
-  # "192.168.0.10:9389" will listen on port 9389 and available on 192.168.0.10 address IPv4.
+  # The address and port on which the server will listen for incoming connections.
+  # Use the format <host>:<port>. For example:
+  # ":9389" will listen on port 9389 on all network interfaces.
+  # "0.0.0.0:9389" will listen on port 9389 on all IPv4 interfaces.
+  # "192.168.0.10:9389" will listen on port 9389 only on 192.168.0.10.
   #
   # listen_address: "127.0.0.1:9389"
 
-  # Http endpoint where the provided metrics are located.
+  # HTTP endpoint where metrics are exposed.
   #
   # metrics_path: "/metrics"
 
-  # ReadTimeout is the maximum duration for reading the entire request, including the body.
-  # A zero or negative value means there will be no timeout.
+  # Maximum duration allowed for reading the entire request, including the body.
+  # A zero or negative value means no timeout.
   #
   # read_timeout: 10
 
-  # Maximum duration before timing out writes of the response. It is reset whenever a new request's header is read.
-  # A zero or negative value means there will be no timeout.
+  # Maximum duration before timing out writes of the response.
+  # This timeout is reset whenever a new request’s header is read.
+  # A zero or negative value means no timeout.
   #
   # write_timeout: 15
 
-  # Maximum amount of time to wait for the next request when keep-alives are enabled.
-  # If zero, the value of ReadTimeout is used. If negative, or if zero and ReadTimeout is zero or negative, there is no timeout.
+  # Maximum duration to wait for the next request when keep-alives are enabled.
+  # If zero, the value of ReadTimeout is used.
+  # If negative, or if both this and ReadTimeout are zero or negative, there is no timeout.
   #
   # idle_timeout: 60
 
   # Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
-  # If the client doesn't send any data within this time, the connection will be closed automatically.
-  # If set to 0, the timeout is disabled, meaning the server will wait indefinitely for the initial read without timing out.
-  # This helps avoid hanging connections from tools like telnet or slow clients.
+  # If the client doesn't send any data within this time, the connection will be closed.
+  # A value of 0 disables the timeout, meaning the server will wait indefinitely.
   #
   # initial_read_timeout: 3
 
-# 'ldap' section defines the parameters of the connection to LDAP server
+# The 'ldap' section defines the parameters of the connection to the LDAP server.
 ldap:
-  # LDAP server URL in RFC-2255 format. Examply:
-  # "ldap://localhost:3389" or "ldaps://remote-server"
+  # LDAP server URL in RFC-2255 format. For example:
+  # "ldap://localhost:389" or "ldaps://remote-server"
   #
   server_url: "ldap://localhost:389"
 
-  # DN of the account on behalf of which authentication is performed on the LDAP server
+  # DN of the account used to authenticate with the LDAP server.
   #
   bind_dn: "cn=directory manager"
 
-  # Password of the LDAP account
+  # Password of the LDAP account.
   #
   bind_pw: "12345678"
 
-  # 'ldap.connecion_pool' section describes the parameters for connecting to the LDAP server from which metrics will be received.
-  # In most cases, there is no need to configure these settings.
+  # The 'ldap.connection_pool' section describes the parameters for connecting to the LDAP server from which metrics will be collected.
+  # In most cases, these settings do not need to be changed.
   connection_pool:
 
-    # Maximum size of the LDAP connection pool
-    # Connections in the pool are created as needed, and deleted when the lifetime and idle time limits are reached.
-    # Recommended and default value is 4. If you specify a lower value,
-    # metric collectors will wait for resources in the pool to become available, which may slow down the exporter.
-    # Specifying a value greater than 4 does not make sense,
-    # since the current version of the exporter does not use more than 4 connections at a time, and more than this number of connections will not be created.
+    # Maximum size of the LDAP connection pool.
+    # Connections are created as needed and deleted when their lifetime or idle time is exceeded.
+    # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
+    # Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
     #
     # connections_limit: 4
 
-    # Timeout in seconds for establishing a connection with ldap.
-    # It is necessary to avoid situations when the connection attempt "hangs".
-    # A zero or negative value means there will be no timeout.
-    # It may be worth increasing if the network connection is unstable or the ldap server is running slowly.
+    # Timeout in seconds for establishing a connection to the LDAP server.
+    # Prevents the connection attempt from hanging indefinitely.
+    # A zero or negative value means no timeout.
     #
     # dial_timeout: 1
 
-    # Number of attempts to connect to LDAP.
-    # When creating a connection, if the first connection fails,
-    # the specified number of repeated attempts will be performed at intervals of 'retry_delay'.
-    # A zero value means that no reconnection attempts will be made.
-    # It might be worth increasing this value if the network connection is unstable.
+    # Number of retry attempts when connecting to the LDAP server.
+    # If the initial attempt fails, this number of retries will be made with delays between attempts.
+    # A value of 0 means no retries.
     #
     # retry_count: 0
 
-    # LDAP reconnection interval in seconds. Provides a delay between reconnection retries ('retry_count') when creating an LDAP connection.
-    # A zero value means there will be no delay.
-    # It might be worth increasing this value if the network connection is unstable.
+    # Delay in seconds between LDAP reconnection attempts (used with retry_count).
+    # A value of 0 means no delay between attempts.
     #
     # retry_delay: 1
 
-    # Connection alive check timeout in seconds.
-    # Before returning a connection, the pool checks its alive with a "dn='' scope='base' filter='(objectClass=*)' attrs='dn'" request.
-    # Parameter sets the timeout for this request.
-    # A zero or negative value means there will be no timeout.
-    # It might be worth increasing this value if the ldap directory is running slowly
+    # Timeout in seconds for checking if an existing connection is still alive.
+    # Before reusing a connection, the pool checks it by sending a basic query.
+    # A zero or negative value disables the timeout.
     #
     # connection_alive_timeout: 1
 
-# 'log' section defines the exporter logging parameters.
+# The 'log' section defines logging parameters.
 log:
   # Logging level.
-  # Can be DEBUG, INFO, WARNING and ERROR.
+  # Can be DEBUG, INFO, WARNING, or ERROR.
   #
   # level: INFO
 
-  # Log handler.
-  # Defines where the logs will be written.
-  # Can be:
-  # 'stdout' - write logs to the program's stdout
-  # 'file' - write logs to a log file
-  # 'both' - write logs to both places
+  # Log output target.
+  # Options:
+  # 'stdout' - logs are printed to standard output
+  # 'file'   - logs are written to a file
+  # 'both'   - logs are written to both stdout and a file
   #
-  handler: stdout
+  # handler: both
 
   # Log file path.
-  # It makes sense to specify only if the 'handler' parameter is set to 'both'
-  # ! If you use are changing path to a file, make sure that the system is configured to rotate this log file (ex. logrotate)
+  # Only relevant if 'handler' is set to 'file' or 'both'.
+  # Make sure the system is configured to rotate this file (e.g., using logrotate).
   #
   # file: /var/log/389-ds-exporter/exporter.log
 
   # STDOUT log format.
-  # Can be text or json.
-  # The text format is used by default and convenient for writing logs to syslog.
-  # The json format can be used for convenient parsing of logs and sending them to third-party systems.
-  # Only makes sense if handler is set to 'stdout' or 'both'
+  # Options: text, json
+  # The 'text' format is the default and is convenient for syslog.
+  # The 'json' format is useful for parsing logs or sending to external systems.
+  # Only applies if 'handler' is 'stdout' or 'both'.
   #
-  # stdout_foramt: text
+  # stdout_format: text
 
   # File log format.
-  # Can be text or json.
-  # The text format is used by default and convenient for writing logs to syslog.
-  # The json format can be used for convenient parsing of logs and sending them to third-party systems.
-  # Only makes sense if handler is set to 'file' or 'both'
+  # Options: text, json
+  # Applies only if 'handler' is 'file' or 'both'.
   #
   # file_format: json
