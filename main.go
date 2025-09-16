@@ -247,12 +247,30 @@ func setupPrometheusMetrics(
 			LdapConnectionPoolTimeout,
 		),
 		)
+		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
+			"ds_exporter",
+			connPool,
+			"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+			metrics.GetLdapBDBDatabaseLDBM(),
+			prometheus.Labels{},
+			LdapConnectionPoolTimeout,
+		),
+		)
 	case config.BackendMDB:
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			connPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapMDBServerCacheMetrics(),
+			prometheus.Labels{},
+			LdapConnectionPoolTimeout,
+		),
+		)
+		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
+			"ds_exporter",
+			connPool,
+			"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+			metrics.GetLdapMDBDatabaseLDBM(),
 			prometheus.Labels{},
 			LdapConnectionPoolTimeout,
 		),
@@ -369,7 +387,7 @@ func run() int {
 	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
 
 	go func() {
-		slog.Info("Starting HTTP server at" + cfg.HTTP.GetListenAddress())
+		slog.Info("Starting HTTP server at " + cfg.HTTP.GetListenAddress())
 		err := server.Serve(timeoutListener)
 		if err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err
