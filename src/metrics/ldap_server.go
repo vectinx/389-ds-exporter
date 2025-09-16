@@ -1,9 +1,9 @@
 package metrics
 
 import (
-	"389-ds-exporter/src/collectors"
-
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/collectors"
 )
 
 // GetLdapServerMetrics is a map of attributes defining ldap server metrics.

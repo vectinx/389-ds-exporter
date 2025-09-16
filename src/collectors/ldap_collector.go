@@ -11,10 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"389-ds-exporter/src/network"
-
 	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/network"
 )
 
 /*
@@ -33,7 +33,8 @@ const (
 	Iso8601CompactString
 )
 
-// LdapMonitoredAttribute implements a container for storing the necessary information about an attribute used in metrics.
+// LdapMonitoredAttribute implements a container for storing
+// the necessary information about an attribute used in metrics.
 type LdapMonitoredAttribute struct {
 	LdapName string
 	LdapType LdapAttrValueType
@@ -50,15 +51,17 @@ type LdapEntryCollector struct {
 	attributes     map[string]LdapMonitoredAttribute
 	descriptors    map[string]*prometheus.Desc
 	mutex          sync.Mutex
+	poolGetTimeout time.Duration
 }
 
-// NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameteres.
+// NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
 	namespace string,
 	connectionPool *network.LdapConnectionPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,
+	poolGetTimeout time.Duration,
 ) *LdapEntryCollector {
 	metricsDescriptors := make(map[string]*prometheus.Desc)
 
@@ -77,52 +80,8 @@ func NewLdapEntryCollector(
 		baseDn:         entryBaseDn,
 		attributes:     attributes,
 		descriptors:    metricsDescriptors,
+		poolGetTimeout: poolGetTimeout,
 	}
-}
-
-// getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap
-func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
-	ldapConnection, err := c.connectionPool.Get(5 * time.Second)
-	defer c.connectionPool.Put(ldapConnection)
-
-	if err != nil {
-		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
-	}
-
-	var attributeList []string
-
-	for _, monitoredAttr := range c.attributes {
-		attributeList = append(attributeList, monitoredAttr.LdapName)
-	}
-
-	searchAttributesRequest := ldap.NewSearchRequest(
-		c.baseDn,
-		ldap.ScopeBaseObject,
-		ldap.NeverDerefAliases,
-		1,
-		0,
-		false,
-		"(objectclass=*)",
-		attributeList,
-		nil,
-	)
-
-	searchResult, err := ldapConnection.Search(searchAttributesRequest)
-	if err != nil {
-		return nil, fmt.Errorf("LDAP Search request (dn='%v', attrs='%v') failed with error: %w", searchAttributesRequest.BaseDN, searchAttributesRequest.Attributes, err)
-	}
-
-	returnValue := make(map[string][]string)
-
-	for _, attr := range searchResult.Entries[0].Attributes {
-		if !slices.Contains(attributeList, attr.Name) {
-			continue
-		}
-
-		returnValue[attr.Name] = attr.Values
-	}
-
-	return returnValue, nil
 }
 
 // Describe function sends the super-set of all possible descriptors of LDAP metrics
@@ -141,6 +100,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
 		slog.Error("Error getting attrs from ldap", "err", err)
+
 		return
 	}
 
@@ -148,6 +108,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		attributeValues, ok := ldapEntries[value.LdapName]
 		if !ok {
 			slog.Debug("Attribute was not found in LDAP response. ", "attr_name", value.LdapName)
+
 			continue
 		}
 
@@ -169,7 +130,13 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		} else {
 			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
 			if err != nil {
-				slog.Error("Unable to convert attribute value to type float64", "attr_name", key, "attr_value", ldapEntries[value.LdapName])
+				slog.Error(
+					"Unable to convert attribute value to type float64",
+					"attr_name",
+					key,
+					"attr_value",
+					ldapEntries[value.LdapName],
+				)
 
 				continue
 			}
@@ -178,4 +145,54 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		channel <- prometheus.MustNewConstMetric(c.descriptors[key],
 			c.attributes[key].Type, converted)
 	}
+}
+
+// getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap.
+func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
+	ldapConnection, err := c.connectionPool.Get(c.poolGetTimeout)
+	defer c.connectionPool.Put(ldapConnection)
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
+	}
+
+	attributeList := make([]string, 0, len(c.attributes))
+
+	for _, monitoredAttr := range c.attributes {
+		attributeList = append(attributeList, monitoredAttr.LdapName)
+	}
+
+	searchAttributesRequest := ldap.NewSearchRequest(
+		c.baseDn,
+		ldap.ScopeBaseObject,
+		ldap.NeverDerefAliases,
+		1,
+		0,
+		false,
+		"(objectclass=*)",
+		attributeList,
+		nil,
+	)
+
+	searchResult, err := ldapConnection.Search(searchAttributesRequest)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"LDAP Search request (dn='%v', attrs='%v') failed with error: %w",
+			searchAttributesRequest.BaseDN,
+			searchAttributesRequest.Attributes,
+			err,
+		)
+	}
+
+	returnValue := make(map[string][]string)
+
+	for _, attr := range searchResult.Entries[0].Attributes {
+		if !slices.Contains(attributeList, attr.Name) {
+			continue
+		}
+
+		returnValue[attr.Name] = attr.Values
+	}
+
+	return returnValue, nil
 }

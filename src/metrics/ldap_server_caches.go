@@ -1,12 +1,13 @@
 package metrics
 
 import (
-	"389-ds-exporter/src/collectors"
-
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/collectors"
 )
 
-// GetLdapBDBServerCacheMetrics function returns map of specific for BDB backend attributes defining ldap server caches metrics.
+// GetLdapBDBServerCacheMetrics function returns map of
+// specific for BDB backend attributes defining ldap server caches metrics.
 func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"dbcachehits": {
@@ -82,7 +83,8 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 	}
 }
 
-// GetLdapMDBServerCacheMetrics function returns map of specific for MDB backend attributes defining ldap server caches metrics.
+// GetLdapMDBServerCacheMetrics function returns a map
+// of specific for MDB backend attributes defining ldap server caches metrics.
 func GetLdapMDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"normalizeddncachetries": {
