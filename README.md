@@ -26,9 +26,6 @@ cd 389-ds-exporter
 
 # Build the 389-ds-exporter binary
 make build
-
-# Build a Debian package
-make deb
 ```
 
 ### Run with Docker
@@ -56,28 +53,6 @@ If something goes wrong, check the logs:
 docker logs 389-ds-exporter
 ```
 
-### Install from debian package
-
-Go to the project's [releases](https://github.com/vectinx/389-ds-exporter/releases) page and download the .deb file from the latest release.
-Then install it using the following command:
-```
-sudo apt install ./389-ds-exporter_0.0.1_amd64.deb
-```
-
-Prepare `/etc/389-ds-exporter/config.yml` file according to [documentation](docs/config.md). Then start the 389-ds-exporter unit:
-```bash
-sudo systemctl start 389-ds-exporter
-```
-
-To test the exporter:
-```bash
-curl localhost:9389/metrics
-```
-
-If something goes wrong, check the logs:
-```bash
-cat /var/log/389-ds-exporter/exporter.log
-```
 
 ## Command-Line Interface
 
