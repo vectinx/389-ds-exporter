@@ -1,7 +1,0 @@
-Package: 389-ds-exporter
-Version: @VERSION@
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: vectinx <vectinx@yandex.ru>
-Description: Prometheus exporter for 389-ds server
