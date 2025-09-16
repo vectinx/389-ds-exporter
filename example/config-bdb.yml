@@ -1,0 +1,15 @@
+---
+global:
+  ds_backend_implement: bdb
+  ds_backends:
+    - userRoot
+  ds_numsubordinate_records:
+    - "dc=example,dc=com"
+http:
+  listen_address: "0.0.0.0:9389"
+ldap:
+  server_url: "ldap://389ds-bdb:3389"
+  bind_dn: "cn=directory manager"
+  bind_pw: "12345678"
+log:
+  handler: stdout
