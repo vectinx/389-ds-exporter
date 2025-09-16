@@ -75,7 +75,7 @@ If negative, or if both this and ReadTimeout are zero or negative, there is no t
 
 Default value: `60`
 
-# initial_read_timeout
+### initial_read_timeout
 Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
 If the client doesn't send any data within this time, the connection will be closed.
 A value of 0 disables the timeout, meaning the server will wait indefinitely.

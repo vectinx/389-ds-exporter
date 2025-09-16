@@ -2,6 +2,8 @@
 
 A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol and exposes them in Prometheus format.
 
+![Dashboard](./.res/dashboard.png)
+
 ## Features
 - Collects metrics from LDAP entry attributes in various formats
 - Counts subordinates of LDAP entries
