@@ -15,6 +15,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	slogmulti "github.com/samber/slog-multi"
 
 	"389-ds-exporter/src/cmd"
@@ -22,20 +25,22 @@ import (
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/metrics"
 	"389-ds-exporter/src/network"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	// This variables is filled via ldflags at build time
-	Version    = "dev"
-	BuildTime  = "unknown"
-	CommitHash = "unknown"
+	// This variables is filled via ldflags at build time.
+	Version    = "dev"     //nolint:gochecknoglobals
+	BuildTime  = "unknown" //nolint:gochecknoglobals
+	CommitHash = "unknown" //nolint:gochecknoglobals
+)
+
+const (
+	LogFileMode               os.FileMode   = 0o644
+	LdapConnectionPoolTimeout time.Duration = 5 * time.Second
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
-// Resources must be added to the structure as they are initialized
+// Resources must be added to the structure as they are initialized.
 type appResources struct {
 	LogFile    *os.File
 	ConnPool   *network.LdapConnectionPool
@@ -49,16 +54,18 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 	if r.HttpServer != nil {
 		slog.Debug("Stopping HTTP server ...")
 		r.HttpServer.SetKeepAlivesEnabled(false)
-		if err := r.HttpServer.Shutdown(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("HTTP server Shutdown failed: %v", err))
+		err := r.HttpServer.Shutdown(ctx)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("HTTP server Shutdown failed: %w", err))
 		}
 		slog.Debug("HTTP server stopped")
 	}
 
 	if r.ConnPool != nil {
 		slog.Debug("Closing LDAP connection pool ...")
-		if err := r.ConnPool.Close(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("error closing ldap pool: %v", err))
+		err := r.ConnPool.Close(ctx)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("error closing ldap pool: %w", err))
 		}
 		slog.Debug("LDAP connection closed")
 	}
@@ -66,10 +73,11 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 		return errors.Join(errs...)
 	}
 	slog.Info("All resources shut down successfully")
+
 	return nil
 }
 
-// defaultHttpResponse function generates a standard HTML response for the exporter
+// defaultHttpResponse function generates a standard HTML response for the exporter.
 func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, err := fmt.Fprintf(w, `<html>
@@ -88,11 +96,13 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 }
 
 func buildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler {
-	if format == "text" {
+	switch format {
+	case "text":
 		return slog.NewTextHandler(w, &slog.HandlerOptions{Level: level})
-	} else if format == "json" {
+	case "json":
 		return slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})
 	}
+
 	return nil
 }
 
@@ -119,7 +129,7 @@ func setupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 	}
 	if cfg.Logging.GetHandler() == "file" || cfg.Logging.GetHandler() == "both" {
 		var err error
-		logFile, err = os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		logFile, err = os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error opening log file: %w", err)
 		}
@@ -131,6 +141,7 @@ func setupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 	}
 
 	logger := slog.New(slogmulti.Fanout(handlers...))
+
 	return logger, logFile, nil
 }
 
@@ -139,14 +150,15 @@ func reopenLogFile(cfg *config.ExporterConfiguration, resources *appResources) e
 		_ = resources.LogFile.Close()
 	}
 
-	logFile, err := os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err := os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 	if err != nil {
 		return fmt.Errorf("failed to open new log file: %w", err)
 	}
 
 	newLogger, _, err := setupLogger(cfg)
 	if err != nil {
-		logFile.Close()
+		_ = logFile.Close()
+
 		return fmt.Errorf("failed to set up new logger: %w", err)
 	}
 
@@ -166,10 +178,14 @@ func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 	if err != nil {
 		return nil, fmt.Errorf("incorrect configuration provided: %w", err)
 	}
+
 	return &configuration, nil
 }
 
-func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network.LdapConnectionPool) *prometheus.Registry {
+func setupPrometheusMetrics(
+	cfg *config.ExporterConfiguration,
+	connPool *network.LdapConnectionPool,
+) *prometheus.Registry {
 	dsMetricsRegistry := prometheus.NewRegistry()
 
 	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
@@ -178,6 +194,7 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 		"cn=monitor",
 		metrics.GetLdapServerMetrics(),
 		prometheus.Labels{},
+		LdapConnectionPoolTimeout,
 	),
 	)
 
@@ -187,6 +204,7 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 		"cn=snmp,cn=monitor",
 		metrics.GetLdapServerSnmpMetrics(),
 		prometheus.Labels{},
+		LdapConnectionPoolTimeout,
 	),
 	)
 
@@ -197,6 +215,7 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 			entry,
 			metrics.GetEntryCountAttr(),
 			prometheus.Labels{"entry": entry},
+			LdapConnectionPoolTimeout,
 		),
 		)
 	}
@@ -208,6 +227,7 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 			"cn=monitor,cn="+backend+",cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapBackendCaches(),
 			prometheus.Labels{"database": backend},
+			LdapConnectionPoolTimeout,
 		),
 		)
 	}
@@ -216,32 +236,43 @@ func setupPrometheusMetrics(cfg *config.ExporterConfiguration, connPool *network
 		Since 389-ds has a different set of monitoring metrics for different backends (Berkley DB and LMDB),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
-	if cfg.Global.BackendImplement == config.BackendBDB {
+	switch cfg.Global.BackendImplement {
+	case config.BackendBDB:
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			connPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapBDBServerCacheMetrics(),
 			prometheus.Labels{},
+			LdapConnectionPoolTimeout,
 		),
 		)
-	} else if cfg.Global.BackendImplement == config.BackendMDB {
+	case config.BackendMDB:
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			connPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			metrics.GetLdapMDBServerCacheMetrics(),
 			prometheus.Labels{},
+			LdapConnectionPoolTimeout,
 		),
 		)
 	}
+
 	return dsMetricsRegistry
 }
 
 func run() int {
 	var (
 		applicationResources = appResources{}
-		args                 = cmd.ParseCmdArguments(fmt.Sprintf("Version: %s\nCommit: %s\nBuild time: %s", Version, CommitHash, BuildTime))
+		args                 = cmd.ParseCmdArguments(
+			fmt.Sprintf(
+				"Version: %s\nCommit: %s\nBuild time: %s",
+				Version,
+				CommitHash,
+				BuildTime,
+			),
+		)
 
 		signalCh    = make(chan os.Signal, 1)
 		serverErrCh = make(chan error)
@@ -250,25 +281,33 @@ func run() int {
 	cfg, err := readConfig(args.ConfigFile)
 	if err != nil {
 		slog.Error("Error loading config", "err", err)
+
 		return 1
 	}
 
 	if args.IsConfigCheck {
 		fmt.Print(cfg.String())
+
 		return 0
 	}
 
-	slog.Info("Configuration read successfuly")
+	slog.Info("Configuration read successfully")
 
 	defer func() {
-		shutdownContext, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.Global.GetShutdownTimeout()*uint(time.Second)))
+		shutdownContext, cancel := context.WithTimeout(
+			context.Background(),
+			time.Duration(cfg.Global.GetShutdownTimeout())*time.Second,
+		)
+
 		defer cancel()
-		if err := applicationResources.Shutdown(shutdownContext); err != nil {
+		err := applicationResources.Shutdown(shutdownContext)
+		if err != nil {
 			slog.Error("Shutdown error", "err", err)
 		}
 		if applicationResources.LogFile != nil {
 			// We close the log file last, because we expect logs to be written to it until the very end
-			if err := applicationResources.LogFile.Close(); err != nil {
+			err := applicationResources.LogFile.Close()
+			if err != nil {
 				slog.Error("Error closing log file", "err", err)
 			}
 		}
@@ -279,6 +318,7 @@ func run() int {
 
 	if err != nil {
 		slog.Error("Error initializing logging", "err", err)
+
 		return 1
 	}
 	slog.SetDefault(logger)
@@ -323,13 +363,15 @@ func run() int {
 	ln, err := net.Listen("tcp", cfg.HTTP.GetListenAddress())
 	if err != nil {
 		slog.Error("Failed to start TCP listener", "err", err)
+
 		return 1
 	}
-	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout()*uint(time.Second)))
+	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
 
 	go func() {
-		slog.Info(fmt.Sprintf("Starting HTTP server at %s", cfg.HTTP.GetListenAddress()))
-		if err := server.Serve(timeoutListener); err != nil && err != http.ErrServerClosed {
+		slog.Info("Starting HTTP server at" + cfg.HTTP.GetListenAddress())
+		err := server.Serve(timeoutListener)
+		if err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err
 		}
 	}()
@@ -358,6 +400,7 @@ func run() int {
 			running = false
 		}
 	}
+
 	return 0
 }
 

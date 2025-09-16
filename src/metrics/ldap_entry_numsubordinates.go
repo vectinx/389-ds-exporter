@@ -4,9 +4,9 @@ Package metrics provides ready-made sets of mappings of ldap attributes to prome
 package metrics
 
 import (
-	"389-ds-exporter/src/collectors"
-
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/collectors"
 )
 
 // GetEntryCountAttr function returns map of attributes defining specific ldap entry numsubordinates metric.

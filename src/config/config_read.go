@@ -9,9 +9,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Validate function cheks if provided configuration is valid
+// Validate function cheks if provided configuration is valid.
 func (c *ExporterConfiguration) Validate() error {
-
 	if c.LDAP.ServerURL == "" {
 		return errors.New("configuration parameter ldap.server_url is required")
 	}
@@ -61,7 +60,8 @@ func (c *ExporterConfiguration) Validate() error {
 	return nil
 }
 
-// ReadConfig function reads the configuration from the provided yaml file and returns it as a LdapConfiguration structure
+// ReadConfig function reads the configuration from the provided yaml file
+// and returns it as a LdapConfiguration structure.
 func ReadConfig(configFilePath string) (ExporterConfiguration, error) {
 	yamlFile, err := os.ReadFile(configFilePath)
 	configuration := ExporterConfiguration{}

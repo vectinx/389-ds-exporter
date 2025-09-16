@@ -17,7 +17,6 @@ Requirements:
 
 - Go >= 1.24.3
 - make
-- fakeroot
 
 ```bash
 # Clone project repository

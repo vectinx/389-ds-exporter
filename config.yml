@@ -126,7 +126,7 @@ log:
   # 'file'   - logs are written to a file
   # 'both'   - logs are written to both stdout and a file
   #
-  # handler: both
+  handler: stdout
 
   # Log file path.
   # Only relevant if 'handler' is set to 'file' or 'both'.

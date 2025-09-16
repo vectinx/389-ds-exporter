@@ -19,6 +19,7 @@ func ParseCmdArguments(version string) *CmdArguments {
 	kingpin.Version(version)
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
+
 	return &CmdArguments{
 		ConfigFile:    *configFilePath,
 		IsConfigCheck: *checkConfig,
