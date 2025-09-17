@@ -1,10 +1,11 @@
 # 389-ds-exporter
 
-A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol and exposes them in Prometheus format.
+A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol
 
 ![Dashboard](./.res/dashboard.png)
 
 ## Features
+- More than 80 metrics from the 389-ds server
 - Collects metrics from LDAP entry attributes in various formats
 - Counts subordinates of LDAP entries
 - Configurable via YAML configuration file
@@ -57,7 +58,7 @@ docker logs 389-ds-exporter
 
 ## Command-Line Interface
 
-The command-line interface is self-documented and available via the `-h` (`--help`) option:
+The CLI is self-documented and available via the `-h` (`--help`) option:
 ```bash
 bash$ 389-ds-exporter --help
 usage: 389-ds-exporter [<flags>]
@@ -65,7 +66,7 @@ usage: 389-ds-exporter [<flags>]
 Flags:
   -h, --[no-]help            Show context-sensitive help (also try --help-long and --help-man).
       --config="config.yml"  Path to configuration file
-      --[no-]check-config    Check current configuration and print it to stdout
+      --[no-]check-config    Validate the current configuration and print it to stdout
       --[no-]version         Show application version.
 ```
 
@@ -77,11 +78,11 @@ cd examples
 docker-compose up -d
 ```
 
-After that, go to the `http://localhost:3000` address in your browser and wait until the infrastructure initialization is complete.
+Then open `http://localhost:3000` in your browser and wait for the infrastructure to finish initializing.
 
 ##  Based on
 
-This project is inspired and **partially based on** the open-source project **[389DS‑exporter](https://github.com/ozgurcd/389DS-exporter)** by **[ozgurcd](https://github.com/ozgurcd)** (MIT Licensed). Although most of the codebase has been significantly rewritten or replaced, the original project served as an architectural and conceptual starting point. The original code remains available here:
+This project is inspired by and **partially based on** the open-source project **[389DS‑exporter](https://github.com/ozgurcd/389DS-exporter)** by **[ozgurcd](https://github.com/ozgurcd)** (MIT Licensed). Although most of the codebase has been significantly rewritten or replaced, the original project served as an architectural and conceptual starting point. The original code remains available here:
 
 https://github.com/ozgurcd/389DS-exporter
 

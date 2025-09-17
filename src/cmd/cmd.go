@@ -14,7 +14,7 @@ func ParseCmdArguments(version string) *CmdArguments {
 		configFilePath = kingpin.Flag("config", "Path to configuration file").
 				Default("config.yml").
 				String()
-		checkConfig = kingpin.Flag("check-config", "Check current configuration and print it to stdout").Bool()
+		checkConfig = kingpin.Flag("check-config", "Validate the current configuration and print it to stdout").Bool()
 	)
 	kingpin.Version(version)
 	kingpin.HelpFlag.Short('h')
