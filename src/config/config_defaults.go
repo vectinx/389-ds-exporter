@@ -8,10 +8,8 @@ const (
 	DefaultHTTPWriteTimeout               int    = 15
 	DefaultHTTPIdleTimeout                int    = 60
 	DefaultHTTPInitialReadTimeout         int    = 3
-	DefaultLDAPPoolConnectionsLimit       int    = 4
+	DefaultLDAPPoolConnLimit              int    = 4
 	DefaultLDAPPoolDialTimeout            int    = 1
-	DefaultLDAPPoolRetryCount             int    = 1
-	DefaultLDAPPoolRetryDelay             int    = 1
 	DefaultLDAPPoolConnectionAliveTimeout int    = 1
 	DefaultLogLevel                       string = "INFO"
 	DefaultLogHandler                     string = "both"
