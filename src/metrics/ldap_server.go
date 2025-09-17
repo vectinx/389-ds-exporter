@@ -36,13 +36,12 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"dtablesize": {
 			LdapName: "dtablesize",
-			Help: `The number of file descriptors available to the directory.
-Essentially, this value shows how many additional concurrent connections can be serviced by the directory`,
-			Type: prometheus.GaugeValue,
+			Help:     "The number of file descriptors available to the directory",
+			Type:     prometheus.GaugeValue,
 		},
 		"readwaiters": {
 			LdapName: "readwaiters",
-			Help:     "Number of threads waiting to read data from a client",
+			Help:     "number of connections where some requests are pending and not currently being serviced by a thread in Directory Server.",
 			Type:     prometheus.GaugeValue,
 		},
 		"opsinitiated": {

@@ -200,7 +200,7 @@ func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"dbenvnumdbis": {
 			LdapName: "dbenvnumdbis",
-			Help:     "",
+			Help:     "Number of DBIs (named databases) within the LMDB environment",
 			Type:     prometheus.GaugeValue,
 		},
 		"waitingrwtxn": {
@@ -225,12 +225,12 @@ func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"granttimerwtxn": {
 			LdapName: "granttimerwtxn",
-			Help:     "",
+			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
 		"lifetimerwtxn": {
 			LdapName: "lifetimerwtxn",
-			Help:     "",
+			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
 		"waitingrotxn": {
@@ -255,12 +255,12 @@ func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"granttimerotxn": {
 			LdapName: "granttimerotxn",
-			Help:     "",
+			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
 		"lifetimerotxn": {
 			LdapName: "lifetimerotxn",
-			Help:     "",
+			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
 	}
