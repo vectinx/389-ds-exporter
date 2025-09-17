@@ -91,13 +91,7 @@ ldap:
   server_url: "ldap://localhost:389"
   bind_dn: "cn=directory manager"
   bind_pw: "12345678"
-
-  connection_pool:
-    connections_limit: 4
-    dial_timeout: 1
-    retry_count: 0
-    retry_delay: 1
-    connection_alive_timeout: 1
+  pool_conn_limit: 4
 ```
 ### server_url
 LDAP server URI (e.g., ldap://localhost:389 or ldaps://example.com)
@@ -110,11 +104,7 @@ DN of the account used to authenticate with the LDAP server.
 ### bind_pw
 Password of the LDAP account.
 
-### connection_pool
-The 'ldap.connection_pool' section describes the parameters for connecting to the LDAP server from which metrics will be collected.
-In most cases, these settings do not need to be changed.
-
-### connections_limit:
+### pool_conn_limit:
 Maximum size of the LDAP connection pool.
 Connections are created as needed and deleted when their lifetime or idle time is exceeded.
 Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
@@ -122,33 +112,6 @@ Values above 4 have no effect, as the current version of the exporter does not u
 
 Default value: `4`
 
-
-### dial_timeout:
-Timeout in seconds for establishing a connection to the LDAP server.
-Prevents the connection attempt from hanging indefinitely.
-A zero or negative value means no timeout.
-
-Default value: `1`
-
-### retry_count:
-Number of retry attempts when connecting to the LDAP server.
-If the initial attempt fails, this number of retries will be made with delays between attempts.
-A value of 0 means no retries.
-
-Default value: `0`
-
-### retry_delay:
-Delay in seconds between LDAP reconnection attempts (used with retry_count).
-A value of 0 means no delay between attempts.
-
-Default value: `1`
-
-### connection_alive_timeout:
-Timeout in seconds for checking if an existing connection is still alive.
-Before reusing a connection, the pool checks it by sending a basic query.
-A zero or negative value disables the timeout.
-
-Default value: `1`
 
 ## Logging
 The 'log' section defines logging parameters.

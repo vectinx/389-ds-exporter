@@ -69,7 +69,7 @@ ldap:
   # LDAP server URL in RFC-2255 format. For example:
   # "ldap://localhost:389" or "ldaps://remote-server"
   #
-  server_url: "ldap://localhost:389"
+  server_url: "ldap://192.168.250.30:389"
 
   # DN of the account used to authenticate with the LDAP server.
   #
@@ -77,41 +77,14 @@ ldap:
 
   # Password of the LDAP account.
   #
-  bind_pw: "12345678"
+  bind_pw: "Astra1234"
 
-  # The 'ldap.connection_pool' section describes the parameters for connecting to the LDAP server from which metrics will be collected.
-  # In most cases, these settings do not need to be changed.
-  connection_pool:
-
-    # Maximum size of the LDAP connection pool.
-    # Connections are created as needed and deleted when their lifetime or idle time is exceeded.
-    # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
-    # Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
-    #
-    # connections_limit: 4
-
-    # Timeout in seconds for establishing a connection to the LDAP server.
-    # Prevents the connection attempt from hanging indefinitely.
-    # A zero or negative value means no timeout.
-    #
-    # dial_timeout: 1
-
-    # Number of retry attempts when connecting to the LDAP server.
-    # If the initial attempt fails, this number of retries will be made with delays between attempts.
-    # A value of 0 means no retries.
-    #
-    # retry_count: 0
-
-    # Delay in seconds between LDAP reconnection attempts (used with retry_count).
-    # A value of 0 means no delay between attempts.
-    #
-    # retry_delay: 1
-
-    # Timeout in seconds for checking if an existing connection is still alive.
-    # Before reusing a connection, the pool checks it by sending a basic query.
-    # A zero or negative value disables the timeout.
-    #
-    # connection_alive_timeout: 1
+  # Maximum size of the LDAP connection pool.
+  # Connections are created as needed and deleted when their lifetime or idle time is exceeded.
+  # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
+  # Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
+  #
+  # pool_conn_limit: 4
 
 # The 'log' section defines logging parameters.
 log:

@@ -14,14 +14,11 @@ import (
 
 // LdapConnectionPoolConfig struct implements LdapConnectionPool configuration.
 type LdapConnectionPoolConfig struct {
-	ServerURL              string        // URL of LDAP Server
-	BindDN                 string        // LDAP server bind DN
-	BindPw                 string        // LDAP server bind Password
-	MaxConnections         int           // Limit of connections in pool
-	DialTimeout            time.Duration // Network timeout while creating new connection
-	RetryCount             int           // Number of attempts to reconnect to an unavailable connection
-	RetryDelay             time.Duration // Delay between reconnect attemnts
-	ConnectionAliveTimeout time.Duration // Connection alive check timeout
+	ServerURL      string        // URL of LDAP Server
+	BindDN         string        // LDAP server bind DN
+	BindPw         string        // LDAP server bind Password
+	MaxConnections int           // Limit of connections in pool
+	DialTimeout    time.Duration // Network timeout while creating new connection
 }
 
 // LdapConnectionPool implements a pool that manages ldap connections.
@@ -35,7 +32,7 @@ type LdapConnectionPool struct {
 }
 
 // ldapConnIsAlive function checks if specified connection is alive.
-func ldapConnIsAlive(conn *ldap.Conn, timeout time.Duration) bool {
+func ldapConnIsAlive(conn *ldap.Conn) bool {
 	req := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
@@ -46,9 +43,7 @@ func ldapConnIsAlive(conn *ldap.Conn, timeout time.Duration) bool {
 		nil,
 	)
 
-	conn.SetTimeout(timeout)
 	_, err := conn.Search(req)
-	conn.SetTimeout(ldap.DefaultTimeout)
 
 	return err == nil
 }
@@ -77,7 +72,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 	for {
 		select {
 		case conn := <-pool.connectionsCh:
-			if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
+			if !ldapConnIsAlive(conn) {
 				err := conn.Unbind()
 				if err != nil {
 					slog.Debug("Error closing pooled ldap connection", "err", err)
@@ -97,7 +92,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 				if err != nil {
 					pool.decreaseTotalConnections()
 
-					return nil, err
+					return nil, fmt.Errorf("error creating new connection: %w", err)
 				}
 
 				return conn, nil
@@ -105,7 +100,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 			pool.mu.Unlock()
 			select {
 			case conn := <-pool.connectionsCh:
-				if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
+				if !ldapConnIsAlive(conn) {
 					err := conn.Unbind()
 					if err != nil {
 						slog.Debug("Error closing pooled ldap connection", "err", err)
@@ -117,7 +112,6 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 
 				return conn, nil
 			case <-time.After(timeout):
-
 				return nil, fmt.Errorf("error getting pooled connection: timeout (%s)", timeout.String())
 			}
 		}
@@ -182,34 +176,22 @@ func (pool *LdapConnectionPool) Close(ctx context.Context) error {
 	return nil
 }
 
-// newConnection function creates a new connection to ldap with the specified number of retries.
+// newConnection function creates a new connection to ldap.
 func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
 	var conn *ldap.Conn
 
 	dialer := &net.Dialer{Timeout: pool.config.DialTimeout}
 
-	err := fmt.Errorf(
-		"failed to create connection after %v attempts with %v delay",
-		pool.config.RetryCount,
-		pool.config.RetryDelay,
-	)
-
-	// Since retry is the number of connection attempts after the first failed one,
-	// we add this first attempt.
-	attempts := pool.config.RetryCount + 1
-	for range attempts {
-		conn, err = ldap.DialURL(pool.config.ServerURL, ldap.DialWithDialer(dialer))
+	conn, err := ldap.DialURL(pool.config.ServerURL, ldap.DialWithDialer(dialer))
+	if err == nil {
+		err = conn.Bind(pool.config.BindDN, pool.config.BindPw)
 		if err == nil {
-			err = conn.Bind(pool.config.BindDN, pool.config.BindPw)
-			if err == nil {
-				return conn, nil
-			}
-			err := conn.Unbind()
-			if err != nil {
-				slog.Debug("Error closing pooled ldap connection", "err", err)
-			}
+			return conn, nil
 		}
-		time.Sleep(pool.config.RetryDelay)
+		err := conn.Unbind()
+		if err != nil {
+			slog.Debug("Error closing pooled ldap connection", "err", err)
+		}
 	}
 
 	return nil, err

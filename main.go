@@ -36,7 +36,7 @@ var (
 
 const (
 	LogFileMode               os.FileMode   = 0o644
-	LdapConnectionPoolTimeout time.Duration = 5 * time.Second
+	LdapConnectionPoolTimeout time.Duration = 3 * time.Second
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
@@ -351,20 +351,16 @@ func run() int {
 	)
 
 	ldapConnPoolConfig := network.LdapConnectionPoolConfig{
-		ServerURL:              cfg.LDAP.ServerURL,
-		BindDN:                 cfg.LDAP.BindDN,
-		BindPw:                 cfg.LDAP.BindPw,
-		MaxConnections:         cfg.LDAP.ConnectionPool.GetConnectionsLimit(),
-		DialTimeout:            time.Duration(cfg.LDAP.ConnectionPool.GetDialTimeout()) * time.Second,
-		RetryCount:             cfg.LDAP.ConnectionPool.GetRetryCount(),
-		RetryDelay:             time.Duration(cfg.LDAP.ConnectionPool.GetRetryDelay()) * time.Second,
-		ConnectionAliveTimeout: time.Duration(cfg.LDAP.ConnectionPool.GetConnectionAliveTimeout()) * time.Second,
+		ServerURL:      cfg.LDAP.ServerURL,
+		BindDN:         cfg.LDAP.BindDN,
+		BindPw:         cfg.LDAP.BindPw,
+		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
 	}
 
 	ldapConnPool := network.NewLdapConnectionPool(ldapConnPoolConfig)
 	applicationResources.ConnPool = ldapConnPool
 
-	dsMetricsRegistry := setupPrometheusMetrics(cfg, ldapConnPool)
+	dsMetricsRegistry := setupPrometheusMetrics(cfg, applicationResources.ConnPool)
 
 	http.Handle(cfg.HTTP.GetMetricsPath(), promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
 	http.HandleFunc("/", defaultHttpResponse(cfg.HTTP.GetMetricsPath()))

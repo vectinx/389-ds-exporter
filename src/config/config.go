@@ -37,18 +37,10 @@ type HTTPConfig struct {
 }
 
 type LDAPConfig struct {
-	ServerURL      string                   `yaml:"server_url"`
-	BindDN         string                   `yaml:"bind_dn"`
-	BindPw         string                   `yaml:"bind_pw"`
-	ConnectionPool LDAPConnectionPoolConfig `yaml:"connection_pool"`
-}
-
-type LDAPConnectionPoolConfig struct {
-	ConnectionsLimit       *int `yaml:"connections_limit"`        // Don't use these field directly.
-	DialTimeout            *int `yaml:"dial_timeout"`             // Don't use these field directly.
-	RetryCount             *int `yaml:"retry_count"`              // Don't use these field directly.
-	RetryDelay             *int `yaml:"retry_delay"`              // Don't use these field directly.
-	ConnectionAliveTimeout *int `yaml:"connection_alive_timeout"` // Don't use these field directly.
+	ServerURL     string `yaml:"server_url"`
+	BindDN        string `yaml:"bind_dn"`
+	BindPw        string `yaml:"bind_pw"`
+	PoolConnLimit *int   `yaml:"pool_conn_limit"`
 }
 
 type LoggingConfig struct {
@@ -75,15 +67,7 @@ func (c *ExporterConfiguration) String() string {
 	b.WriteString(fmt.Sprintf("ldap.server_url: %s\n", c.LDAP.ServerURL))
 	b.WriteString(fmt.Sprintf("ldap.bind_dn: %s\n", c.LDAP.BindDN))
 	b.WriteString(fmt.Sprintf("ldap.bind_pw: %s\n", "*****"))
-	b.WriteString(fmt.Sprintf("ldap.connection_pool.connections_limit: %d\n", c.LDAP.ConnectionPool.GetConnectionsLimit()))
-	b.WriteString(fmt.Sprintf("ldap.connection_pool.dial_timeout: %d\n", c.LDAP.ConnectionPool.GetDialTimeout()))
-	b.WriteString(fmt.Sprintf("ldap.connection_pool.retry_count: %d\n", c.LDAP.ConnectionPool.GetRetryCount()))
-	b.WriteString(fmt.Sprintf("ldap.connection_pool.retry_delay: %d\n", c.LDAP.ConnectionPool.GetRetryDelay()))
-	b.WriteString(
-		fmt.Sprintf(
-			"ldap.connection_pool.connection_alive_timeout: %d\n",
-			c.LDAP.ConnectionPool.GetConnectionAliveTimeout()),
-	)
+	b.WriteString(fmt.Sprintf("ldap.pool_conn_limit: %d\n", c.LDAP.PoolConnLimit))
 	b.WriteString(fmt.Sprintf("log.level: %s\n", c.Logging.GetLevel()))
 	b.WriteString(fmt.Sprintf("log.handler: %s\n", c.Logging.GetHandler()))
 	b.WriteString(fmt.Sprintf("log.file: %s\n", c.Logging.GetFile()))
@@ -103,54 +87,14 @@ func (c *GlobalConfig) GetShutdownTimeout() int {
 	return *c.ShutdownTimeout
 }
 
-// GetConnectionsLimit func return LDAPConnectionPoolConfig.ConnectionsLimit if it defined.
-// Else returns config.DefaultPoolConnectionsLimit constant.
-func (c *LDAPConnectionPoolConfig) GetConnectionsLimit() int {
-	if c.ConnectionsLimit == nil {
-		return DefaultLDAPPoolConnectionsLimit
+// GetPoolConnLimit func return LDAPConfig.GetPoolConnLimit if it defined.
+// Else returns config.DefaultLDAPPoolConnLimit constant.
+func (c *LDAPConfig) GetPoolConnLimit() int {
+	if c.PoolConnLimit == nil {
+		return DefaultLDAPPoolConnLimit
 	}
 
-	return *c.ConnectionsLimit
-}
-
-// GetDialTimeout func return LDAPConnectionPoolConfig.DialTimeout if it defined.
-// Else returns config.DefaultPoolDialTimeout constant.
-func (c *LDAPConnectionPoolConfig) GetDialTimeout() int {
-	if c.DialTimeout == nil {
-		return DefaultLDAPPoolDialTimeout
-	}
-
-	return *c.DialTimeout
-}
-
-// GetRetryCount func return LDAPConnectionPoolConfig.RetryCount if it defined.
-// Else returns config.DefaultPoolRetryCount constant.
-func (c *LDAPConnectionPoolConfig) GetRetryCount() int {
-	if c.RetryCount == nil {
-		return DefaultLDAPPoolRetryCount
-	}
-
-	return *c.RetryCount
-}
-
-// GetRetryDelay func return LDAPConnectionPoolConfig.RetryDelay if it defined.
-// Else returns config.DefaultPoolRetryDelay constant.
-func (c *LDAPConnectionPoolConfig) GetRetryDelay() int {
-	if c.RetryDelay == nil {
-		return DefaultLDAPPoolRetryDelay
-	}
-
-	return *c.RetryDelay
-}
-
-// GetConnectionAliveTimeout func return LDAPConnectionPoolConfig.ConnectionAliveTimeout if it defined.
-// Else returns config.DefaultLDAPPoolConnectionAliveTimeout constant.
-func (c *LDAPConnectionPoolConfig) GetConnectionAliveTimeout() int {
-	if c.ConnectionAliveTimeout == nil {
-		return DefaultLDAPPoolConnectionAliveTimeout
-	}
-
-	return *c.ConnectionAliveTimeout
+	return *c.PoolConnLimit
 }
 
 // GetListenAddress func return HTTPConfig.ListenAddress if it defined.

@@ -220,7 +220,7 @@ func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"commitrwtxn": {
 			LdapName: "commitrwtxn",
-			Help:     "LMDB Commited RW transactions",
+			Help:     "LMDB Committed RW transactions",
 			Type:     prometheus.GaugeValue,
 		},
 		"granttimerwtxn": {
@@ -250,7 +250,7 @@ func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"commitrotxn": {
 			LdapName: "commitrotxn",
-			Help:     "LMDB Commited RO transactions",
+			Help:     "LMDB Committed RO transactions",
 			Type:     prometheus.GaugeValue,
 		},
 		"granttimerotxn": {

@@ -34,8 +34,8 @@ func (c *ExporterConfiguration) Validate() error {
 		return fmt.Errorf("invalid global.ds_backend_implement: '%q' (must be 'bdb' or 'mdb')", c.Global.BackendImplement)
 	}
 
-	if c.LDAP.ConnectionPool.GetConnectionsLimit() <= 0 {
-		return errors.New("invalid ldap.connection_pool.connections_limit: must be greater than 0")
+	if c.LDAP.GetPoolConnLimit() <= 0 {
+		return errors.New("invalid ldap.pool_conn_limit: must be greater than 0")
 	}
 
 	logLevels := []string{"DEBUG", "INFO", "WARNING", "ERROR"}
