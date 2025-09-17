@@ -78,7 +78,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 		select {
 		case conn := <-pool.connectionsCh:
 			if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
-				err := conn.Close()
+				err := conn.Unbind()
 				if err != nil {
 					slog.Debug("Error closing pooled ldap connection", "err", err)
 				}
@@ -106,7 +106,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 			select {
 			case conn := <-pool.connectionsCh:
 				if !ldapConnIsAlive(conn, pool.config.ConnectionAliveTimeout) {
-					err := conn.Close()
+					err := conn.Unbind()
 					if err != nil {
 						slog.Debug("Error closing pooled ldap connection", "err", err)
 					}
@@ -138,7 +138,7 @@ func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
 		}
 		pool.mu.Unlock()
 	default:
-		err := conn.Close()
+		err := conn.Unbind()
 		if err != nil {
 			slog.Debug("Error closing pooled ldap connection", "err", err)
 		}
@@ -169,7 +169,7 @@ func (pool *LdapConnectionPool) Close(ctx context.Context) error {
 	hasCloseErrors := false
 	errorsCount := 0
 	for conn := range pool.connectionsCh {
-		if conn.Close() != nil {
+		if conn.Unbind() != nil {
 			hasCloseErrors = true
 			errorsCount++
 		}
@@ -204,7 +204,7 @@ func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
 			if err == nil {
 				return conn, nil
 			}
-			err := conn.Close()
+			err := conn.Unbind()
 			if err != nil {
 				slog.Debug("Error closing pooled ldap connection", "err", err)
 			}
