@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
@@ -91,6 +92,49 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 `, html.EscapeString(metricsPath))
 		if err != nil {
 			log.Printf("Error writing HTTP answer: %s", err)
+		}
+	}
+}
+
+// defaultHttpResponse function generates a standard HTML response for the exporter.
+func healthHttpResponse(pool *network.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		//ctx, cancel := context.WithTimeout(req.Context(), 100*time.Millisecond)
+		//defer cancel()
+
+		ldapStatus := "ok"
+		ldapAvailable := true
+		// Since the pool checks connections before issuing them,
+		// and gives out either a verified (live) connection or a newly established one,
+		// we can assume that if the pool has issued a connection, ldap is available.
+		conn, err := pool.Get(LdapConnectionPoolTimeout * time.Second)
+
+		if err != nil {
+			slog.Warn("LDAP health check failed", "err", err)
+			ldapStatus = "unavailable"
+			ldapAvailable = false
+		}
+		pool.Put(conn)
+		uptime := time.Since(startTime).Seconds()
+
+		healthResponse := map[string]any{
+			"status": map[string]string{
+				"ldap": ldapStatus,
+			},
+			"uptime_seconds": int(uptime),
+			"timestamp":      time.Now().Format(time.RFC3339),
+		}
+
+		if ldapAvailable {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(healthResponse)
+		if err != nil {
+			slog.Error("Failed to write health response", "err", err)
 		}
 	}
 }
@@ -283,6 +327,7 @@ func setupPrometheusMetrics(
 func run() int {
 	var (
 		applicationResources = appResources{}
+		startTime            = time.Now()
 		args                 = cmd.ParseCmdArguments(
 			fmt.Sprintf(
 				"Version: %s\nCommit: %s\nBuild time: %s",
@@ -364,6 +409,11 @@ func run() int {
 
 	http.Handle(cfg.HTTP.GetMetricsPath(), promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
 	http.HandleFunc("/", defaultHttpResponse(cfg.HTTP.GetMetricsPath()))
+	http.HandleFunc("/health", healthHttpResponse(applicationResources.ConnPool, startTime))
+	http.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+	})
 
 	server := &http.Server{
 		Addr:         cfg.HTTP.GetListenAddress(),
