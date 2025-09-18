@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -107,14 +108,22 @@ func healthHttpResponse(pool *network.LdapConnectionPool, startTime time.Time) f
 		// Since the pool checks connections before issuing them,
 		// and gives out either a verified (live) connection or a newly established one,
 		// we can assume that if the pool has issued a connection, ldap is available.
-		conn, err := pool.Get(LdapConnectionPoolTimeout * time.Second)
-
+		ldapReq := ldap.NewSearchRequest(
+			"",
+			ldap.ScopeBaseObject,
+			ldap.NeverDerefAliases,
+			1, 0, false,
+			"(objectClass=*)",
+			[]string{"dn"},
+			nil,
+		)
+		_, err := pool.Search(ldapReq, LdapConnectionPoolTimeout*time.Second)
 		if err != nil {
 			slog.Warn("LDAP health check failed", "err", err)
 			ldapStatus = "unavailable"
 			ldapAvailable = false
 		}
-		pool.Put(conn)
+
 		uptime := time.Since(startTime).Seconds()
 
 		healthResponse := map[string]any{
