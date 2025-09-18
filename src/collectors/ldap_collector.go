@@ -149,13 +149,6 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 
 // getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap.
 func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
-	ldapConnection, err := c.connectionPool.Get(c.poolGetTimeout)
-	defer c.connectionPool.Put(ldapConnection)
-
-	if err != nil {
-		return nil, fmt.Errorf("error getting LDAP connection from pool: %w", err)
-	}
-
 	attributeList := make([]string, 0, len(c.attributes))
 
 	for _, monitoredAttr := range c.attributes {
@@ -174,7 +167,7 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		nil,
 	)
 
-	searchResult, err := ldapConnection.Search(searchAttributesRequest)
+	searchResult, err := c.connectionPool.Search(searchAttributesRequest, c.poolGetTimeout)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"LDAP Search request (dn='%v', attrs='%v') failed with error: %w",
