@@ -97,7 +97,7 @@ services:
       entrypoint: >
         /bin/sh -c "
           sleep 10 &&
-          wget https://github.com/vectinx/389-ds-exporter/releases/download/0.1.0/dashboard.json -O dashboard.json &&
+          wget https://github.com/vectinx/389-ds-exporter/releases/download/0.2.0/dashboard.json -O dashboard.json &&
           echo '{\"dashboard\": ' > payload.json &&
           cat dashboard.json >> payload.json &&
           echo ', \"overwrite\": true, \"folderId\": 0 }' >> payload.json &&
