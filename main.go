@@ -400,6 +400,7 @@ func run() int {
 		BindDN:         cfg.LDAP.BindDN,
 		BindPw:         cfg.LDAP.BindPw,
 		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
+		DialFunc:       network.RealConnectionDialUrl,
 	}
 
 	ldapConnPool := network.NewLdapConnectionPool(ldapConnPoolConfig)
