@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"sync"
 	"time"
 
@@ -14,17 +13,17 @@ import (
 
 // LdapConnectionPoolConfig struct implements LdapConnectionPool configuration.
 type LdapConnectionPoolConfig struct {
-	ServerURL      string        // URL of LDAP Server
-	BindDN         string        // LDAP server bind DN
-	BindPw         string        // LDAP server bind Password
-	MaxConnections int           // Limit of connections in pool
-	DialTimeout    time.Duration // Network timeout while creating new connection
+	ServerURL      string // URL of LDAP Server
+	BindDN         string // LDAP server bind DN
+	BindPw         string // LDAP server bind Password
+	MaxConnections int    // Limit of connections in pool
+	DialFunc       func(url string) (LdapConn, error)
 }
 
 // LdapConnectionPool implements a pool that manages ldap connections.
 type LdapConnectionPool struct {
 	config           LdapConnectionPoolConfig
-	connectionsCh    chan *ldap.Conn
+	connectionsCh    chan LdapConn
 	totalConnections int
 	mu               sync.Mutex
 	closing          bool
@@ -32,7 +31,7 @@ type LdapConnectionPool struct {
 }
 
 // ldapConnIsAlive function checks if specified connection is alive.
-func ldapConnIsAlive(conn *ldap.Conn) bool {
+func ldapConnIsAlive(conn LdapConn) bool {
 	req := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
@@ -52,7 +51,7 @@ func ldapConnIsAlive(conn *ldap.Conn) bool {
 func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
 	pool := &LdapConnectionPool{
 		config:           cfg,
-		connectionsCh:    make(chan *ldap.Conn, cfg.MaxConnections),
+		connectionsCh:    make(chan LdapConn, cfg.MaxConnections),
 		doneCh:           make(chan struct{}),
 		totalConnections: 0,
 	}
@@ -61,7 +60,7 @@ func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
 }
 
 // Get function gives a connection from the pool. If specified timeout expires, returns an error.
-func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
+func (pool *LdapConnectionPool) Get(timeout time.Duration) (LdapConn, error) {
 	pool.mu.Lock()
 	if pool.closing {
 		pool.mu.Unlock()
@@ -119,7 +118,7 @@ func (pool *LdapConnectionPool) Get(timeout time.Duration) (*ldap.Conn, error) {
 }
 
 // Put function returns specified connection to pool.
-func (pool *LdapConnectionPool) Put(conn *ldap.Conn) {
+func (pool *LdapConnectionPool) Put(conn LdapConn) {
 	if conn == nil {
 		return
 	}
@@ -177,12 +176,9 @@ func (pool *LdapConnectionPool) Close(ctx context.Context) error {
 }
 
 // newConnection function creates a new connection to ldap.
-func (pool *LdapConnectionPool) newConnection() (*ldap.Conn, error) {
-	var conn *ldap.Conn
+func (pool *LdapConnectionPool) newConnection() (LdapConn, error) {
 
-	dialer := &net.Dialer{Timeout: pool.config.DialTimeout}
-
-	conn, err := ldap.DialURL(pool.config.ServerURL, ldap.DialWithDialer(dialer))
+	conn, err := pool.config.DialFunc(pool.config.ServerURL)
 	if err == nil {
 		err = conn.Bind(pool.config.BindDN, pool.config.BindPw)
 		if err == nil {
