@@ -25,8 +25,8 @@ import (
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
+	"389-ds-exporter/src/connections"
 	"389-ds-exporter/src/metrics"
-	"389-ds-exporter/src/network"
 )
 
 var (
@@ -45,7 +45,7 @@ const (
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
 	LogFile    *os.File
-	ConnPool   *network.LdapConnectionPool
+	ConnPool   *connections.LdapConnectionPool
 	HttpServer *http.Server
 }
 
@@ -98,7 +98,7 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 }
 
 // defaultHttpResponse function generates a standard HTML response for the exporter.
-func healthHttpResponse(pool *network.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
+func healthHttpResponse(pool *connections.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		//ctx, cancel := context.WithTimeout(req.Context(), 100*time.Millisecond)
 		//defer cancel()
@@ -237,7 +237,7 @@ func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 
 func setupPrometheusMetrics(
 	cfg *config.ExporterConfiguration,
-	connPool *network.LdapConnectionPool,
+	connPool *connections.LdapConnectionPool,
 ) *prometheus.Registry {
 	dsMetricsRegistry := prometheus.NewRegistry()
 
@@ -404,15 +404,15 @@ func run() int {
 		"backend", cfg.Global.BackendImplement,
 	)
 
-	ldapConnPoolConfig := network.LdapConnectionPoolConfig{
+	ldapConnPoolConfig := connections.LdapConnectionPoolConfig{
 		ServerURL:      cfg.LDAP.ServerURL,
 		BindDN:         cfg.LDAP.BindDN,
 		BindPw:         cfg.LDAP.BindPw,
 		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
-		DialFunc:       network.RealConnectionDialUrl,
+		DialFunc:       connections.RealConnectionDialUrl,
 	}
 
-	ldapConnPool := network.NewLdapConnectionPool(ldapConnPoolConfig)
+	ldapConnPool := connections.NewLdapConnectionPool(ldapConnPoolConfig)
 	applicationResources.ConnPool = ldapConnPool
 
 	dsMetricsRegistry := setupPrometheusMetrics(cfg, applicationResources.ConnPool)
@@ -440,7 +440,7 @@ func run() int {
 
 		return 1
 	}
-	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
+	timeoutListener := connections.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
 
 	go func() {
 		slog.Info("Starting HTTP server at " + cfg.HTTP.GetListenAddress())

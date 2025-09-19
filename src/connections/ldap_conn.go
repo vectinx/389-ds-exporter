@@ -1,4 +1,4 @@
-package network
+package connections
 
 import (
 	"github.com/go-ldap/ldap/v3"

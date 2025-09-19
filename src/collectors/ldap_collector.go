@@ -4,6 +4,7 @@ The collectors package provides various structures implementing the prometheus.C
 package collectors
 
 import (
+	"389-ds-exporter/src/connections"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -13,8 +14,6 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
-
-	"389-ds-exporter/src/network"
 )
 
 /*
@@ -45,7 +44,7 @@ type LdapMonitoredAttribute struct {
 
 // LdapCollector collects 389-ds metrics. It implements prometheus.Collector interface.
 type LdapEntryCollector struct {
-	connectionPool *network.LdapConnectionPool
+	connectionPool *connections.LdapConnectionPool
 	namespace      string
 	baseDn         string
 	attributes     map[string]LdapMonitoredAttribute
@@ -57,7 +56,7 @@ type LdapEntryCollector struct {
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
 	namespace string,
-	connectionPool *network.LdapConnectionPool,
+	connectionPool *connections.LdapConnectionPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,
