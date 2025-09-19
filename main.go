@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"log"
 	"log/slog"
 	"net"
 	"net/http"
@@ -25,8 +24,8 @@ import (
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
+	"389-ds-exporter/src/connections"
 	"389-ds-exporter/src/metrics"
-	"389-ds-exporter/src/network"
 )
 
 var (
@@ -45,7 +44,7 @@ const (
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
 	LogFile    *os.File
-	ConnPool   *network.LdapConnectionPool
+	ConnPool   *connections.LdapConnectionPool
 	HttpServer *http.Server
 }
 
@@ -56,11 +55,12 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 	if r.HttpServer != nil {
 		slog.Debug("Stopping HTTP server ...")
 		r.HttpServer.SetKeepAlivesEnabled(false)
-		err := r.HttpServer.Shutdown(ctx)
+		// err := r.HttpServer.Shutdown(ctx)
+		err := r.HttpServer.Close()
 		if err != nil {
-			errs = append(errs, fmt.Errorf("HTTP server Shutdown failed: %w", err))
+			errs = append(errs, fmt.Errorf("HTTP server Close failed: %w", err))
 		}
-		slog.Debug("HTTP server stopped")
+		slog.Debug("HTTP server stopped", "err", err)
 	}
 
 	if r.ConnPool != nil {
@@ -69,7 +69,7 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error closing ldap pool: %w", err))
 		}
-		slog.Debug("LDAP connection closed")
+		slog.Debug("LDAP connection pool closed", "err", err)
 	}
 	if len(errs) > 0 {
 		return errors.Join(errs...)
@@ -92,13 +92,13 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 </html>
 `, html.EscapeString(metricsPath))
 		if err != nil {
-			log.Printf("Error writing HTTP answer: %s", err)
+			slog.Error("Error writing HTTP answer", "err", err)
 		}
 	}
 }
 
 // defaultHttpResponse function generates a standard HTML response for the exporter.
-func healthHttpResponse(pool *network.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
+func healthHttpResponse(pool *connections.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		//ctx, cancel := context.WithTimeout(req.Context(), 100*time.Millisecond)
 		//defer cancel()
@@ -117,11 +117,23 @@ func healthHttpResponse(pool *network.LdapConnectionPool, startTime time.Time) f
 			[]string{"dn"},
 			nil,
 		)
-		_, err := pool.Search(ldapReq, LdapConnectionPoolTimeout*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		conn, err := pool.Get(ctx)
+
 		if err != nil {
-			slog.Warn("LDAP health check failed", "err", err)
+			slog.Warn("Healthcheck error", "err", err)
 			ldapStatus = "unavailable"
 			ldapAvailable = false
+		} else {
+			defer conn.Close()
+
+			_, err = conn.Search(ldapReq)
+			if err != nil {
+				slog.Warn("LDAP health check failed", "err", err)
+				ldapStatus = "unavailable"
+				ldapAvailable = false
+			}
 		}
 
 		uptime := time.Since(startTime).Seconds()
@@ -156,7 +168,7 @@ func buildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler 
 		return slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})
 	}
 
-	return nil
+	return slog.Default().Handler()
 }
 
 func setupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, error) {
@@ -237,7 +249,7 @@ func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 
 func setupPrometheusMetrics(
 	cfg *config.ExporterConfiguration,
-	connPool *network.LdapConnectionPool,
+	connPool *connections.LdapConnectionPool,
 ) *prometheus.Registry {
 	dsMetricsRegistry := prometheus.NewRegistry()
 
@@ -404,15 +416,15 @@ func run() int {
 		"backend", cfg.Global.BackendImplement,
 	)
 
-	ldapConnPoolConfig := network.LdapConnectionPoolConfig{
+	ldapConnPoolConfig := connections.LdapConnectionPoolConfig{
 		ServerURL:      cfg.LDAP.ServerURL,
 		BindDN:         cfg.LDAP.BindDN,
 		BindPw:         cfg.LDAP.BindPw,
 		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
-		DialFunc:       network.RealConnectionDialUrl,
+		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
-	ldapConnPool := network.NewLdapConnectionPool(ldapConnPoolConfig)
+	ldapConnPool := connections.NewLdapConnectionPool(ldapConnPoolConfig)
 	applicationResources.ConnPool = ldapConnPool
 
 	dsMetricsRegistry := setupPrometheusMetrics(cfg, applicationResources.ConnPool)
@@ -440,7 +452,7 @@ func run() int {
 
 		return 1
 	}
-	timeoutListener := network.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
+	timeoutListener := connections.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
 
 	go func() {
 		slog.Info("Starting HTTP server at " + cfg.HTTP.GetListenAddress())
@@ -475,6 +487,7 @@ func run() int {
 		}
 	}
 
+	// Before return, deferred Shutdown function will be executed
 	return 0
 }
 
