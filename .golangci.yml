@@ -39,7 +39,6 @@ linters:
     - nilerr
     - nilnesserr
     - nilnil
-    - nlreturn
     - noinlineerr
     - nolintlint
     - nonamedreturns

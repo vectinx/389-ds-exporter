@@ -4,7 +4,7 @@ The collectors package provides various structures implementing the prometheus.C
 package collectors
 
 import (
-	"389-ds-exporter/src/connections"
+	"context"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -14,6 +14,8 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/connections"
 )
 
 /*
@@ -98,7 +100,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 
 	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
-		slog.Error("Error getting attrs from ldap", "err", err)
+		slog.Warn("Failed to get attrs from ldap", "err", err)
 
 		return
 	}
@@ -166,7 +168,15 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		nil,
 	)
 
-	searchResult, err := c.connectionPool.Search(searchAttributesRequest, c.poolGetTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	conn, err := c.connectionPool.Get(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get connection from pool: %w", err)
+	}
+	defer conn.Close()
+
+	searchResult, err := conn.Search(searchAttributesRequest)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"LDAP Search request (dn='%v', attrs='%v') failed with error: %w",

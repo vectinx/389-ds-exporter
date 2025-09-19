@@ -3,35 +3,199 @@ package connections
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"sync"
-	"time"
+	"sync/atomic"
 
 	"github.com/go-ldap/ldap/v3"
 )
 
-// LdapConnectionPoolConfig struct implements LdapConnectionPool configuration.
+var (
+	ErrPoolClosed             = errors.New("pool closed")
+	ErrPoolFull               = errors.New("pool is full")
+	ErrPoolGetTimedOut        = errors.New("timed out while trying to get a connection from the pool")
+	ErrPoolClosingWaitTimeout = errors.New("timed out while waiting for all connections to be returned to the pool")
+	ErrPoolClosingFailed      = errors.New("the pool was closed with errors")
+)
+
+type PooledConn struct {
+	conn LdapConn
+	pool *LdapConnectionPool
+	once sync.Once
+}
+
+func (c *PooledConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
+	return c.conn.Search(req)
+}
+
+func (c *PooledConn) Close() {
+	c.once.Do(func() {
+		_ = c.pool.put(c.conn)
+		c.pool.wg.Done()
+	})
+}
+
 type LdapConnectionPoolConfig struct {
-	ServerURL      string // URL of LDAP Server
-	BindDN         string // LDAP server bind DN
-	BindPw         string // LDAP server bind Password
-	MaxConnections int    // Limit of connections in pool
-	DialFunc       func(url string) (LdapConn, error)
+	ServerURL      string
+	BindDN         string
+	BindPw         string
+	MaxConnections int
+	ConnFactory    func(url string) (LdapConn, error)
 }
 
-// LdapConnectionPool implements a pool that manages ldap connections.
 type LdapConnectionPool struct {
-	config                 LdapConnectionPoolConfig
-	connectionsCh          chan LdapConn
-	managedConnectionCount int
-	mu                     sync.Mutex
-	closed                 bool
-	doneCh                 chan struct{}
+	cfg        LdapConnectionPoolConfig
+	connCh     chan LdapConn
+	totalConns atomic.Int32
+	closed     bool
+	mu         sync.Mutex
+	wg         sync.WaitGroup
 }
 
-// ldapConnIsAlive function checks if specified connection is alive.
-func ldapConnIsAlive(conn LdapConn) bool {
+func NewLdapConnectionPool(config LdapConnectionPoolConfig) *LdapConnectionPool {
+	return &LdapConnectionPool{
+		cfg:    config,
+		connCh: make(chan LdapConn, config.MaxConnections),
+	}
+}
+
+func (p *LdapConnectionPool) Get(ctx context.Context) (*PooledConn, error) {
+	p.mu.Lock()
+	if p.closed {
+		p.mu.Unlock()
+
+		return nil, ErrPoolClosed
+	}
+	p.wg.Add(1)
+	p.mu.Unlock()
+
+	for {
+		conn := p.tryGetFromChan()
+		if conn != nil {
+			if isConnAlive(conn) {
+				return &PooledConn{conn: conn, pool: p}, nil
+			} else {
+				p.totalConns.Add(-1)
+				_ = conn.Unbind()
+			}
+		}
+
+		p.mu.Lock()
+		if int(p.totalConns.Load()) < p.cfg.MaxConnections {
+			p.totalConns.Add(1)
+			p.mu.Unlock()
+			conn, err := p.cfg.ConnFactory(p.cfg.ServerURL)
+			if err == nil {
+				if conn != nil {
+					err = conn.Bind(p.cfg.BindDN, p.cfg.BindPw)
+					if err == nil {
+						return &PooledConn{conn: conn, pool: p}, nil
+					}
+					p.totalConns.Add(-1)
+					_ = conn.Unbind()
+				} else {
+					p.totalConns.Add(-1)
+					continue
+				}
+			} else {
+				p.totalConns.Add(-1)
+			}
+
+		} else {
+			p.mu.Unlock()
+		}
+
+		select {
+		case <-ctx.Done():
+			p.wg.Done()
+
+			return nil, ErrPoolGetTimedOut
+		default:
+		}
+	}
+}
+
+func (p *LdapConnectionPool) TotalConnections() int {
+	return int(p.totalConns.Load())
+}
+
+func (p *LdapConnectionPool) ConnsAtPool() int {
+	return len(p.connCh)
+}
+
+func (p *LdapConnectionPool) Close(ctx context.Context) error {
+	p.mu.Lock()
+	if p.closed {
+		p.mu.Unlock()
+
+		return ErrPoolClosed
+	}
+	p.closed = true
+
+	p.mu.Unlock()
+	doneCh := make(chan struct{})
+	go func() {
+		p.wg.Wait()
+		close(doneCh)
+	}()
+
+	select {
+	case <-doneCh:
+		// all connections returned to pool
+	case <-ctx.Done():
+
+		return ErrPoolClosingWaitTimeout
+	}
+
+	close(p.connCh)
+
+	hasCloseErrors := false
+	errorsCount := 0
+	for conn := range p.connCh {
+		if conn.Unbind() != nil {
+			hasCloseErrors = true
+			errorsCount++
+		}
+	}
+
+	if hasCloseErrors {
+		return ErrPoolClosingFailed
+	}
+
+	return nil
+}
+
+func (p *LdapConnectionPool) Closed() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	return p.closed
+}
+
+func (p *LdapConnectionPool) put(conn LdapConn) error {
+
+	select {
+	case p.connCh <- conn:
+
+		return nil
+	default:
+		_ = conn.Unbind()
+		slog.Debug("Unable to put connection to pool")
+
+		return ErrPoolFull
+	}
+}
+
+func (p *LdapConnectionPool) tryGetFromChan() LdapConn {
+	select {
+	case conn := <-p.connCh:
+		return conn
+	default:
+		return nil
+	}
+}
+
+func isConnAlive(conn LdapConn) bool {
 	req := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
@@ -43,165 +207,8 @@ func ldapConnIsAlive(conn LdapConn) bool {
 	)
 
 	_, err := conn.Search(req)
-
+	if err != nil {
+		slog.Debug("Error checking connection", "err", err)
+	}
 	return err == nil
-}
-
-// NewLdapConnectionPool function creates and returns new LdapConnectionPool object with specified config.
-func NewLdapConnectionPool(cfg LdapConnectionPoolConfig) *LdapConnectionPool {
-	pool := &LdapConnectionPool{
-		config:                 cfg,
-		connectionsCh:          make(chan LdapConn, cfg.MaxConnections),
-		doneCh:                 make(chan struct{}),
-		managedConnectionCount: 0,
-		closed:                 false,
-	}
-
-	return pool
-}
-
-// Search function gives a connection from the pool. If specified timeout expires, returns an error.
-func (pool *LdapConnectionPool) Search(req *ldap.SearchRequest, timeout time.Duration) (*ldap.SearchResult, error) {
-
-	pool.mu.Lock()
-	if pool.closed {
-		pool.mu.Unlock()
-
-		return nil, errors.New("pool closed")
-	}
-
-	pool.mu.Unlock()
-
-	for {
-		select {
-		case conn := <-pool.connectionsCh:
-			slog.Debug("There is an available connection in the pool, using it")
-
-			if !ldapConnIsAlive(conn) {
-				slog.Debug("The connection is broken, deleting it")
-				_ = conn.Unbind()
-				pool.mu.Lock()
-				pool.managedConnectionCount--
-				pool.mu.Unlock()
-
-				continue
-			}
-
-			return pool.searchAndReturn(conn, req)
-
-		default:
-			slog.Debug("There are no connections available in the pool")
-			pool.mu.Lock()
-			if pool.managedConnectionCount < pool.config.MaxConnections {
-				pool.managedConnectionCount++
-				pool.mu.Unlock()
-
-				slog.Debug("Creating a new connection in the pool")
-
-				conn, err := pool.newConnection()
-
-				if err != nil {
-					pool.mu.Lock()
-					pool.managedConnectionCount--
-					pool.mu.Unlock()
-
-					return nil, fmt.Errorf("error creating new connection: %w", err)
-				}
-
-				return pool.searchAndReturn(conn, req)
-			}
-			pool.mu.Unlock()
-
-			slog.Debug("Waiting for more connections to become available")
-			select {
-			case conn := <-pool.connectionsCh:
-				slog.Debug("There is an available connection in the pool, using it")
-				if !ldapConnIsAlive(conn) {
-					_ = conn.Unbind()
-					pool.mu.Lock()
-					pool.managedConnectionCount--
-					pool.mu.Unlock()
-					slog.Debug("The connection is broken, deleting it")
-
-					continue
-				}
-
-				return pool.searchAndReturn(conn, req)
-
-			case <-time.After(timeout):
-
-				return nil, fmt.Errorf("error getting pooled connection: timeout (%s)", timeout.String())
-			}
-		}
-	}
-}
-
-// Close function prevents receiving connections from the pool,
-// waits until all connections are returned to the pool and closes them.
-func (pool *LdapConnectionPool) Close(ctx context.Context) error {
-	pool.mu.Lock()
-	if pool.closed {
-		pool.mu.Unlock()
-
-		return errors.New("closing of closed pool")
-	}
-	pool.mu.Unlock()
-
-	pool.mu.Lock()
-	pool.closed = true
-	pool.mu.Unlock()
-
-	close(pool.connectionsCh)
-
-	hasCloseErrors := false
-	errorsCount := 0
-	for conn := range pool.connectionsCh {
-		if conn.Unbind() != nil {
-			hasCloseErrors = true
-			errorsCount++
-		}
-	}
-
-	if hasCloseErrors {
-		return fmt.Errorf("pool closed incorrectly - failed to close %v connections", errorsCount)
-	}
-
-	return nil
-}
-
-// newConnection function creates a new connection to ldap.
-func (pool *LdapConnectionPool) newConnection() (LdapConn, error) {
-
-	conn, err := pool.config.DialFunc(pool.config.ServerURL)
-	if err == nil {
-		err = conn.Bind(pool.config.BindDN, pool.config.BindPw)
-		if err == nil {
-			return conn, nil
-		}
-		err := conn.Unbind()
-		if err != nil {
-			slog.Debug("Error closing pooled ldap connection", "err", err)
-		}
-	}
-
-	return nil, err
-}
-
-// searchAndReturn performs a search through the connection and returns it to the pool
-func (pool *LdapConnectionPool) searchAndReturn(conn LdapConn, req *ldap.SearchRequest) (*ldap.SearchResult, error) {
-	res, err := conn.Search(req)
-
-	// Try to return connection back to pool
-	select {
-	case pool.connectionsCh <- conn:
-		slog.Debug("The connection was successfully returned to the pool after use")
-	default:
-		slog.Debug("Error returning connection to pool - removing it")
-		_ = conn.Unbind()
-		pool.mu.Lock()
-		pool.managedConnectionCount--
-		pool.mu.Unlock()
-	}
-
-	return res, err
 }

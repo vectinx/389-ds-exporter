@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"log"
 	"log/slog"
 	"net"
 	"net/http"
@@ -56,11 +55,12 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 	if r.HttpServer != nil {
 		slog.Debug("Stopping HTTP server ...")
 		r.HttpServer.SetKeepAlivesEnabled(false)
-		err := r.HttpServer.Shutdown(ctx)
+		// err := r.HttpServer.Shutdown(ctx)
+		err := r.HttpServer.Close()
 		if err != nil {
-			errs = append(errs, fmt.Errorf("HTTP server Shutdown failed: %w", err))
+			errs = append(errs, fmt.Errorf("HTTP server Close failed: %w", err))
 		}
-		slog.Debug("HTTP server stopped")
+		slog.Debug("HTTP server stopped", "err", err)
 	}
 
 	if r.ConnPool != nil {
@@ -69,7 +69,7 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error closing ldap pool: %w", err))
 		}
-		slog.Debug("LDAP connection closed")
+		slog.Debug("LDAP connection pool closed", "err", err)
 	}
 	if len(errs) > 0 {
 		return errors.Join(errs...)
@@ -92,7 +92,7 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 </html>
 `, html.EscapeString(metricsPath))
 		if err != nil {
-			log.Printf("Error writing HTTP answer: %s", err)
+			slog.Error("Error writing HTTP answer", "err", err)
 		}
 	}
 }
@@ -117,11 +117,23 @@ func healthHttpResponse(pool *connections.LdapConnectionPool, startTime time.Tim
 			[]string{"dn"},
 			nil,
 		)
-		_, err := pool.Search(ldapReq, LdapConnectionPoolTimeout*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		conn, err := pool.Get(ctx)
+
 		if err != nil {
-			slog.Warn("LDAP health check failed", "err", err)
+			slog.Warn("Healthcheck error", "err", err)
 			ldapStatus = "unavailable"
 			ldapAvailable = false
+		} else {
+			defer conn.Close()
+
+			_, err = conn.Search(ldapReq)
+			if err != nil {
+				slog.Warn("LDAP health check failed", "err", err)
+				ldapStatus = "unavailable"
+				ldapAvailable = false
+			}
 		}
 
 		uptime := time.Since(startTime).Seconds()
@@ -156,7 +168,7 @@ func buildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler 
 		return slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})
 	}
 
-	return nil
+	return slog.Default().Handler()
 }
 
 func setupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, error) {
@@ -409,7 +421,7 @@ func run() int {
 		BindDN:         cfg.LDAP.BindDN,
 		BindPw:         cfg.LDAP.BindPw,
 		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
-		DialFunc:       connections.RealConnectionDialUrl,
+		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
 	ldapConnPool := connections.NewLdapConnectionPool(ldapConnPoolConfig)
@@ -475,6 +487,7 @@ func run() int {
 		}
 	}
 
+	// Before return, deferred Shutdown function will be executed
 	return 0
 }
 
