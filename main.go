@@ -163,9 +163,9 @@ func healthHttpResponse(pool *connections.LdapConnectionPool, startTime time.Tim
 func buildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler {
 	switch format {
 	case "text":
-		return slog.NewTextHandler(w, &slog.HandlerOptions{Level: level})
+		return slog.NewTextHandler(w, &slog.HandlerOptions{AddSource: true, Level: level})
 	case "json":
-		return slog.NewJSONHandler(w, &slog.HandlerOptions{Level: level})
+		return slog.NewJSONHandler(w, &slog.HandlerOptions{AddSource: true, Level: level})
 	}
 
 	return slog.Default().Handler()
