@@ -405,6 +405,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Average number of bind operations per second over a $__rate_interval, broken down by bind type",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -567,6 +568,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Average number of initiated and completed operations per second over a $__rate_interval",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -695,7 +697,7 @@
           "refId": "B"
         }
       ],
-      "title": "Initiated/Completed LDAP requests rate",
+      "title": "Initiated/Completed LDAP operations rate",
       "type": "timeseries"
     },
     {
@@ -703,6 +705,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Average number of LDAP operations per second over a $__rate_interval, broken down by operation type",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -843,7 +846,7 @@
           "refId": "D"
         }
       ],
-      "title": "LDAP Requests rate",
+      "title": "LDAP operations rate",
       "type": "timeseries"
     },
     {
@@ -851,6 +854,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "The average number of records sent by the server per second over a $__rate_interval",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -940,6 +944,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "The average amount of data sent by the server per second over a $__rate_interval",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1030,6 +1035,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Number of connections where some requests are pending and not currently being serviced by a thread in Directory Server",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1124,6 +1130,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Average number of errors per second over a time interval $__rate_interval",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1383,7 +1390,7 @@
           "useBackend": false
         }
       ],
-      "title": "Normalized DN Cache size",
+      "title": "Normalized DN cache size",
       "type": "timeseries"
     },
     {
@@ -1523,7 +1530,7 @@
           "useBackend": false
         }
       ],
-      "title": "NDN Cache Tries / NDN Cache hits rate",
+      "title": "Normalized DN cache tries/hits rate",
       "type": "timeseries"
     },
     {
@@ -1640,7 +1647,7 @@
           "refId": "A"
         }
       ],
-      "title": "Normalized DN Cache hit ratio (%)",
+      "title": "Normalized DN cache hit ratio (%)",
       "type": "timeseries"
     },
     {
@@ -1797,7 +1804,7 @@
           "useBackend": false
         }
       ],
-      "title": "Entry Cache size",
+      "title": "Entry cache size",
       "type": "timeseries"
     },
     {
@@ -1941,7 +1948,7 @@
           "useBackend": false
         }
       ],
-      "title": "Entry Cache tries / Entry Cache hits rates",
+      "title": "Entry cache tries/hits rate",
       "type": "timeseries"
     },
     {
@@ -2056,7 +2063,7 @@
           "useBackend": false
         }
       ],
-      "title": "Entry Cache Hit Ratio (%)",
+      "title": "Entry cache hit ratio (%)",
       "type": "timeseries"
     },
     {
@@ -2172,7 +2179,7 @@
           "useBackend": false
         }
       ],
-      "title": "DN Cache size",
+      "title": "DN cache size",
       "type": "timeseries"
     },
     {
@@ -2285,7 +2292,7 @@
           "useBackend": false
         }
       ],
-      "title": "DN Cache tries / DN Cache hits rate",
+      "title": "DN cache tries/hits rate",
       "type": "timeseries"
     },
     {
@@ -2400,7 +2407,7 @@
           "useBackend": false
         }
       ],
-      "title": "DN Cache Hit Ratio (%)",
+      "title": "DN cache hit ratio (%)",
       "type": "timeseries"
     }
   ],
@@ -2410,6 +2417,11 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "PBFA97CFB590B2093"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -2502,6 +2514,6 @@
   "timezone": "browser",
   "title": "389-ds-exporter",
   "uid": "389-ds",
-  "version": 0,
+  "version": 3,
   "weekStart": ""
 }

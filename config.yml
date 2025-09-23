@@ -80,7 +80,6 @@ ldap:
   bind_pw: "12345678"
 
   # Maximum size of the LDAP connection pool.
-  # Connections are created as needed and deleted when their lifetime or idle time is exceeded.
   # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
   # Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
   #
