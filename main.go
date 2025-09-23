@@ -55,8 +55,7 @@ func (r *appResources) Shutdown(ctx context.Context) error {
 	if r.HttpServer != nil {
 		slog.Debug("Stopping HTTP server ...")
 		r.HttpServer.SetKeepAlivesEnabled(false)
-		// err := r.HttpServer.Shutdown(ctx)
-		err := r.HttpServer.Close()
+		err := r.HttpServer.Shutdown(ctx)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("HTTP server Close failed: %w", err))
 		}
@@ -100,8 +99,6 @@ func defaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 // defaultHttpResponse function generates a standard HTML response for the exporter.
 func healthHttpResponse(pool *connections.LdapConnectionPool, startTime time.Time) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		//ctx, cancel := context.WithTimeout(req.Context(), 100*time.Millisecond)
-		//defer cancel()
 
 		ldapStatus := "ok"
 		ldapAvailable := true
@@ -424,8 +421,7 @@ func run() int {
 		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
-	ldapConnPool := connections.NewLdapConnectionPool(ldapConnPoolConfig)
-	applicationResources.ConnPool = ldapConnPool
+	applicationResources.ConnPool = connections.NewLdapConnectionPool(ldapConnPoolConfig)
 
 	dsMetricsRegistry := setupPrometheusMetrics(cfg, applicationResources.ConnPool)
 
@@ -437,7 +433,7 @@ func run() int {
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	server := &http.Server{
+	applicationResources.HttpServer = &http.Server{
 		Addr:         cfg.HTTP.GetListenAddress(),
 		Handler:      http.DefaultServeMux,
 		ReadTimeout:  time.Duration(cfg.HTTP.GetReadTimeout()) * time.Second,
@@ -445,18 +441,17 @@ func run() int {
 		IdleTimeout:  time.Duration(cfg.HTTP.GetIdleTimeout()) * time.Second,
 	}
 
-	applicationResources.HttpServer = server
-	ln, err := net.Listen("tcp", cfg.HTTP.GetListenAddress())
+	listener, err := net.Listen("tcp", cfg.HTTP.GetListenAddress())
 	if err != nil {
 		slog.Error("Failed to start TCP listener", "err", err)
 
 		return 1
 	}
-	timeoutListener := connections.NewTimeoutListener(ln, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
+	timeoutListener := connections.NewTimeoutListener(listener, time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second)
 
 	go func() {
 		slog.Info("Starting HTTP server at " + cfg.HTTP.GetListenAddress())
-		err := server.Serve(timeoutListener)
+		err := applicationResources.HttpServer.Serve(timeoutListener)
 		if err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err
 		}
