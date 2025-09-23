@@ -15,7 +15,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		"db_abort_rate": {
 			LdapName: "nsslapd-db-abort-rate",
 			Help:     "Number of transactions that have been aborted.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"db_active_txns": {
 			LdapName: "nsslapd-db-active-txns",
@@ -40,7 +40,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		"db_commits_rate": {
 			LdapName: "nsslapd-db-commit-rate",
 			Help:     "Number of transactions that have been committed.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"db_deadlock_rate": {
 			LdapName: "nsslapd-db-deadlock-rate",

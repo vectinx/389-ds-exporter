@@ -13,12 +13,12 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 		"dbcachehits": {
 			LdapName: "dbcachehits",
 			Help:     "Number of requested pages found in the database",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"dbcachetries": {
 			LdapName: "dbcachetries",
 			Help:     "Total number of cache lookups",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"dbcachehitratio": {
 			LdapName: "dbcachehitratio",
@@ -48,17 +48,17 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 		"normalizeddncachetries": {
 			LdapName: "normalizeddncachetries",
 			Help:     "Total number of cache lookups since the instance was started",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"normalizeddncachehits": {
 			LdapName: "normalizeddncachehits",
 			Help:     "Normalized DNs found within the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"normalizeddncachemisses": {
 			LdapName: "normalizeddncachemisses",
 			Help:     "Normalized DNs not found within the cache",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"normalizeddncachehitratio": {
 			LdapName: "normalizeddncachehitratio",

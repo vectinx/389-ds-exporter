@@ -12,27 +12,27 @@ func GetLdapServerSnmpMetrics() map[string]collectors.LdapMonitoredAttribute {
 		"anonymousbinds": {
 			LdapName: "anonymousbinds",
 			Help:     "Number of anonymous bind requests",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"unauthbinds": {
 			LdapName: "unauthbinds",
 			Help:     "Number of unauthenticated (anonymous) binds",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"simpleauthbinds": {
 			LdapName: "simpleauthbinds",
 			Help:     "Number of LDAP simple bind requests (DN and password)",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"strongauthbinds": {
 			LdapName: "strongauthbinds",
 			Help:     "Number of LDAP SASL bind requests, for all SASL mechanisms",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"bindsecurityerrors": {
 			LdapName: "bindsecurityerrors",
 			Help:     "Number of number of times an invalid password was given in a bind request.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"compareops": {
 			LdapName: "compareops",
@@ -62,28 +62,28 @@ func GetLdapServerSnmpMetrics() map[string]collectors.LdapMonitoredAttribute {
 		"searchops": {
 			LdapName: "searchops",
 			Help:     "Number of LDAP search requests",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"onelevelsearchops": {
 			LdapName: "onelevelsearchops",
 			Help:     "Number of one-level search operations",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"wholesubtreesearchops": {
 			LdapName: "wholesubtreesearchops",
 			Help:     "Number of subtree-level search operations",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"securityerrors": {
 			LdapName: "securityerrors",
 			Help: `Number of errors returned that were security related, such as invalid passwords,
 unknown or invalid authentication methods, or stronger authentication required`,
-			Type: prometheus.GaugeValue,
+			Type: prometheus.CounterValue,
 		},
 		"errors": {
 			LdapName: "errors",
 			Help:     "Number of errors returned",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 	}
 }

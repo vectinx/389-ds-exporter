@@ -15,12 +15,12 @@ func GetLdapBackendCaches() map[string]collectors.LdapMonitoredAttribute {
 		"dncachehits": {
 			LdapName: "dncachehits",
 			Help:     "Number of times the server could process a request by obtaining a normalized distinguished name (DN) from the DN cache rather than normalizing it again",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"dncachetries": {
 			LdapName: "dncachetries",
 			Help:     "Total number of DN cache accesses since you started the instance",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"dncachehitratio": {
 			LdapName: "dncachehitratio",
@@ -45,12 +45,12 @@ func GetLdapBackendCaches() map[string]collectors.LdapMonitoredAttribute {
 		"entrycachehits": {
 			LdapName: "entrycachehits",
 			Help:     "Total number of successful entry cache lookups",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"entrycachetries": {
 			LdapName: "entrycachetries",
 			Help:     "Total number of entry cache lookups since you started the instance",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"entrycachehitratio": {
 			LdapName: "entrycachehitratio",

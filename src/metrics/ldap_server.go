@@ -12,7 +12,7 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 		"threads": {
 			LdapName: "threads",
 			Help:     "Current number of active threads used for handling requests",
-			Type:     prometheus.CounterValue,
+			Type:     prometheus.GaugeValue,
 		},
 		"currentconnections": {
 			LdapName: "currentconnections",
@@ -47,22 +47,22 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 		"opsinitiated": {
 			LdapName: "opsinitiated",
 			Help:     "Number of operations the server has initiated since it started",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"opscompleted": {
 			LdapName: "opscompleted",
 			Help:     "Number of operations the server has completed since it started.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"entriessent": {
 			LdapName: "entriessent",
 			Help:     "Number of entries sent to clients since the server started",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"bytessent": {
 			LdapName: "bytessent",
 			Help:     "Number of bytes sent to clients after the server starts",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"nbackends": {
 			LdapName: "nbackends",
@@ -73,7 +73,7 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 			LdapName: "currenttime",
 			LdapType: collectors.Iso8601CompactString,
 			Help:     "Current time of the server. The time is displayed in Greenwich Mean Time (GMT) in UTC format",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"starttime": {
 			LdapName: "starttime",
