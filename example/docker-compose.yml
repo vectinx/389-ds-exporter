@@ -15,6 +15,11 @@ services:
       # - ./389ds-mdb-data:/data
       - ./entrypoint.sh:/app/entrypoint.sh:ro
     entrypoint: /app/entrypoint.sh
+    healthcheck:
+      test: ["CMD-SHELL", "dsconf localhost backend suffix list | grep -w $$SUFFIX_NAME"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   389ds-exporter-mdb:
     image: vectinx/389-ds-exporter:latest
@@ -46,6 +51,11 @@ services:
       # - ./389ds-bdb-data:/data
       - ./entrypoint.sh:/app/entrypoint.sh:ro
     entrypoint: /app/entrypoint.sh
+    healthcheck:
+      test: ["CMD-SHELL", "dsconf localhost backend suffix list | grep -w $$SUFFIX_NAME"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   389ds-exporter-bdb:
     image: vectinx/389-ds-exporter:latest

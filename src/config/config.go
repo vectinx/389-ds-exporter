@@ -21,7 +21,6 @@ type ExporterConfiguration struct {
 }
 
 type GlobalConfig struct {
-	Backends               []string `yaml:"ds_backends"`
 	ShutdownTimeout        *int     `yaml:"shutdown_timeout"`
 	NumSubordinatesRecords []string `yaml:"ds_numsubordinate_records"`
 }
@@ -53,7 +52,6 @@ type LoggingConfig struct {
 // String returns string describing config with default values.
 func (c *ExporterConfiguration) String() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("global.ds_backends: %v\n", c.Global.Backends))
 	b.WriteString(fmt.Sprintf("global.shutdown_timeout: %v\n", c.Global.GetShutdownTimeout()))
 	b.WriteString(fmt.Sprintf("global.ds_numsubordinate_records: %v\n", c.Global.NumSubordinatesRecords))
 	b.WriteString(fmt.Sprintf("http.listen_address: %s\n", c.HTTP.GetListenAddress()))

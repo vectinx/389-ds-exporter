@@ -1,8 +1,5 @@
 ---
 global:
-  ds_backend_implement: mdb
-  ds_backends:
-    - userRoot
   ds_numsubordinate_records:
     - "dc=example,dc=com"
 http:

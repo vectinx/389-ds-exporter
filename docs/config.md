@@ -8,20 +8,9 @@ The 'global' section defines general exporter parameters.
 
 ```yaml
 global:
-  ds_backend_implement: bdb
-  ds_backends: []
   ds_numsubordinate_records: []
   shutdown_timeout: 5
 ```
-
-### ds_backend_implement
-Specifies the backend database used by 389-ds.
-Possible values: bdb, mbd
-
-### ds_backends
-List of 389-ds backend databases to monitor.
-See: Red Hat Backend Database Docs
-Default value: `[]`
 
 ### ds_numsubordinate_records
 List of LDAP entries for which the number of subordinates (numSubordinates) will be collected.
