@@ -148,7 +148,6 @@ func run() int {
 	slog.Info("LDAP server info",
 		"url", cfg.LDAP.ServerURL,
 		"bind_dn", cfg.LDAP.BindDN,
-		"backend", cfg.Global.BackendImplement,
 	)
 
 	ldapConnPoolConfig := connections.LdapConnectionPoolConfig{

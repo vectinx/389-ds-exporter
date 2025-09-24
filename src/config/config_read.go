@@ -23,17 +23,6 @@ func (c *ExporterConfiguration) Validate() error {
 		return errors.New("configuration parameter ldap.bind_pw is required")
 	}
 
-	if c.Global.BackendImplement == "" {
-		return errors.New("configuration parameter global.ds_backend_implement is required")
-	}
-
-	switch c.Global.BackendImplement {
-	case BackendBDB, BackendMDB:
-		// valid value - pass
-	default:
-		return fmt.Errorf("invalid global.ds_backend_implement: '%q' (must be 'bdb' or 'mdb')", c.Global.BackendImplement)
-	}
-
 	if c.LDAP.GetPoolConnLimit() <= 0 {
 		return errors.New("invalid ldap.pool_conn_limit: must be greater than 0")
 	}

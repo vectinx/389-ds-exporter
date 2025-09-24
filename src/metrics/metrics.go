@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+	"log/slog"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -8,6 +10,7 @@ import (
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/connections"
+	"389-ds-exporter/src/utils"
 )
 
 // SetupPrometheusMetrics creates *prometheus.Registry, adds the required metrics and returns it.
@@ -66,8 +69,24 @@ func SetupPrometheusMetrics(
 		Since 389-ds has a different set of monitoring metrics for different backends (Berkley DB and LMDB),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
-	switch cfg.Global.BackendImplement {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	conn, err := connPool.Get(ctx)
+	if err != nil {
+		slog.Warn("Error getting backend implementation type", "err", err)
+		return dsMetricsRegistry
+	}
+
+	implement, err := utils.GetLdapBackendType(conn)
+	if err != nil {
+		slog.Warn("Error getting backend implementation type", "err", err)
+		return dsMetricsRegistry
+	}
+	conn.Close()
+
+	switch implement {
 	case config.BackendBDB:
+		slog.Info("Berkeley DB backend implementation detected")
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			connPool,
@@ -87,6 +106,7 @@ func SetupPrometheusMetrics(
 		),
 		)
 	case config.BackendMDB:
+		slog.Info("LMDB backend implementation detected")
 		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
 			"ds_exporter",
 			connPool,
@@ -105,6 +125,8 @@ func SetupPrometheusMetrics(
 			connPoolTimeout,
 		),
 		)
+	default:
+		slog.Warn("An unknown backend implementation type was received. Backend metrics will not be collected", "backend", implement)
 	}
 
 	return dsMetricsRegistry
