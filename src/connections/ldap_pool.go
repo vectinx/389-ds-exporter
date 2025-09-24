@@ -19,17 +19,26 @@ var (
 )
 
 type PooledConn struct {
-	conn LdapConn
-	pool *LdapConnectionPool
-	once sync.Once
+	conn   LdapConn
+	pool   *LdapConnectionPool
+	once   sync.Once
+	closed atomic.Bool
 }
 
 func (c *PooledConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
+	if c.closed.Load() {
+		panic("BUG: Attempt to use a closed connection")
+	}
 	return c.conn.Search(req)
 }
 
 func (c *PooledConn) Close() {
+	if c.closed.Load() {
+		panic("BUG: Re-closing an already closed connection")
+	}
+
 	c.once.Do(func() {
+		c.closed.Store(true)
 		_ = c.pool.put(c.conn)
 		c.pool.wg.Done()
 	})
