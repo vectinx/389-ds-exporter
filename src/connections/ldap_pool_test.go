@@ -77,7 +77,12 @@ func TestLdapPool(t *testing.T) {
 
 				// Trying to get more connections than there are in the pool.
 				_, err = ldapConnPool.Get(get_ctx)
-				require.ErrorIs(t, err, ErrPoolGetTimedOut, "An attempt to obtain a connection from a pool that has exceeded the limit should return an error after a timeout")
+				require.ErrorIs(
+					t,
+					err,
+					ErrPoolGetTimedOut,
+					"An attempt to obtain a connection from a pool that has exceeded the limit should return an error after a timeout",
+				)
 
 				// Closing connection
 				conn.Close()
@@ -89,15 +94,29 @@ func TestLdapPool(t *testing.T) {
 
 			t.Logf("\t\tGet a previously created connection from the pool")
 			{
-				get_ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+				get_ctx, cancel := context.WithTimeout(
+					context.Background(),
+					500*time.Millisecond,
+				)
+
 				defer cancel()
 				conn, err := ldapConnPool.Get(get_ctx)
 				require.NoError(t, err, "Getting a connection previously created in the pool should not fail")
 
-				require.Equal(t, int32(1), mockConn.SearchCount.Load(), "The reissued connection must have at least one search performed - connection check")
+				require.Equal(
+					t,
+					int32(1),
+					mockConn.SearchCount.Load(),
+					"The reissued connection must have at least one search performed - connection check",
+				)
 				conn.Close()
 
-				require.Equal(t, 1, ldapConnPool.ConnsAtPool(), "After returning a connection, the pool should contain as many connections as were previously allocated")
+				require.Equal(
+					t,
+					1,
+					ldapConnPool.ConnsAtPool(),
+					"After returning a connection, the pool should contain as many connections as were previously allocated",
+				)
 			}
 
 			t.Logf("\t\tClose pool")
@@ -108,7 +127,12 @@ func TestLdapPool(t *testing.T) {
 				_ = ldapConnPool.Close(close_ctx)
 				require.Equal(t, 0, ldapConnPool.ConnsAtPool(), "After closing the pool, there should be no connections left in it")
 
-				require.Equal(t, int32(1), mockConn.UnbindCount.Load(), "A connection must have one UNBIND operation after pool closing")
+				require.Equal(
+					t,
+					int32(1),
+					mockConn.UnbindCount.Load(),
+					"A connection must have one UNBIND operation after pool closing",
+				)
 			}
 
 			t.Logf("\t\tTest the operation of the closed pool")
@@ -121,7 +145,12 @@ func TestLdapPool(t *testing.T) {
 				require.ErrorIs(t, err, ErrPoolClosed, "Closing the pool again should fail with 'ErrPoolClosed'")
 
 				_, err = ldapConnPool.Get(get_ctx)
-				require.ErrorIs(t, err, ErrPoolClosed, "Attempting to obtain a connection from the closed pool should fail with 'ErrPoolClosed'")
+				require.ErrorIs(
+					t,
+					err,
+					ErrPoolClosed,
+					"Attempting to obtain a connection from the closed pool should fail with 'ErrPoolClosed'",
+				)
 			}
 
 		}
@@ -153,7 +182,8 @@ func TestLdapPool(t *testing.T) {
 
 			ldapConnPool := NewLdapConnectionPool(ldapConnPoolConfig)
 
-			// This test itself doesn't check anything and is needed to detect concurrent execution errors. For example, using the `go test -race`
+			// This test itself doesn't check anything and is needed to detect concurrent execution errors.
+			// For example, using the `go test -race`
 			t.Logf("\t\tCompetitively obtaining from a pool of connections in quantities greater than the pool size")
 			{
 				var wg sync.WaitGroup

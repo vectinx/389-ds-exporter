@@ -14,8 +14,9 @@ func GetLdapBackendCaches() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"dncachehits": {
 			LdapName: "dncachehits",
-			Help:     "Number of times the server could process a request by obtaining a normalized distinguished name (DN) from the DN cache rather than normalizing it again",
-			Type:     prometheus.CounterValue,
+			Help: `Number of times the server could process a request by obtaining a normalized
+distinguished name (DN) from the DN cache rather than normalizing it again`,
+			Type: prometheus.CounterValue,
 		},
 		"dncachetries": {
 			LdapName: "dncachetries",

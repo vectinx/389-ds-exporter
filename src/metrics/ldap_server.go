@@ -41,8 +41,9 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"readwaiters": {
 			LdapName: "readwaiters",
-			Help:     "Number of connections where some requests are pending and not currently being serviced by a thread in Directory Server.",
-			Type:     prometheus.GaugeValue,
+			Help: `Number of connections where some requests are pending
+and not currently being serviced by a thread in Directory Server`,
+			Type: prometheus.GaugeValue,
 		},
 		"opsinitiated": {
 			LdapName: "opsinitiated",
