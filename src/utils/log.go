@@ -32,7 +32,7 @@ func SetupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 	handlers := []slog.Handler{}
 	var logFile *os.File
 
-	strLogLevel := cfg.Logging.GetLevel()
+	strLogLevel := cfg.Logging.Level
 	levelMap := map[string]slog.Level{
 		"DEBUG":   slog.LevelDebug,
 		"INFO":    slog.LevelInfo,
@@ -45,16 +45,16 @@ func SetupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 		return nil, nil, fmt.Errorf("unknown logging level: '%s'", strLogLevel)
 	}
 
-	if cfg.Logging.GetHandler() == "stdout" || cfg.Logging.GetHandler() == "both" {
-		handlers = append(handlers, BuildLogHandler(cfg.Logging.GetStdoutFormat(), os.Stdout, logLevel))
+	if cfg.Logging.Handler == "stdout" || cfg.Logging.Handler == "both" {
+		handlers = append(handlers, BuildLogHandler(cfg.Logging.StdoutFormat, os.Stdout, logLevel))
 	}
-	if cfg.Logging.GetHandler() == "file" || cfg.Logging.GetHandler() == "both" {
+	if cfg.Logging.Handler == "file" || cfg.Logging.Handler == "both" {
 		var err error
-		logFile, err = os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
+		logFile, err = os.OpenFile(cfg.Logging.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error opening log file: %w", err)
 		}
-		handlers = append(handlers, BuildLogHandler(cfg.Logging.GetFileFormat(), logFile, logLevel))
+		handlers = append(handlers, BuildLogHandler(cfg.Logging.FileFormat, logFile, logLevel))
 	}
 
 	if len(handlers) == 0 {
@@ -72,7 +72,7 @@ func ReopenLogFile(cfg *config.ExporterConfiguration, old_file *os.File) (*os.Fi
 		_ = old_file.Close()
 	}
 
-	newLogFile, err := os.OpenFile(cfg.Logging.GetFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
+	newLogFile, err := os.OpenFile(cfg.Logging.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open new log file: %w", err)
 	}

@@ -116,7 +116,7 @@ func run() int {
 	defer func() {
 		shutdownContext, cancel := context.WithTimeout(
 			context.Background(),
-			time.Duration(cfg.Global.GetShutdownTimeout())*time.Second,
+			time.Duration(cfg.Global.ShutdownTimeout)*time.Second,
 		)
 
 		defer cancel()
@@ -154,7 +154,7 @@ func run() int {
 		ServerURL:      cfg.LDAP.ServerURL,
 		BindDN:         cfg.LDAP.BindDN,
 		BindPw:         cfg.LDAP.BindPw,
-		MaxConnections: cfg.LDAP.GetPoolConnLimit(),
+		MaxConnections: cfg.LDAP.PoolConnLimit,
 		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
@@ -164,27 +164,27 @@ func run() int {
 
 	// Create HTTP server
 	applicationResources.HttpServer = &http.Server{
-		Addr:         cfg.HTTP.GetListenAddress(),
+		Addr:         cfg.HTTP.ListenAddress,
 		Handler:      http.DefaultServeMux,
-		ReadTimeout:  time.Duration(cfg.HTTP.GetReadTimeout()) * time.Second,
-		WriteTimeout: time.Duration(cfg.HTTP.GetWriteTimeout()) * time.Second,
-		IdleTimeout:  time.Duration(cfg.HTTP.GetIdleTimeout()) * time.Second,
+		ReadTimeout:  time.Duration(cfg.HTTP.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.HTTP.WriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(cfg.HTTP.IdleTimeout) * time.Second,
 	}
 
 	// Create HTTP Listener with timeouts
-	listener, err := net.Listen("tcp", cfg.HTTP.GetListenAddress())
+	listener, err := net.Listen("tcp", cfg.HTTP.ListenAddress)
 	if err != nil {
 		slog.Error("Failed to start TCP listener", "err", err)
 		return 1
 	}
 	timeoutListener := connections.NewTimeoutListener(
 		listener,
-		time.Duration(cfg.HTTP.GetInitialReadTimeout())*time.Second,
+		time.Duration(cfg.HTTP.InitialReadTimeout)*time.Second,
 	)
 
 	// Register HTTP endpoinnts
-	http.Handle(cfg.HTTP.GetMetricsPath(), promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
-	http.HandleFunc("/", utils.DefaultHttpResponse(cfg.HTTP.GetMetricsPath()))
+	http.Handle(cfg.HTTP.MetricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
+	http.HandleFunc("/", utils.DefaultHttpResponse(cfg.HTTP.MetricsPath))
 	http.HandleFunc("/health", utils.HealthHttpResponse(applicationResources.ConnPool, startTime))
 	http.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -193,7 +193,7 @@ func run() int {
 
 	// Start HTTP server
 	go func() {
-		slog.Info("Starting HTTP server at " + cfg.HTTP.GetListenAddress())
+		slog.Info("Starting HTTP server at " + cfg.HTTP.ListenAddress)
 		err := applicationResources.HttpServer.Serve(timeoutListener)
 		if err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err
