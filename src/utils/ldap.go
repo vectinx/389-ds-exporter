@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -33,6 +34,9 @@ func GetLdapBackendType(conn *connections.PooledConn) (config.BackendType, error
 
 // GetLdapBackendInstances gets backend instances from ldap and returns them as []string.
 func GetLdapBackendInstances(conn *connections.PooledConn) ([]string, error) {
+	if conn == nil {
+		return nil, errors.New("connection is nil")
+	}
 	searchAttributesRequest := ldap.NewSearchRequest(
 		"cn=ldbm database,cn=plugins,cn=config",
 		ldap.ScopeSingleLevel,

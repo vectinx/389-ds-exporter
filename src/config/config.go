@@ -3,10 +3,14 @@ package config
 import "gopkg.in/yaml.v2"
 
 type BackendType string
+type EnabledCollectorsType string
 
 const (
-	BackendBDB BackendType = "bdb"
-	BackendMDB BackendType = "mdb"
+	BackendBDB         BackendType           = "bdb"
+	BackendMDB         BackendType           = "mdb"
+	CollectorsAll      EnabledCollectorsType = "all"
+	CollectorsStandard EnabledCollectorsType = "standard"
+	CollectorsDisabled EnabledCollectorsType = "disabled"
 )
 
 // ExporterConfiguration represents exporter configuration top level struct.
@@ -18,8 +22,11 @@ type ExporterConfiguration struct {
 }
 
 type globalConfig struct {
-	ShutdownTimeout        int      `yaml:"shutdown_timeout"`
-	NumSubordinatesRecords []string `yaml:"ds_numsubordinate_records"`
+	ShutdownTimeout        int                   `yaml:"shutdown_timeout"`
+	CollectorsDefault      EnabledCollectorsType `yaml:"collectors_default"`
+	CollectorsEnabled      []string              `yaml:"collectors_enabled"`
+	CollectorsDisabled     []string              `yaml:"collectors_disabled"`
+	NumSubordinatesRecords []string              `yaml:"ds_numsubordinate_records"`
 }
 
 type httpConfig struct {

@@ -2,7 +2,9 @@ package metrics
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -13,6 +15,34 @@ import (
 	"389-ds-exporter/src/utils"
 )
 
+func standardCollectors() []string {
+	return []string{
+		"server",
+		"snmp-server",
+		"numsubordinates",
+	}
+}
+
+func collectorEnabled(cfg *config.ExporterConfiguration, collector string) bool {
+	if cfg.Global.CollectorsDefault == "all" {
+		if !slices.Contains(cfg.Global.CollectorsDisabled, collector) {
+			return true
+		}
+	}
+	if cfg.Global.CollectorsDefault == "disabled" {
+		if slices.Contains(cfg.Global.CollectorsEnabled, collector) {
+			return true
+		}
+	}
+
+	if cfg.Global.CollectorsDefault == "standard" {
+		if slices.Contains(standardCollectors(), collector) {
+			return true
+		}
+	}
+	return false
+}
+
 // SetupPrometheusMetrics creates *prometheus.Registry, adds the required metrics and returns it.
 func SetupPrometheusMetrics(
 	cfg *config.ExporterConfiguration,
@@ -21,33 +51,56 @@ func SetupPrometheusMetrics(
 ) *prometheus.Registry {
 	dsMetricsRegistry := prometheus.NewRegistry()
 
-	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-		"ds_exporter",
-		connPool,
-		"cn=monitor",
-		GetLdapServerMetrics(),
-		prometheus.Labels{},
-		connPoolTimeout,
-	),
-	)
+	dsCollector := collectors.NewDSCollector()
 
-	dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-		"ds_exporter",
-		connPool,
-		"cn=snmp,cn=monitor",
-		GetLdapServerSnmpMetrics(),
-		prometheus.Labels{},
-		connPoolTimeout,
-	),
-	)
-
-	for _, entry := range cfg.Global.NumSubordinatesRecords {
-		dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-			"ds_exporter",
+	if collectorEnabled(cfg, "server") {
+		slog.Debug("Registering collector", "collector", "server")
+		dsCollector.Register("server", collectors.NewLdapEntryCollector(
+			"server",
 			connPool,
-			entry,
-			GetEntryCountAttr(),
-			prometheus.Labels{"entry": entry},
+			"cn=monitor",
+			GetLdapServerMetrics(),
+			prometheus.Labels{},
+			connPoolTimeout,
+		))
+	}
+
+	if collectorEnabled(cfg, "snmp-server") {
+		slog.Debug("Registering collector", "collector", "snmp-server")
+		dsCollector.Register("snmp-server", collectors.NewLdapEntryCollector(
+			"snmp_server",
+			connPool,
+			"cn=snmp,cn=monitor",
+			GetLdapServerSnmpMetrics(),
+			prometheus.Labels{},
+			connPoolTimeout,
+		),
+		)
+	}
+
+	if collectorEnabled(cfg, "numsubordinates") {
+		slog.Debug("Registering collector", "collector", "numsubordinates")
+		for _, entry := range cfg.Global.NumSubordinatesRecords {
+			dsCollector.Register(fmt.Sprintf("numsubordinates_%s", entry), collectors.NewLdapEntryCollector(
+				"numsubordinates",
+				connPool,
+				entry,
+				GetEntryCountAttr(),
+				prometheus.Labels{"entry": entry},
+				connPoolTimeout,
+			),
+			)
+		}
+	}
+
+	slog.Debug("Registering collector", "collector", "ndn-cache")
+	if collectorEnabled(cfg, "ndn-cache") {
+		dsCollector.Register("ndn-cache", collectors.NewLdapEntryCollector(
+			"ldbm",
+			connPool,
+			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+			GetNdnCacheMetrics(),
+			prometheus.Labels{},
 			connPoolTimeout,
 		),
 		)
@@ -58,26 +111,28 @@ func SetupPrometheusMetrics(
 	conn, err := connPool.Get(ctx)
 	if err != nil {
 		slog.Warn("Error obtaining connection to determine backend parameters", "err", err)
-		return dsMetricsRegistry
+	} else {
+		defer conn.Close()
 	}
-
-	defer conn.Close()
 
 	backendInstances, err := utils.GetLdapBackendInstances(conn)
 	if err != nil {
 		slog.Warn("Error getting backend instances", "err", err)
 	} else {
-		for _, instance := range backendInstances {
-			slog.Info("Registeing metrics for backend instance", "instance", instance)
-			dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-				"ds_exporter",
-				connPool,
-				"cn=monitor,cn="+instance+",cn=ldbm database,cn=plugins,cn=config",
-				GetLdapBackendCaches(),
-				prometheus.Labels{"database": instance},
-				connPoolTimeout,
-			),
-			)
+		if collectorEnabled(cfg, "ldbm-instance") {
+			slog.Debug("Registering collector", "collector", "ldbm-instance")
+			for _, instance := range backendInstances {
+				slog.Info("Registeing metrics for backend instance", "instance", instance)
+				dsCollector.Register(fmt.Sprintf("ldbm-instance_%s", instance), collectors.NewLdapEntryCollector(
+					"ldbm_instance",
+					connPool,
+					"cn=monitor,cn="+instance+",cn=ldbm database,cn=plugins,cn=config",
+					GetLdapBackendCaches(),
+					prometheus.Labels{"database": instance},
+					connPoolTimeout,
+				),
+				)
+			}
 		}
 	}
 
@@ -91,45 +146,49 @@ func SetupPrometheusMetrics(
 	} else {
 		switch backendImplement {
 		case config.BackendBDB:
+
 			slog.Info("Berkeley DB backend implementation detected")
-			dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-				"ds_exporter",
-				connPool,
-				"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
-				GetLdapBDBServerCacheMetrics(),
-				prometheus.Labels{},
-				connPoolTimeout,
-			),
-			)
-			dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-				"ds_exporter",
-				connPool,
-				"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
-				GetLdapBDBDatabaseLDBM(),
-				prometheus.Labels{},
-				connPoolTimeout,
-			),
-			)
+
+			if collectorEnabled(cfg, "bdb-caches") {
+				slog.Debug("Registering collector", "collector", "bdb-caches")
+				dsCollector.Register("bdb-caches", collectors.NewLdapEntryCollector(
+					"bdb",
+					connPool,
+					"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+					GetLdapBDBServerCacheMetrics(),
+					prometheus.Labels{},
+					connPoolTimeout,
+				),
+				)
+			}
+
+			if collectorEnabled(cfg, "bdb-internal") {
+				slog.Debug("Registering collector", "collector", "bdb-internal")
+				dsCollector.Register("bdb-internal", collectors.NewLdapEntryCollector(
+					"bdb",
+					connPool,
+					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+					GetLdapBDBDatabaseLDBM(),
+					prometheus.Labels{},
+					connPoolTimeout,
+				),
+				)
+			}
 		case config.BackendMDB:
 			slog.Info("LMDB backend implementation detected")
-			dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-				"ds_exporter",
-				connPool,
-				"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
-				GetLdapMDBServerCacheMetrics(),
-				prometheus.Labels{},
-				connPoolTimeout,
-			),
-			)
-			dsMetricsRegistry.MustRegister(collectors.NewLdapEntryCollector(
-				"ds_exporter",
-				connPool,
-				"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
-				GetLdapMDBDatabaseLDBM(),
-				prometheus.Labels{},
-				connPoolTimeout,
-			),
-			)
+
+			if collectorEnabled(cfg, "lmdb-internal") {
+				slog.Debug("Registering collector", "collector", "lmdb-internal")
+				dsCollector.Register("lmdb-internal", collectors.NewLdapEntryCollector(
+					"lmdb",
+					connPool,
+					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
+					GetLdapMDBDatabaseLDBM(),
+					prometheus.Labels{},
+					connPoolTimeout,
+				),
+				)
+			}
 		default:
 			slog.Warn(
 				"An unknown backend implementation type was detected. Backend metrics will not be collected",
@@ -138,6 +197,8 @@ func SetupPrometheusMetrics(
 			)
 		}
 	}
+
+	dsMetricsRegistry.MustRegister(dsCollector)
 
 	return dsMetricsRegistry
 }

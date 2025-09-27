@@ -1,5 +1,6 @@
 ---
 global:
+  collectors_default: all
   ds_numsubordinate_records:
     - "dc=example,dc=com"
 http:
@@ -9,4 +10,5 @@ ldap:
   bind_dn: "cn=directory manager"
   bind_pw: "12345678"
 log:
+  level: DEBUG
   handler: stdout

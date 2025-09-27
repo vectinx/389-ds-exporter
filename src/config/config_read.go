@@ -11,6 +11,45 @@ import (
 
 // Validate function cheks if provided configuration is valid.
 func (c *ExporterConfiguration) Validate() error {
+
+	if !slices.Contains(
+		[]EnabledCollectorsType{CollectorsAll, CollectorsDisabled, CollectorsStandard},
+		c.Global.CollectorsDefault) {
+		return fmt.Errorf(
+			"invalid global.collectors_default: %v (must be all, standard or disabled)",
+			c.Global.CollectorsDefault,
+		)
+	}
+
+	if c.Global.CollectorsDefault == CollectorsAll {
+		if len(c.Global.CollectorsEnabled) > 0 {
+			return errors.New(
+				"global.collectors_default is set to 'all', specifying the 'collectors_enabled' does not make sense",
+			)
+		}
+	}
+
+	if c.Global.CollectorsDefault == CollectorsDisabled {
+		if len(c.Global.CollectorsDisabled) > 0 {
+			return errors.New(
+				"global.collectors_default is set to 'disabled', specifying the 'collectors_disabled' does not make sense",
+			)
+		}
+	}
+
+	if c.Global.CollectorsDefault == CollectorsStandard {
+		if len(c.Global.CollectorsEnabled) > 0 {
+			return errors.New(
+				"global.collectors_default is set to 'standard', specifying the 'collectors_enabled' does not make sense",
+			)
+		}
+		if len(c.Global.CollectorsDisabled) > 0 {
+			return errors.New(
+				"global.collectors_default is set to 'standard', specifying the 'collectors_disabled' does not make sense",
+			)
+		}
+	}
+
 	if c.LDAP.ServerURL == "" {
 		return errors.New("configuration parameter ldap.server_url is required")
 	}
@@ -56,6 +95,15 @@ func (c *ExporterConfiguration) setDefaults() {
 	}
 	if c.Global.NumSubordinatesRecords == nil {
 		c.Global.NumSubordinatesRecords = []string{}
+	}
+	if c.Global.CollectorsDefault == "" {
+		c.Global.CollectorsDefault = CollectorsStandard
+	}
+	if c.Global.CollectorsEnabled == nil {
+		c.Global.CollectorsEnabled = []string{}
+	}
+	if c.Global.CollectorsDisabled == nil {
+		c.Global.CollectorsDisabled = []string{}
 	}
 
 	// --- HTTP ---
@@ -105,30 +153,7 @@ func (c *ExporterConfiguration) setDefaults() {
 // and returns it as a LdapConfiguration structure.
 func ReadConfig(configFilePath string) (ExporterConfiguration, error) {
 	yamlFile, err := os.ReadFile(configFilePath)
-	configuration := ExporterConfiguration{
-		Global: globalConfig{
-			ShutdownTimeout:        DefaultGlobalShutdownTimeout,
-			NumSubordinatesRecords: []string{},
-		},
-		HTTP: httpConfig{
-			ListenAddress:      DefaultHTTPListenAdderss,
-			MetricsPath:        DefaultHTTPMetricsPath,
-			ReadTimeout:        DefaultHTTPReadTimeout,
-			WriteTimeout:       DefaultHTTPWriteTimeout,
-			IdleTimeout:        DefaultHTTPIdleTimeout,
-			InitialReadTimeout: DefaultHTTPInitialReadTimeout,
-		},
-		LDAP: ldapConfig{
-			PoolConnLimit: DefaultLDAPPoolConnLimit,
-		},
-		Logging: loggingConfig{
-			Level:        DefaultLogLevel,
-			Handler:      DefaultLogHandler,
-			File:         DefaultLogFile,
-			StdoutFormat: DefaultLogStdoutFormat,
-			FileFormat:   DefaultLogFileFormat,
-		},
-	}
+	configuration := ExporterConfiguration{}
 
 	if err != nil {
 		return ExporterConfiguration{}, fmt.Errorf("unable to open configuration file: %w", err)

@@ -45,47 +45,12 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 			Help:     "Number of dirty pages forced from the cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"normalizeddncachetries": {
-			LdapName: "normalizeddncachetries",
-			Help:     "Total number of cache lookups since the instance was started",
-			Type:     prometheus.CounterValue,
-		},
-		"normalizeddncachehits": {
-			LdapName: "normalizeddncachehits",
-			Help:     "Normalized DNs found within the cache.",
-			Type:     prometheus.CounterValue,
-		},
-		"normalizeddncachemisses": {
-			LdapName: "normalizeddncachemisses",
-			Help:     "Normalized DNs not found within the cache",
-			Type:     prometheus.CounterValue,
-		},
-		"normalizeddncachehitratio": {
-			LdapName: "normalizeddncachehitratio",
-			Help:     "Percentage of the normalized DNs found in the cache",
-			Type:     prometheus.GaugeValue,
-		},
-		"currentnormalizeddncachesize": {
-			LdapName: "currentnormalizeddncachesize",
-			Help:     "Current size of the normalized DN cache in bytes",
-			Type:     prometheus.GaugeValue,
-		},
-		"maxnormalizeddncachesize": {
-			LdapName: "maxnormalizeddncachesize",
-			Help:     "Maximum size of NDn cache",
-			Type:     prometheus.GaugeValue,
-		},
-		"currentnormalizeddncachecount": {
-			LdapName: "currentnormalizeddncachecount",
-			Help:     "Number of normalized cached DNs",
-			Type:     prometheus.GaugeValue,
-		},
 	}
 }
 
-// GetLdapMDBServerCacheMetrics function returns a map
-// of specific for MDB backend attributes defining ldap server caches metrics.
-func GetLdapMDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
+// GetNdnCacheMetrics function returns a map
+// of server NDN cache metrics
+func GetNdnCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"normalizeddncachetries": {
 			LdapName: "normalizeddncachetries",

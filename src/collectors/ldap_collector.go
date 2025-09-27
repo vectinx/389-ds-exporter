@@ -44,10 +44,9 @@ type LdapMonitoredAttribute struct {
 	Labels   prometheus.Labels
 }
 
-// LdapCollector collects 389-ds metrics. It implements prometheus.Collector interface.
+// LdapCollector collects 389-ds metrics
 type LdapEntryCollector struct {
 	connectionPool *connections.LdapConnectionPool
-	namespace      string
 	baseDn         string
 	attributes     map[string]LdapMonitoredAttribute
 	descriptors    map[string]*prometheus.Desc
@@ -57,7 +56,7 @@ type LdapEntryCollector struct {
 
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
-	namespace string,
+	subsystem string,
 	connectionPool *connections.LdapConnectionPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
@@ -68,7 +67,7 @@ func NewLdapEntryCollector(
 
 	for key, val := range attributes {
 		metricsDescriptors[key] = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", key),
+			prometheus.BuildFQName(exporterNamespace, subsystem, key),
 			val.Help,
 			nil,
 			labels,
@@ -77,7 +76,6 @@ func NewLdapEntryCollector(
 
 	return &LdapEntryCollector{
 		connectionPool: connectionPool,
-		namespace:      namespace,
 		baseDn:         entryBaseDn,
 		attributes:     attributes,
 		descriptors:    metricsDescriptors,
@@ -85,25 +83,16 @@ func NewLdapEntryCollector(
 	}
 }
 
-// Describe function sends the super-set of all possible descriptors of LDAP metrics
-// to the provided channel.
-func (c *LdapEntryCollector) Describe(channel chan<- *prometheus.Desc) {
-	for _, descriptor := range c.descriptors {
-		channel <- descriptor
-	}
-}
-
-// Collect function fetches metrics from LDAP and sends them to the provided channel.
-func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
+// Get function fetches metrics from LDAP and sends them to the provided channel.
+func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
-		slog.Warn("Failed to get attrs from ldap", "err", err)
-
-		return
+		return fmt.Errorf("error getting attrs from LDAP: %w", err)
 	}
+	var result error = nil
 
 	for key, value := range c.attributes {
 		attributeValues, ok := ldapEntries[value.LdapName]
@@ -122,8 +111,20 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		if value.LdapType == Iso8601CompactString {
 			parsedTime, err := time.Parse(dateTimeLayout, attributeValues[0])
 			if err != nil {
-				slog.Error("Error parsing date from ldap", "attr_name", key, "attr_value", attributeValues[0], "err", err)
+				slog.Debug(
+					"Error converting date to type float64",
+					"attr_name",
+					key,
+					"attr_value",
+					attributeValues[0],
+					"err",
+					err,
+				)
 
+				result = fmt.Errorf(
+					"error converting attribute value to float64: %w",
+					err,
+				)
 				continue
 			}
 
@@ -131,14 +132,17 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		} else {
 			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
 			if err != nil {
-				slog.Error(
-					"Unable to convert attribute value to type float64",
+				slog.Debug(
+					"Error converting attribute value to type float64",
 					"attr_name",
 					key,
 					"attr_value",
 					ldapEntries[value.LdapName],
 				)
-
+				result = fmt.Errorf(
+					"error converting attribute value to float64: %w",
+					err,
+				)
 				continue
 			}
 		}
@@ -146,6 +150,7 @@ func (c *LdapEntryCollector) Collect(channel chan<- prometheus.Metric) {
 		channel <- prometheus.MustNewConstMetric(c.descriptors[key],
 			c.attributes[key].Type, converted)
 	}
+	return result
 }
 
 // getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap.
@@ -168,9 +173,10 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		nil,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	conn, err := c.connectionPool.Get(ctx)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connection from pool: %w", err)
 	}
