@@ -54,7 +54,7 @@ func GetNdnCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"normalizeddncachetries": {
 			LdapName: "normalizeddncachetries",
-			Help:     "Total number of cache lookups since the instance was started",
+			Help:     "Total number of cache lookups since the server was started",
 			Type:     prometheus.GaugeValue,
 		},
 		"normalizeddncachehits": {

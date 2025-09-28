@@ -31,7 +31,7 @@ func GetLdapServerSnmpMetrics() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"bindsecurityerrors": {
 			LdapName: "bindsecurityerrors",
-			Help:     "Number of number of times an invalid password was given in a bind request.",
+			Help:     "Number of times an invalid password was given in a bind request.",
 			Type:     prometheus.CounterValue,
 		},
 		"compareops": {
