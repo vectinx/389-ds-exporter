@@ -94,7 +94,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "connections"
+              "options": "Established"
             },
             "properties": [
               {
@@ -144,7 +144,7 @@
           "expr": "ds_server_currentconnections{job=\"$job\", instance=\"$node\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "connections",
+          "legendFormat": "Established",
           "range": true,
           "refId": "Current connections",
           "useBackend": false
@@ -439,6 +439,7 @@
         "type": "prometheus",
         "uid": "${Datasource}"
       },
+      "description": "Number of bind operations split by bind type",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -492,7 +493,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "strongauth binds"
+              "options": "Strong auth"
             },
             "properties": [
               {
@@ -507,7 +508,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "simipleauth bind"
+              "options": "Simiple auth"
             },
             "properties": [
               {
@@ -522,7 +523,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "unauth binds"
+              "options": "Unauth"
             },
             "properties": [
               {
@@ -537,7 +538,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "anonymous binds"
+              "options": "Anonymous"
             },
             "properties": [
               {
@@ -589,7 +590,7 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "strongauth binds",
+          "legendFormat": "Strong auth",
           "range": true,
           "refId": "Strong",
           "useBackend": false
@@ -606,7 +607,7 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "simipleauth bind",
+          "legendFormat": "Simiple auth",
           "range": true,
           "refId": "Simple",
           "useBackend": false
@@ -623,7 +624,7 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "unauth binds",
+          "legendFormat": "Unauth",
           "range": true,
           "refId": "Unauth",
           "useBackend": false
@@ -640,13 +641,13 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "anonymous binds",
+          "legendFormat": "Anonymous",
           "range": true,
           "refId": "Anonymous",
           "useBackend": false
         }
       ],
-      "title": "Binds rate",
+      "title": "Binds",
       "type": "timeseries"
     },
     {
@@ -664,6 +665,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Averate number of operations per second executed by server",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -716,7 +718,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "initiated"
+                  "options": "Initiated"
                 },
                 "properties": [
                   {
@@ -731,7 +733,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "completed"
+                  "options": "Completed"
                 },
                 "properties": [
                   {
@@ -749,7 +751,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 22
+            "y": 14
           },
           "id": 26,
           "options": {
@@ -780,7 +782,7 @@
               "expr": "rate(ds_server_opscompleted{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "completed",
+              "legendFormat": "Completed",
               "range": true,
               "refId": "Completed"
             },
@@ -791,12 +793,12 @@
               },
               "editorMode": "code",
               "expr": "rate(ds_server_opsinitiated{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
-              "legendFormat": "initiated",
+              "legendFormat": "Initiated",
               "range": true,
               "refId": "Initiated"
             }
           ],
-          "title": "Initiated/Completed LDAP requests rate",
+          "title": "LDAP operations rate",
           "type": "timeseries"
         },
         {
@@ -804,6 +806,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average number of operations per second performed by the server per second, split by operation type",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -860,7 +863,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "modify"
+                  "options": "Modify"
                 },
                 "properties": [
                   {
@@ -875,7 +878,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "add"
+                  "options": "Add"
                 },
                 "properties": [
                   {
@@ -890,7 +893,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "remove"
+                  "options": "Remove"
                 },
                 "properties": [
                   {
@@ -905,13 +908,28 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "modifyrdn"
+                  "options": "Modifyrdn"
                 },
                 "properties": [
                   {
                     "id": "color",
                     "value": {
                       "fixedColor": "orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Search"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
                       "mode": "fixed"
                     }
                   }
@@ -923,7 +941,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 22
+            "y": 14
           },
           "id": 30,
           "options": {
@@ -955,7 +973,7 @@
               "expr": "rate(ds_snmp_server_searchops{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "search",
+              "legendFormat": "Search",
               "range": true,
               "refId": "Search",
               "useBackend": false
@@ -969,7 +987,7 @@
               "expr": "rate(ds_snmp_server_modifyentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "modify",
+              "legendFormat": "Modify",
               "range": true,
               "refId": "Modify"
             },
@@ -982,7 +1000,7 @@
               "expr": "rate(ds_snmp_server_addentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "add",
+              "legendFormat": "Add",
               "range": true,
               "refId": "Add"
             },
@@ -995,7 +1013,7 @@
               "expr": "rate(ds_snmp_server_removeentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "remove",
+              "legendFormat": "Remove",
               "range": true,
               "refId": "Remove"
             },
@@ -1008,12 +1026,12 @@
               "expr": "rate(ds_snmp_server_modifyrdnops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "modifyrdn",
+              "legendFormat": "Modify RDN",
               "range": true,
               "refId": "ModifyRDN"
             }
           ],
-          "title": "LDAP Requests rate",
+          "title": "LDAP requests rate",
           "type": "timeseries"
         },
         {
@@ -1021,6 +1039,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average number of records per second sent by the server to clients",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1092,7 +1111,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 29
+            "y": 21
           },
           "id": 27,
           "options": {
@@ -1121,7 +1140,7 @@
               },
               "editorMode": "code",
               "expr": "rate(ds_server_entriessent{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
-              "legendFormat": "data sent",
+              "legendFormat": "Sent",
               "range": true,
               "refId": "Entries sent"
             }
@@ -1134,6 +1153,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Connections with some requests waiting, not currently served by a server thread",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1187,7 +1207,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "read waiters"
+                  "options": "Count"
                 },
                 "properties": [
                   {
@@ -1205,7 +1225,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 29
+            "y": 21
           },
           "id": 33,
           "options": {
@@ -1235,7 +1255,7 @@
               "editorMode": "code",
               "expr": "ds_server_readwaiters{job=\"$job\", instance=\"$node\"}",
               "instant": false,
-              "legendFormat": "read waiters",
+              "legendFormat": "Count",
               "range": true,
               "refId": "A"
             }
@@ -1248,10 +1268,11 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average amount of data sent by the server per second",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "semi-dark-orange",
+                "fixedColor": "text",
                 "mode": "fixed"
               },
               "custom": {
@@ -1302,7 +1323,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "data sent"
+                  "options": "Bytes"
                 },
                 "properties": [
                   {
@@ -1313,6 +1334,30 @@
                     }
                   }
                 ]
+              },
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "Bytes"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1320,7 +1365,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 36
+            "y": 28
           },
           "id": 28,
           "options": {
@@ -1349,7 +1394,7 @@
               },
               "editorMode": "code",
               "expr": "rate(ds_server_bytessent{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
-              "legendFormat": "data sent",
+              "legendFormat": "Bytes",
               "range": true,
               "refId": "Sent"
             }
@@ -1362,6 +1407,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average number of returned security-related errors, such as wrong passwords, invalid authentication methods, or higher security requirements",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1406,10 +1452,6 @@
                 "steps": [
                   {
                     "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               }
@@ -1418,7 +1460,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "errors"
+                  "options": "Errors"
                 },
                 "properties": [
                   {
@@ -1433,7 +1475,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "security errors"
+                  "options": "Security errors"
                 },
                 "properties": [
                   {
@@ -1451,7 +1493,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 36
+            "y": 28
           },
           "id": 32,
           "options": {
@@ -1483,7 +1525,7 @@
               "expr": "rate(ds_snmp_server_errors{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "errors",
+              "legendFormat": "Errors",
               "range": true,
               "refId": "Errors",
               "useBackend": false
@@ -1500,7 +1542,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "security errors",
+              "legendFormat": "Security errors",
               "range": true,
               "refId": "Security errors",
               "useBackend": false
@@ -1528,6 +1570,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Available and used cache sizes of normalized DNs",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1581,7 +1624,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Total"
+                  "options": "Available"
                 },
                 "properties": [
                   {
@@ -1607,36 +1650,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "total"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "green",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "used"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "yellow",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
               }
             ]
           },
@@ -1644,7 +1657,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 23
+            "y": 15
           },
           "id": 18,
           "options": {
@@ -1672,15 +1685,15 @@
                 "uid": "${Datasource}"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "expr": "ds_ldbm_maxnormalizeddncachesize{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "total",
+              "legendFormat": "Available",
               "range": true,
-              "refId": "Total",
+              "refId": "Available",
               "useBackend": false
             },
             {
@@ -1689,11 +1702,11 @@
                 "uid": "${Datasource}"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "expr": "ds_ldbm_currentnormalizeddncachesize{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "used",
+              "legendFormat": "Used",
               "range": true,
               "refId": "Used",
               "useBackend": false
@@ -1707,6 +1720,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of normalized DN cache lookups per second",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1759,7 +1773,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "tries"
+                  "options": "Tries"
                 },
                 "properties": [
                   {
@@ -1774,7 +1788,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "hits"
+                  "options": "Hits"
                 },
                 "properties": [
                   {
@@ -1792,7 +1806,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 23
+            "y": 15
           },
           "id": 21,
           "options": {
@@ -1824,7 +1838,7 @@
               "expr": "rate(ds_ldbm_normalizeddncachetries{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "tries",
+              "legendFormat": "Tries",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -1841,7 +1855,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "hits",
+              "legendFormat": "Hits",
               "range": true,
               "refId": "B",
               "useBackend": false
@@ -1855,6 +1869,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Cache hit ratio",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1954,7 +1969,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 23
+            "y": 15
           },
           "id": 19,
           "options": {
@@ -1983,12 +1998,12 @@
               },
               "editorMode": "code",
               "expr": "ds_ldbm_normalizeddncachehitratio{job=\"$job\",instance=\"$node\"}",
-              "legendFormat": "hit ratio",
+              "legendFormat": "Hit ratio",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Normalized DN cache hit ratio (%)",
+          "title": "Normalized DN cache efficiency",
           "type": "timeseries"
         }
       ],
@@ -2127,7 +2142,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 24
+            "y": 16
           },
           "id": 4,
           "options": {
@@ -2306,7 +2321,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 24
+            "y": 16
           },
           "id": 8,
           "options": {
@@ -2445,7 +2460,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 24
+            "y": 16
           },
           "id": 11,
           "options": {
@@ -2582,7 +2597,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 32
+            "y": 24
           },
           "id": 10,
           "options": {
@@ -2734,7 +2749,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 32
+            "y": 24
           },
           "id": 13,
           "options": {
@@ -2889,7 +2904,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 32
+            "y": 24
           },
           "id": 12,
           "options": {
@@ -2951,6 +2966,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Available and used DB cache sizes",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2994,8 +3010,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3009,7 +3024,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "total"
+                  "options": "Available"
                 },
                 "properties": [
                   {
@@ -3024,7 +3039,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "used"
+                  "options": "Used"
                 },
                 "properties": [
                   {
@@ -3072,9 +3087,9 @@
               "expr": "ds_bdb_cache_size_bytes{job=\"$job\", instance=\"$node\"}",
               "hide": false,
               "instant": false,
-              "legendFormat": "total",
+              "legendFormat": "Available",
               "range": true,
-              "refId": "Total"
+              "refId": "Available"
             },
             {
               "datasource": {
@@ -3088,7 +3103,7 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "used",
+              "legendFormat": "Used",
               "range": true,
               "refId": "Used",
               "useBackend": false
@@ -3102,10 +3117,11 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Cache hit ratio",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "fixed"
               },
               "custom": {
                 "axisBorderShow": true,
@@ -3146,12 +3162,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
+                    "color": "green"
                   }
                 ]
               },
@@ -3161,7 +3172,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "hit ratio"
+                  "options": "Hit ratio"
                 },
                 "properties": [
                   {
@@ -3210,13 +3221,13 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "hit ratio",
+              "legendFormat": "Hit ratio",
               "range": true,
               "refId": "Hit ratio",
               "useBackend": false
             }
           ],
-          "title": "DB cache hit ratio (%)",
+          "title": "DB cache efficiency",
           "type": "timeseries"
         },
         {
@@ -3224,6 +3235,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of DB cache lookups per second",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3267,8 +3279,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3281,7 +3292,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "hits"
+                  "options": "Hits"
                 },
                 "properties": [
                   {
@@ -3296,7 +3307,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "tries"
+                  "options": "Tries"
                 },
                 "properties": [
                   {
@@ -3343,7 +3354,7 @@
               "expr": "rate(ds_bdb_dbcachetries{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
-              "legendFormat": "tries",
+              "legendFormat": "Tries",
               "range": true,
               "refId": "Tries"
             },
@@ -3358,7 +3369,7 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "hits",
+              "legendFormat": "Hits",
               "range": true,
               "refId": "Hits",
               "useBackend": false
@@ -3372,6 +3383,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of pages in the database cache",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3415,8 +3427,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3430,7 +3441,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "clean"
+                  "options": "Clean"
                 },
                 "properties": [
                   {
@@ -3445,7 +3456,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "dirty"
+                  "options": "Dirty"
                 },
                 "properties": [
                   {
@@ -3495,7 +3506,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "clean",
+              "legendFormat": "Clean",
               "range": true,
               "refId": "Clean",
               "useBackend": false
@@ -3511,7 +3522,7 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "dirty",
+              "legendFormat": "Dirty",
               "range": true,
               "refId": "Dirty",
               "useBackend": false
@@ -3525,6 +3536,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of cache pages evicted per second",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3568,8 +3580,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3583,7 +3594,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "clean"
+                  "options": "Clean"
                 },
                 "properties": [
                   {
@@ -3598,7 +3609,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "dirty"
+                  "options": "Dirty"
                 },
                 "properties": [
                   {
@@ -3647,7 +3658,7 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "clean",
+              "legendFormat": "Clean",
               "range": true,
               "refId": "Clean",
               "useBackend": false
@@ -3664,13 +3675,13 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "dirty",
+              "legendFormat": "Dirty",
               "range": true,
               "refId": "Dirty",
               "useBackend": false
             }
           ],
-          "title": "DB cache pages eviction",
+          "title": "DB cache pages eviction rate",
           "type": "timeseries"
         },
         {
@@ -3678,6 +3689,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average number of dirty pages written to disk per second by Berkeley DB using memp_trickle",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3721,8 +3733,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3736,22 +3747,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "clean"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "green",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "dirty"
+                  "options": "Pages"
                 },
                 "properties": [
                   {
@@ -3801,13 +3797,13 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "pages",
+              "legendFormat": "Pages",
               "range": true,
               "refId": "Trickle",
               "useBackend": false
             }
           ],
-          "title": "DB cache dirty pages written by memp_trickle",
+          "title": "DB dirty pages trickle rate",
           "type": "timeseries"
         },
         {
@@ -3815,6 +3811,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of transactions performed by server per second",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3858,8 +3855,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3873,7 +3869,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "committed"
+                  "options": "Committed"
                 },
                 "properties": [
                   {
@@ -3888,7 +3884,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "aborted"
+                  "options": "Aborted"
                 },
                 "properties": [
                   {
@@ -3937,7 +3933,7 @@
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "committed",
+              "legendFormat": "Committed",
               "range": true,
               "refId": "Committed",
               "useBackend": false
@@ -3954,7 +3950,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "aborted",
+              "legendFormat": "Aborted",
               "range": true,
               "refId": "Aborted",
               "useBackend": false
@@ -3968,6 +3964,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of transactions currently active and used by the database",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4011,8 +4008,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4067,7 +4063,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_active_txns{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "ds_bdb_active_txns{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -4085,6 +4081,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of avaliable and used database locks, lock objects and lockers",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4128,8 +4125,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4139,7 +4135,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "current"
+                  "options": "Current lockers"
                 },
                 "properties": [
                   {
@@ -4154,13 +4150,43 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "configured"
+                  "options": "Current locks"
                 },
                 "properties": [
                   {
                     "id": "color",
                     "value": {
-                      "fixedColor": "green",
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Lock objects"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "super-light-orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Available locks"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "super-light-blue",
                       "mode": "fixed"
                     }
                   }
@@ -4197,15 +4223,28 @@
                 "type": "prometheus",
                 "uid": "${Datasource}"
               },
+              "editorMode": "code",
+              "expr": "ds_bdb_lockers{job=\"$job\", instance=\"$node\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Current lockers",
+              "range": true,
+              "refId": "Current lockers"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
               "disableTextWrap": false,
               "editorMode": "code",
               "expr": "ds_bdb_current_locks{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "current",
+              "legendFormat": "Current locks",
               "range": true,
-              "refId": "Current",
+              "refId": "Current locks",
               "useBackend": false
             },
             {
@@ -4214,12 +4253,26 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
+              "expr": "ds_bdb_current_lock_objects{job=\"$job\", instance=\"$node\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Lock objects",
+              "range": true,
+              "refId": "Currenet lock objects"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
               "expr": "ds_bdb_configured_locks{job=\"$job\", instance=\"$node\"}",
               "hide": false,
               "instant": false,
-              "legendFormat": "configured",
+              "legendFormat": "Available locks",
               "range": true,
-              "refId": "Configured"
+              "refId": "Avaliable locks"
             }
           ],
           "title": "Locks",
@@ -4230,6 +4283,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Number of lock requests, lock conflicts, and deadlocks",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4273,8 +4327,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4284,241 +4337,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "lockers"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "green",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 49
-          },
-          "id": 45,
-          "options": {
-            "legend": {
-              "calcs": [
-                "lastNotNull",
-                "max",
-                "mean"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${Datasource}"
-              },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "ds_bdb_lockers{job=\"$job\", instance=\"$node\"}",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "lockers",
-              "range": true,
-              "refId": "Lockers",
-              "useBackend": false
-            }
-          ],
-          "title": "Lockers",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${Datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": true,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 25,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "lock objects"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "green",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 57
-          },
-          "id": 46,
-          "options": {
-            "legend": {
-              "calcs": [
-                "lastNotNull",
-                "max",
-                "mean"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${Datasource}"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "ds_bdb_current_lock_objects{job=\"$job\", instance=\"$node\"}",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "lock objects",
-              "range": true,
-              "refId": "Lockers",
-              "useBackend": false
-            }
-          ],
-          "title": "Lock objects",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${Datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": true,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 25,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "requested"
+                  "options": "Requested"
                 },
                 "properties": [
                   {
@@ -4533,7 +4352,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "deadlocks"
+                  "options": "Deadlocks"
                 },
                 "properties": [
                   {
@@ -4548,7 +4367,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "conflicts"
+                  "options": "Conflicts"
                 },
                 "properties": [
                   {
@@ -4566,7 +4385,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 57
+            "y": 49
           },
           "id": 42,
           "options": {
@@ -4598,7 +4417,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "requested",
+              "legendFormat": "Requested",
               "range": true,
               "refId": "Requested",
               "useBackend": false
@@ -4615,7 +4434,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "conflicts",
+              "legendFormat": "Conflicts",
               "range": true,
               "refId": "Conflicts",
               "useBackend": false
@@ -4632,13 +4451,13 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "deadlocks",
+              "legendFormat": "Deadlocks",
               "range": true,
               "refId": "Deadlocks",
               "useBackend": false
             }
           ],
-          "title": "Locks rate",
+          "title": "Locks request rate",
           "type": "timeseries"
         },
         {
@@ -4646,6 +4465,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "Average amount of data written to the transaction log per second",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4689,8 +4509,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4718,7 +4537,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 65
+            "y": 57
           },
           "id": 44,
           "options": {
@@ -4744,13 +4563,13 @@
                 "uid": "${Datasource}"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "expr": "rate(ds_bdb_log_write_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "rate",
+              "legendFormat": "Written",
               "range": true,
               "refId": "Logwrite",
               "useBackend": false
@@ -4764,6 +4583,7 @@
             "type": "prometheus",
             "uid": "${Datasource}"
           },
+          "description": "The number of times threads were forced to wait to acquire a region lock per second, split by region type",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4807,8 +4627,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4818,7 +4637,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "lock"
+                  "options": "Lock"
                 },
                 "properties": [
                   {
@@ -4833,7 +4652,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "cache"
+                  "options": "Cache"
                 },
                 "properties": [
                   {
@@ -4848,7 +4667,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "log"
+                  "options": "Log"
                 },
                 "properties": [
                   {
@@ -4863,7 +4682,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "txn"
+                  "options": "Txn"
                 },
                 "properties": [
                   {
@@ -4881,7 +4700,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 65
+            "y": 57
           },
           "id": 43,
           "options": {
@@ -4913,7 +4732,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "lock",
+              "legendFormat": "Lock",
               "range": true,
               "refId": "Lock",
               "useBackend": false
@@ -4930,7 +4749,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "cache",
+              "legendFormat": "Cache",
               "range": true,
               "refId": "Cache",
               "useBackend": false
@@ -4947,7 +4766,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "log",
+              "legendFormat": "Log",
               "range": true,
               "refId": "Log",
               "useBackend": false
@@ -4964,7 +4783,7 @@
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "txn",
+              "legendFormat": "Txn",
               "range": true,
               "refId": "Txn",
               "useBackend": false
@@ -4975,6 +4794,212 @@
         }
       ],
       "title": "Berkeley DB",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 50,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "description": "Time of receipt of metrics by collectors",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": true,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 24,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ns"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 18
+          },
+          "id": 51,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "ds_scrape_duration_nanoseconds{job=\"$job\", instance=\"$node\"}",
+              "instant": false,
+              "legendFormat": "{{collector}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Scrape duration",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${Datasource}"
+          },
+          "description": "Success rate of collecting metrics by collectors. 1 - successful, 0 - unsuccessful",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": true,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 24,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 18
+          },
+          "id": 52,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Datasource}"
+              },
+              "editorMode": "code",
+              "expr": "ds_scrape_success{job=\"$job\", instance=\"$node\"}",
+              "instant": false,
+              "legendFormat": "{{collector}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Scrape success",
+          "type": "timeseries"
+        }
+      ],
+      "title": "389-ds-exporter",
       "type": "row"
     }
   ],
@@ -5014,7 +5039,7 @@
           "query": "label_values(up,job)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -5025,7 +5050,7 @@
           "type": "prometheus",
           "uid": "${Datasource}"
         },
-        "definition": "label_values(ds_server_threads{job=\"$job\"},instance)",
+        "definition": "label_values(ds_scrape_success{job=\"$job\"},instance)",
         "hide": 0,
         "includeAll": false,
         "label": "node",
@@ -5034,10 +5059,10 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(ds_server_threads{job=\"$job\"},instance)",
+          "query": "label_values(ds_scrape_success{job=\"$job\"},instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -5060,7 +5085,7 @@
           "query": "label_values(ds_ldbm_instance_maxdncachesize{job=\"$job\", instance=\"$node\"},database)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
