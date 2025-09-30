@@ -106,7 +106,7 @@ func SetupPrometheusMetrics(
 		)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), connPoolTimeout)
 	defer cancel()
 	conn, err := connPool.Get(ctx)
 	if err != nil {
@@ -144,7 +144,7 @@ func SetupPrometheusMetrics(
 	if err != nil {
 		slog.Warn("Error getting backend implementation type", "err", err)
 	} else {
-		switch backendImplement {
+		switch *backendImplement {
 		case config.BackendBDB:
 
 			slog.Info("Berkeley DB backend implementation detected")

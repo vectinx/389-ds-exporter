@@ -12,7 +12,10 @@ import (
 )
 
 // GetLdapBackendType gets backend parameters from ldap and returns them as a BackendType.
-func GetLdapBackendType(conn *connections.PooledConn) (config.BackendType, error) {
+func GetLdapBackendType(conn *connections.PooledConn) (*config.BackendType, error) {
+	if conn == nil {
+		return nil, errors.New("connection is nil")
+	}
 	searchAttributesRequest := ldap.NewSearchRequest(
 		"cn=config,cn=ldbm database,cn=plugins,cn=config",
 		ldap.ScopeBaseObject,
@@ -27,9 +30,11 @@ func GetLdapBackendType(conn *connections.PooledConn) (config.BackendType, error
 
 	searchResult, err := conn.Search(searchAttributesRequest)
 	if err != nil {
-		return "", fmt.Errorf("error determining backend type: %w", err)
+		return nil, fmt.Errorf("error determining backend type: %w", err)
 	}
-	return config.BackendType(searchResult.Entries[0].GetAttributeValue("nsslapd-backend-implement")), nil
+
+	result := searchResult.Entries[0].GetAttributeValue("nsslapd-backend-implement")
+	return (*config.BackendType)(&result), nil
 }
 
 // GetLdapBackendInstances gets backend instances from ldap and returns them as []string.
