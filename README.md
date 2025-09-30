@@ -6,11 +6,11 @@ A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol
 
 ## Features
 - More than 80 metrics from the 389-ds server
-- Collects metrics from LDAP entry attributes in various formats
-- Counts subordinates of LDAP entries
-- Configurable via YAML configuration file
-- Supports 389-ds version 2.3 and higher
-- Supports Berkeley DB and LMDB backends of the 389-ds server
+- Support for 389-ds version 2.3 and higher
+- Support for Berkeley DB and LMDB backends of the 389-ds server
+- Minimal load on the LDAP directory thanks to connection reuse via LDAP pool
+- Configuration via YAML
+- Ready-to-use dashboard included
 
 ## Quick Start
 
@@ -28,6 +28,9 @@ cd 389-ds-exporter
 
 # Build the 389-ds-exporter binary
 make build
+
+# Build the docker image
+make docker
 ```
 
 ### Run with Docker
@@ -60,7 +63,7 @@ docker logs 389-ds-exporter
 
 The CLI is self-documented and available via the `-h` (`--help`) option:
 ```bash
-bash$ 389-ds-exporter --help
+389-ds-exporter --help
 usage: 389-ds-exporter [<flags>]
 
 Flags:
