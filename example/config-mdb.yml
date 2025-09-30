@@ -1,14 +1,10 @@
 ---
-global:
-  collectors_default: all
-  ds_numsubordinate_records:
+collectors_default: all
+ds_numsubordinate_records:
     - "dc=example,dc=com"
-http:
-  listen_address: "0.0.0.0:9389"
-ldap:
-  server_url: "ldap://389ds-mdb:3389"
-  bind_dn: "cn=directory manager"
-  bind_pw: "12345678"
-log:
-  level: DEBUG
-  handler: stdout
+http_listen_address: "0.0.0.0:9389"
+ldap_server_url: "ldap://389ds-mdb:3389"
+ldap_bind_dn: "cn=directory manager"
+ldap_bind_pw: "12345678"
+log_level: DEBUG
+log_handler: stdout

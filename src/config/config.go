@@ -89,6 +89,7 @@ type rawConfig struct {
 	LogFileFormat   *string `yaml:"log_file_format"`
 }
 
+//nolint:gocognit
 func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg := &ExporterConfig{}
 
@@ -249,7 +250,8 @@ func ReadConfig(filename string) (*ExporterConfig, error) {
 	}
 
 	var raw rawConfig
-	if err := yaml.Unmarshal(data, &raw); err != nil {
+	err = yaml.Unmarshal(data, &raw)
+	if err != nil {
 		return nil, err
 	}
 

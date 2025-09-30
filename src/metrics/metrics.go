@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"slices"
 	"time"
@@ -84,7 +83,7 @@ func SetupPrometheusMetrics(
 	if collectorEnabled(cfg, "numsubordinates") {
 		slog.Debug("Registering collector", "collector", "numsubordinates")
 		for _, entry := range cfg.NumSubordinateRecords {
-			dsCollector.Register(fmt.Sprintf("numsubordinates_%s", entry), collectors.NewLdapEntryCollector(
+			dsCollector.Register("numsubordinates_%s"+entry, collectors.NewLdapEntryCollector(
 				"numsubordinates",
 				connPool,
 				entry,
@@ -126,7 +125,7 @@ func SetupPrometheusMetrics(
 			slog.Debug("Registering collector", "collector", "ldbm-instance")
 			for _, instance := range backendInstances {
 				slog.Info("Registeing metrics for backend instance", "instance", instance)
-				dsCollector.Register(fmt.Sprintf("ldbm-instance_%s", instance), collectors.NewLdapEntryCollector(
+				dsCollector.Register("ldbm-instance_"+instance, collectors.NewLdapEntryCollector(
 					"ldbm_instance",
 					connPool,
 					"cn=monitor,cn="+instance+",cn=ldbm database,cn=plugins,cn=config",

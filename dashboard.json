@@ -4859,7 +4859,7 @@
                   }
                 ]
               },
-              "unit": "ns"
+              "unit": "s"
             },
             "overrides": []
           },
@@ -4893,7 +4893,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_scrape_duration_nanoseconds{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_scrape_duration_seconds{job=\"$job\", instance=\"$node\"}",
               "instant": false,
               "legendFormat": "{{collector}}",
               "range": true,

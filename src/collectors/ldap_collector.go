@@ -44,7 +44,7 @@ type LdapMonitoredAttribute struct {
 	Labels   prometheus.Labels
 }
 
-// LdapCollector collects 389-ds metrics
+// LdapCollector collects 389-ds metrics.
 type LdapEntryCollector struct {
 	connectionPool *connections.LdapConnectionPool
 	baseDn         string

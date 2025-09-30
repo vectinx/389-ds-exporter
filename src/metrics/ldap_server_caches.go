@@ -49,7 +49,7 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 }
 
 // GetNdnCacheMetrics function returns a map
-// of server NDN cache metrics
+// of server NDN cache metrics.
 func GetNdnCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"normalizeddncachetries": {

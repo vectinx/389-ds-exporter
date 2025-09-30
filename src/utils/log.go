@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"os"
 
-	"389-ds-exporter/src/config"
-
 	slogmulti "github.com/samber/slog-multi"
+
+	"389-ds-exporter/src/config"
 )
 
 const LogFileMode os.FileMode = 0o644

@@ -12,13 +12,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/connections"
 	"389-ds-exporter/src/metrics"
 	"389-ds-exporter/src/utils"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
