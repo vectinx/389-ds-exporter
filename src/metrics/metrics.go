@@ -19,24 +19,27 @@ func standardCollectors() []string {
 	return []string{
 		"server",
 		"snmp-server",
+		"ndn-cache",
+		"ldbm-instance",
 		"numsubordinates",
 	}
 }
 
-func collectorEnabled(cfg *config.ExporterConfiguration, collector string) bool {
-	if cfg.Global.CollectorsDefault == "all" {
-		if !slices.Contains(cfg.Global.CollectorsDisabled, collector) {
-			return true
-		}
-	}
-	if cfg.Global.CollectorsDefault == "disabled" {
-		if slices.Contains(cfg.Global.CollectorsEnabled, collector) {
-			return true
-		}
+func collectorEnabled(cfg *config.ExporterConfig, collector string) bool {
+	if cfg.CollectorsDefault == "all" {
+		return true
 	}
 
-	if cfg.Global.CollectorsDefault == "standard" {
-		if slices.Contains(standardCollectors(), collector) {
+	if cfg.CollectorsDefault == "none" &&
+		slices.Contains(cfg.CollectorsEnabled, collector) {
+
+		return true
+	}
+
+	if cfg.CollectorsDefault == "standard" {
+		if slices.Contains(cfg.CollectorsEnabled, collector) ||
+			slices.Contains(standardCollectors(), collector) {
+
 			return true
 		}
 	}
@@ -45,7 +48,7 @@ func collectorEnabled(cfg *config.ExporterConfiguration, collector string) bool 
 
 // SetupPrometheusMetrics creates *prometheus.Registry, adds the required metrics and returns it.
 func SetupPrometheusMetrics(
-	cfg *config.ExporterConfiguration,
+	cfg *config.ExporterConfig,
 	connPool *connections.LdapConnectionPool,
 	connPoolTimeout time.Duration,
 ) *prometheus.Registry {
@@ -80,7 +83,7 @@ func SetupPrometheusMetrics(
 
 	if collectorEnabled(cfg, "numsubordinates") {
 		slog.Debug("Registering collector", "collector", "numsubordinates")
-		for _, entry := range cfg.Global.NumSubordinatesRecords {
+		for _, entry := range cfg.NumSubordinateRecords {
 			dsCollector.Register(fmt.Sprintf("numsubordinates_%s", entry), collectors.NewLdapEntryCollector(
 				"numsubordinates",
 				connPool,
@@ -93,8 +96,8 @@ func SetupPrometheusMetrics(
 		}
 	}
 
-	slog.Debug("Registering collector", "collector", "ndn-cache")
 	if collectorEnabled(cfg, "ndn-cache") {
+		slog.Debug("Registering collector", "collector", "ndn-cache")
 		dsCollector.Register("ndn-cache", collectors.NewLdapEntryCollector(
 			"ldbm",
 			connPool,

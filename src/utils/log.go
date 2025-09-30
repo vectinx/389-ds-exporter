@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"os"
 
-	slogmulti "github.com/samber/slog-multi"
-
 	"389-ds-exporter/src/config"
+
+	slogmulti "github.com/samber/slog-multi"
 )
 
 const LogFileMode os.FileMode = 0o644
@@ -18,21 +18,21 @@ const LogFileMode os.FileMode = 0o644
 func BuildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler {
 	switch format {
 	case "text":
-		return slog.NewTextHandler(w, &slog.HandlerOptions{AddSource: true, Level: level})
+		return slog.NewTextHandler(w, &slog.HandlerOptions{AddSource: false, Level: level})
 	case "json":
-		return slog.NewJSONHandler(w, &slog.HandlerOptions{AddSource: true, Level: level})
+		return slog.NewJSONHandler(w, &slog.HandlerOptions{AddSource: false, Level: level})
 	}
 
 	return slog.Default().Handler()
 }
 
 // SetupLogger creates a logger based on the provided configuration.
-func SetupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, error) {
+func SetupLogger(cfg *config.ExporterConfig) (*slog.Logger, *os.File, error) {
 	var logLevel slog.Level
 	handlers := []slog.Handler{}
 	var logFile *os.File
 
-	strLogLevel := cfg.Logging.Level
+	strLogLevel := cfg.LogLevel
 	levelMap := map[string]slog.Level{
 		"DEBUG":   slog.LevelDebug,
 		"INFO":    slog.LevelInfo,
@@ -45,16 +45,16 @@ func SetupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 		return nil, nil, fmt.Errorf("unknown logging level: '%s'", strLogLevel)
 	}
 
-	if cfg.Logging.Handler == "stdout" || cfg.Logging.Handler == "both" {
-		handlers = append(handlers, BuildLogHandler(cfg.Logging.StdoutFormat, os.Stdout, logLevel))
+	if cfg.LogHandler == "stdout" || cfg.LogHandler == "both" {
+		handlers = append(handlers, BuildLogHandler(cfg.LogStdoutFormat, os.Stdout, logLevel))
 	}
-	if cfg.Logging.Handler == "file" || cfg.Logging.Handler == "both" {
+	if cfg.LogHandler == "file" || cfg.LogHandler == "both" {
 		var err error
-		logFile, err = os.OpenFile(cfg.Logging.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
+		logFile, err = os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error opening log file: %w", err)
 		}
-		handlers = append(handlers, BuildLogHandler(cfg.Logging.FileFormat, logFile, logLevel))
+		handlers = append(handlers, BuildLogHandler(cfg.LogFileFormat, logFile, logLevel))
 	}
 
 	if len(handlers) == 0 {
@@ -67,12 +67,12 @@ func SetupLogger(cfg *config.ExporterConfiguration) (*slog.Logger, *os.File, err
 }
 
 // ReopenLogFile reopens the log file. This function is needed to handle log rotation.
-func ReopenLogFile(cfg *config.ExporterConfiguration, old_file *os.File) (*os.File, error) {
+func ReopenLogFile(cfg *config.ExporterConfig, old_file *os.File) (*os.File, error) {
 	if old_file != nil {
 		_ = old_file.Close()
 	}
 
-	newLogFile, err := os.OpenFile(cfg.Logging.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
+	newLogFile, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, LogFileMode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open new log file: %w", err)
 	}

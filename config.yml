@@ -1,107 +1,117 @@
 ---
-# The 'global' section defines general exporter parameters.
-global:
-  # List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
-  #
-  # ds_numsubordinate_records: []
+# List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
+#
+# ds_numsubordinate_records: []
 
-  # The maximum duration the server will wait for a graceful shutdown of all resources when the application is stopping.
-  # During this period, the server stops accepting new connections, attempts to finish processing ongoing requests,
-  # and properly closes the HTTP server, LDAP connection pools, and other active resources.
-  # If the timeout is exceeded, any remaining open connections or resources will be forcibly closed to prevent the application from hanging.
-  # If the value is 0, it is assumed that the timeout has already expired and graceful shutdown will be skipped.
-  #
-  # shutdown_timeout: 5
+# Default set of collectors.
+# Possible values:
+# - `all`: enables all collectors by default.
+# - `none`: disables all collectors by default.
+# - `standard`: enables standard set of collectors.
+#
+# collectors_default: standard
 
-# The 'http' section defines the parameters of the HTTP server that provides metrics.
-http:
-  # The address and port on which the server will listen for incoming connections.
-  # Use the format <host>:<port>. For example:
-  # ":9389" will listen on port 9389 on all network interfaces.
-  # "0.0.0.0:9389" will listen on port 9389 on all IPv4 interfaces.
-  # "192.168.0.10:9389" will listen on port 9389 only on 192.168.0.10.
-  #
-  # listen_address: "127.0.0.1:9389"
+# Enable specific collector.
+# Specifying it together with `collectors_default: all` does not make sense, since all collectors are already enabled.
+#
+# collectors_enabled: []
 
-  # HTTP endpoint where metrics are exposed.
-  #
-  # metrics_path: "/metrics"
+# The maximum duration the server will wait for a graceful shutdown of all resources when the application is stopping.
+# During this period, the server stops accepting new connections, attempts to finish processing ongoing requests,
+# and properly closes the HTTP server, LDAP connection pools, and other active resources.
+# If the timeout is exceeded, any remaining open connections or resources will be forcibly closed to prevent the application from hanging.
+# If the value is 0, it is assumed that the timeout has already expired and graceful shutdown will be skipped.
+#
+# shutdown_timeout: 5
 
-  # Maximum duration allowed for reading the entire request, including the body.
-  # A zero or negative value means no timeout.
-  #
-  # read_timeout: 10
+# The address and port on which the server will listen for incoming connections.
+# Use the format <host>:<port>. For example:
+# ":9389" will listen on port 9389 on all network interfaces.
+# "0.0.0.0:9389" will listen on port 9389 on all IPv4 interfaces.
+# "192.168.0.10:9389" will listen on port 9389 only on 192.168.0.10.
+#
+# http_listen_address: "127.0.0.1:9389"
 
-  # Maximum duration before timing out writes of the response.
-  # This timeout is reset whenever a new request’s header is read.
-  # A zero or negative value means no timeout.
-  #
-  # write_timeout: 15
+# HTTP endpoint where metrics are exposed.
+#
+# http_metrics_path: "/metrics"
 
-  # Maximum duration to wait for the next request when keep-alives are enabled.
-  # If zero, the value of ReadTimeout is used.
-  # If negative, or if both this and ReadTimeout are zero or negative, there is no timeout.
-  #
-  # idle_timeout: 60
+# Maximum duration allowed for reading the entire request, including the body.
+# A zero or negative value means no timeout.
+#
+# http_read_timeout: 10
 
-  # Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
-  # If the client doesn't send any data within this time, the connection will be closed.
-  # A value of 0 disables the timeout, meaning the server will wait indefinitely.
-  #
-  # initial_read_timeout: 3
+# Maximum duration before timing out writes of the response.
+# This timeout is reset whenever a new request’s header is read.
+# A zero or negative value means no timeout.
+#
+# http_write_timeout: 15
 
-# The 'ldap' section defines the parameters of the connection to the LDAP server.
-ldap:
-  # LDAP server URL in RFC-2255 format. For example:
-  # "ldap://localhost:389" or "ldaps://remote-server"
-  #
-  server_url: "ldap://localhost:389"
+# Maximum duration to wait for the next request when keep-alives are enabled.
+# If zero, the value of ReadTimeout is used.
+# If negative, or if both this and ReadTimeout are zero or negative, there is no timeout.
+#
+# http_idle_timeout: 60
 
-  # DN of the account used to authenticate with the LDAP server.
-  #
-  bind_dn: "cn=directory manager"
+# Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
+# If the client doesn't send any data within this time, the connection will be closed.
+# A value of 0 disables the timeout, meaning the server will wait indefinitely.
+#
+# http_initial_read_timeout: 3
 
-  # Password of the LDAP account.
-  #
-  bind_pw: "12345678"
 
-  # Maximum size of the LDAP connection pool.
-  # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
-  # Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
-  #
-  # pool_conn_limit: 4
+# LDAP server URL in RFC-2255 format. For example:
+# "ldap://localhost:389" or "ldaps://remote-server"
+#
+ldap_server_url: "ldap://localhost:389"
 
-# The 'log' section defines logging parameters.
-log:
-  # Logging level.
-  # Can be DEBUG, INFO, WARNING, or ERROR.
-  #
-  # level: INFO
+# DN of the account used to authenticate with the LDAP server.
+#
+ldap_bind_dn: "cn=directory manager"
 
-  # Log output target.
-  # Options:
-  # 'stdout' - logs are printed to standard output
-  # 'file'   - logs are written to a file
-  # 'both'   - logs are written to both stdout and a file
-  #
-  handler: stdout
+# Password of the LDAP account.
+#
+ldap_bind_pw: "12345678"
 
-  # Log file path.
-  # Only relevant if 'handler' is set to 'file' or 'both'.
-  # Make sure the system is configured to rotate this file (e.g., using logrotate).
-  #
-  # file: /var/log/389-ds-exporter/exporter.log
+# Maximum size of the LDAP connection pool.
+# Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
+# Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
+#
+# ldap_pool_conn_limit: 5
 
-  # STDOUT log format.
-  # Options: text, json
-  # The 'text' format is the default and is convenient for syslog.
-  # The 'json' format is useful for parsing logs or sending to external systems.
-  # Only applies if 'handler' is 'stdout' or 'both'.
-  #
-  # stdout_format: text
+# Timeout for the collector to receive a connection from the pool.
+#
+# ldap_pool_get_timeout: 5
 
-  # File log format.
-  # Options: text, json
-  # Applies only if 'handler' is 'file' or 'both'.
-  #
-  # file_format: json
+# Logging level.
+# Can be DEBUG, INFO, WARNING, or ERROR.
+#
+# log_level: INFO
+
+# Log output target.
+# Options:
+# 'stdout' - logs are printed to standard output
+# 'file'   - logs are written to a file
+# 'both'   - logs are written to both stdout and a file
+#
+# log_handler: stdout
+
+# Log file path.
+# Only relevant if 'handler' is set to 'file' or 'both'.
+# Make sure the system is configured to rotate this file (e.g., using logrotate).
+#
+# log_file: /var/log/389-ds-exporter/exporter.log
+
+# STDOUT log format.
+# Options: text, json
+# The 'text' format is the default and is convenient for syslog.
+# The 'json' format is useful for parsing logs or sending to external systems.
+# Only applies if 'handler' is 'stdout' or 'both'.
+#
+# log_stdout_format: text
+
+# File log format.
+# Options: text, json
+# Applies only if 'handler' is 'file' or 'both'.
+#
+# log_file_format: json

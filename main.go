@@ -12,13 +12,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/connections"
 	"389-ds-exporter/src/metrics"
 	"389-ds-exporter/src/utils"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -26,10 +26,6 @@ var (
 	Version    = "dev"     //nolint:gochecknoglobals
 	BuildTime  = "unknown" //nolint:gochecknoglobals
 	CommitHash = "unknown" //nolint:gochecknoglobals
-)
-
-const (
-	LdapConnectionPoolTimeout time.Duration = 3 * time.Second
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
@@ -70,7 +66,7 @@ func (r *appResources) shutdown(ctx context.Context) error {
 	return nil
 }
 
-func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
+func readConfig(configFilePath string) (*config.ExporterConfig, error) {
 	configuration, err := config.ReadConfig(configFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading configuration: %w", err)
@@ -81,7 +77,7 @@ func readConfig(configFilePath string) (*config.ExporterConfiguration, error) {
 		return nil, fmt.Errorf("incorrect configuration provided: %w", err)
 	}
 
-	return &configuration, nil
+	return configuration, nil
 }
 
 func run() int {
@@ -116,7 +112,7 @@ func run() int {
 	defer func() {
 		shutdownContext, cancel := context.WithTimeout(
 			context.Background(),
-			time.Duration(cfg.Global.ShutdownTimeout)*time.Second,
+			time.Duration(cfg.ShutdownTimeout)*time.Second,
 		)
 
 		defer cancel()
@@ -146,54 +142,64 @@ func run() int {
 
 	slog.Info("Starting 389-ds-exporter", "version", Version, "commit", CommitHash, "build_time", BuildTime)
 	slog.Info("LDAP server info",
-		"url", cfg.LDAP.ServerURL,
-		"bind_dn", cfg.LDAP.BindDN,
+		"url", cfg.LDAPServerURL,
+		"bind_dn", cfg.LDAPBindDN,
 	)
 
 	ldapConnPoolConfig := connections.LdapConnectionPoolConfig{
-		ServerURL:      cfg.LDAP.ServerURL,
-		BindDN:         cfg.LDAP.BindDN,
-		BindPw:         cfg.LDAP.BindPw,
-		MaxConnections: cfg.LDAP.PoolConnLimit,
+		ServerURL:      cfg.LDAPServerURL,
+		BindDN:         cfg.LDAPBindDN,
+		BindPw:         cfg.LDAPBindPw,
+		MaxConnections: cfg.LDAPPoolConnLimit,
 		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
 	applicationResources.ConnPool = connections.NewLdapConnectionPool(ldapConnPoolConfig)
 
-	dsMetricsRegistry := metrics.SetupPrometheusMetrics(cfg, applicationResources.ConnPool, LdapConnectionPoolTimeout)
+	dsMetricsRegistry := metrics.SetupPrometheusMetrics(
+		cfg,
+		applicationResources.ConnPool,
+		time.Duration(cfg.LDAPPoolGetTimeout)*time.Second,
+	)
 
 	// Create HTTP server
 	applicationResources.HttpServer = &http.Server{
-		Addr:         cfg.HTTP.ListenAddress,
+		Addr:         cfg.HTTPListenAddress,
 		Handler:      http.DefaultServeMux,
-		ReadTimeout:  time.Duration(cfg.HTTP.ReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(cfg.HTTP.WriteTimeout) * time.Second,
-		IdleTimeout:  time.Duration(cfg.HTTP.IdleTimeout) * time.Second,
+		ReadTimeout:  time.Duration(cfg.HTTPReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.HTTPWriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(cfg.HTTPIdleTimeout) * time.Second,
 	}
 
 	// Create HTTP Listener with timeouts
-	listener, err := net.Listen("tcp", cfg.HTTP.ListenAddress)
+	listener, err := net.Listen("tcp", cfg.HTTPListenAddress)
 	if err != nil {
 		slog.Error("Failed to start TCP listener", "err", err)
 		return 1
 	}
 	timeoutListener := connections.NewTimeoutListener(
 		listener,
-		time.Duration(cfg.HTTP.InitialReadTimeout)*time.Second,
+		time.Duration(cfg.HTTPInitialReadTimeout)*time.Second,
 	)
 
 	// Register HTTP endpoinnts
-	http.Handle(cfg.HTTP.MetricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
-	http.HandleFunc("/", utils.DefaultHttpResponse(cfg.HTTP.MetricsPath))
-	http.HandleFunc("/health", utils.HealthHttpResponse(applicationResources.ConnPool, startTime))
+	http.Handle(cfg.HTTPMetricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
+	http.HandleFunc("/", utils.DefaultHttpResponse(cfg.HTTPMetricsPath))
+
+	http.HandleFunc("/health", utils.HealthHttpResponse(
+		applicationResources.ConnPool,
+		startTime,
+		time.Duration(cfg.LDAPPoolGetTimeout)*time.Second),
+	)
+
 	http.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK\n"))
 	})
 
 	// Start HTTP server
 	go func() {
-		slog.Info("Starting HTTP server at " + cfg.HTTP.ListenAddress)
+		slog.Info("Starting HTTP server at " + cfg.HTTPListenAddress)
 		err := applicationResources.HttpServer.Serve(timeoutListener)
 		if err != nil && err != http.ErrServerClosed {
 			serverErrCh <- err

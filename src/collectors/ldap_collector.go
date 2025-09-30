@@ -173,7 +173,7 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		nil,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), c.poolGetTimeout)
 	defer cancel()
 	conn, err := c.connectionPool.Get(ctx)
 

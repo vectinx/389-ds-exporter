@@ -36,6 +36,7 @@ func DefaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 func HealthHttpResponse(
 	pool *connections.LdapConnectionPool,
 	startTime time.Time,
+	timeout time.Duration,
 ) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 
@@ -53,7 +54,7 @@ func HealthHttpResponse(
 			[]string{"dn"},
 			nil,
 		)
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		conn, err := pool.Get(ctx)
 
