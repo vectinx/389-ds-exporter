@@ -16,11 +16,12 @@ const LogFileMode os.FileMode = 0o644
 
 // BuildLogHandler creates a log handler with the specified type.
 func BuildLogHandler(format string, w io.Writer, level slog.Level) slog.Handler {
+	addSource := level == slog.LevelDebug
 	switch format {
 	case "text":
-		return slog.NewTextHandler(w, &slog.HandlerOptions{AddSource: false, Level: level})
+		return slog.NewTextHandler(w, &slog.HandlerOptions{AddSource: addSource, Level: level})
 	case "json":
-		return slog.NewJSONHandler(w, &slog.HandlerOptions{AddSource: false, Level: level})
+		return slog.NewJSONHandler(w, &slog.HandlerOptions{AddSource: addSource, Level: level})
 	}
 
 	return slog.Default().Handler()
