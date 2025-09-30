@@ -49,7 +49,7 @@ type loggingConfig struct {
 	Level        string `yaml:"level"`
 	Handler      string `yaml:"handler"`
 	File         string `yaml:"file"`
-	StdoutFormat string `yaml:"stdout_foramt"`
+	StdoutFormat string `yaml:"stdout_format"`
 	FileFormat   string `yaml:"file_format"`
 }
 
