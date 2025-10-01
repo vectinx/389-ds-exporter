@@ -83,7 +83,7 @@ func SetupPrometheusMetrics(
 	if collectorEnabled(cfg, "numsubordinates") {
 		slog.Debug("Registering collector", "collector", "numsubordinates")
 		for _, entry := range cfg.NumSubordinateRecords {
-			dsCollector.Register("numsubordinates_%s"+entry, collectors.NewLdapEntryCollector(
+			dsCollector.Register("numsubordinates_"+entry, collectors.NewLdapEntryCollector(
 				"numsubordinates",
 				connPool,
 				entry,
