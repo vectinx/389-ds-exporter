@@ -118,9 +118,10 @@
       "options": {
         "legend": {
           "calcs": [
-            "lastNotNull",
+            "mean",
+            "min",
             "max",
-            "mean"
+            "lastNotNull"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -562,9 +563,10 @@
       "options": {
         "legend": {
           "calcs": [
-            "lastNotNull",
+            "mean",
+            "min",
             "max",
-            "mean"
+            "lastNotNull"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -751,15 +753,16 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 3
+            "y": 14
           },
           "id": 26,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -941,15 +944,16 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 3
+            "y": 14
           },
           "id": 30,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1111,15 +1115,16 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 10
+            "y": 21
           },
           "id": 27,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1225,15 +1230,16 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 10
+            "y": 21
           },
           "id": 33,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1365,15 +1371,16 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 17
+            "y": 28
           },
           "id": 28,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1493,15 +1500,16 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 28
           },
           "id": 32,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1657,15 +1665,16 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 3
+            "y": 36
           },
           "id": 18,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1806,15 +1815,16 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 3
+            "y": 36
           },
           "id": 21,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -1969,15 +1979,16 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 3
+            "y": 36
           },
           "id": 19,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2069,8 +2080,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -2143,15 +2153,16 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 16
+            "y": 37
           },
           "id": 4,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2250,8 +2261,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -2323,15 +2333,16 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 16
+            "y": 37
           },
           "id": 8,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2435,8 +2446,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -2479,15 +2489,16 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 16
+            "y": 37
           },
           "id": 12,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2569,8 +2580,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2617,15 +2627,16 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 24
+            "y": 45
           },
           "id": 10,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2727,8 +2738,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -2770,15 +2780,16 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 24
+            "y": 45
           },
           "id": 13,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -2881,8 +2892,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -2910,15 +2920,16 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 24
+            "y": 45
           },
           "id": 11,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3016,8 +3027,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3064,15 +3074,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 17
+            "y": 62
           },
           "id": 35,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3169,8 +3180,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -3198,15 +3208,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 62
           },
           "id": 37,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3287,8 +3298,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3334,15 +3344,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 70
           },
           "id": 36,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3436,8 +3447,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3484,15 +3494,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 70
           },
           "id": 47,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3590,8 +3601,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3638,15 +3648,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 33
+            "y": 78
           },
           "id": 48,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3744,8 +3755,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3777,15 +3787,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 33
+            "y": 78
           },
           "id": 49,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -3867,8 +3878,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3915,15 +3925,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 41
+            "y": 86
           },
           "id": 39,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4021,8 +4032,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4050,15 +4060,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 41
+            "y": 86
           },
           "id": 40,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4139,8 +4150,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4213,15 +4223,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 49
+            "y": 94
           },
           "id": 41,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4342,8 +4353,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4401,15 +4411,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 49
+            "y": 94
           },
           "id": 42,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4525,8 +4536,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4554,15 +4564,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 57
+            "y": 102
           },
           "id": 44,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4644,8 +4655,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4718,15 +4728,16 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 57
+            "y": 102
           },
           "id": 43,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4872,8 +4883,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4885,15 +4895,16 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 82
+            "y": 111
           },
           "id": 51,
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull",
+                "mean",
+                "min",
                 "max",
-                "mean"
+                "lastNotNull"
               ],
               "displayMode": "table",
               "placement": "bottom",
@@ -4958,7 +4969,7 @@
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
-                  "mode": "normal"
+                  "mode": "none"
                 },
                 "thresholdsStyle": {
                   "mode": "off"
@@ -4969,8 +4980,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4982,7 +4992,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 82
+            "y": 111
           },
           "id": 52,
           "options": {
@@ -5023,15 +5033,12 @@
   ],
   "refresh": "5s",
   "schemaVersion": 39,
-  "tags": [],
+  "tags": [
+    "389-ds"
+  ],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "PBFA97CFB590B2093"
-        },
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -5123,7 +5130,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "389-ds-exporter",
-  "uid": "389-ds",
+  "uid": "389-ds-exporter",
   "version": 3,
   "weekStart": ""
 }
