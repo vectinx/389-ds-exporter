@@ -69,7 +69,7 @@ func registerGeneralCollectors(
 
 	registerCollectorIfEnabled(dsCollector, "snmp-server", cfg, func() *collectors.LdapEntryCollector {
 		return collectors.NewLdapEntryCollector(
-			"snmp-server",
+			"snmp_server",
 			connPool,
 			"cn=snmp,cn=monitor",
 			GetLdapServerSnmpMetrics(),
@@ -80,7 +80,7 @@ func registerGeneralCollectors(
 
 	registerCollectorIfEnabled(dsCollector, "ndn-cache", cfg, func() *collectors.LdapEntryCollector {
 		return collectors.NewLdapEntryCollector(
-			"ndn-cache",
+			"ldbm",
 			connPool,
 			"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 			GetNdnCacheMetrics(),
@@ -97,15 +97,17 @@ func registerGeneralCollectors(
 				connPool,
 				e,
 				GetEntryCountAttr(),
-				prometheus.Labels{},
+				prometheus.Labels{"entry": entry},
 				connPoolTimeout,
 			)
 		})
 	}
 }
 
-// determineBackendInstances determines the list of backends to use based on the configuration and information in the LDAP directory.
-func determineBackendInstances(cfg *config.ExporterConfig, pool *connections.LdapConnectionPool, timeout time.Duration) ([]string, error) {
+// determineBackendInstances determines the list of backends
+// to use based on the configuration and information in the LDAP directory.
+func determineBackendInstances(cfg *config.ExporterConfig,
+	pool *connections.LdapConnectionPool, timeout time.Duration) ([]string, error) {
 
 	if len(cfg.DSBackendDBs) == 0 {
 		slog.Debug("Backend instances not specified, detecting automatically")
@@ -132,8 +134,10 @@ func determineBackendInstances(cfg *config.ExporterConfig, pool *connections.Lda
 	return cfg.DSBackendDBs, nil
 }
 
-// determineBackendType determines backend type to use based on the configuration and information in the LDAP directory.
-func determineBackendType(cfg *config.ExporterConfig, pool *connections.LdapConnectionPool, timeout time.Duration) (string, error) {
+// determineBackendType determines backend type
+// to use based on the configuration and information in the LDAP directory.
+func determineBackendType(cfg *config.ExporterConfig,
+	pool *connections.LdapConnectionPool, timeout time.Duration) (string, error) {
 
 	if cfg.DSBackendType == "" {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -239,16 +243,17 @@ func SetupPrometheusMetrics(
 		slog.Error("Error detecting backend instances", "err", err)
 	} else {
 		for i := range detectedBackendInstances {
-			registerCollectorIfEnabled(dsCollector, "ldbm-instance_"+detectedBackendInstances[i], cfg, func() *collectors.LdapEntryCollector {
-				return collectors.NewLdapEntryCollector(
-					"ldbm_instance",
-					connPool,
-					"cn=monitor,cn="+detectedBackendInstances[i]+",cn=ldbm database,cn=plugins,cn=config",
-					GetLdapBackendCaches(),
-					prometheus.Labels{},
-					connPoolTimeout,
-				)
-			})
+			registerCollectorIfEnabled(dsCollector, "ldbm-instance_"+detectedBackendInstances[i], cfg,
+				func() *collectors.LdapEntryCollector {
+					return collectors.NewLdapEntryCollector(
+						"ldbm_instance",
+						connPool,
+						"cn=monitor,cn="+detectedBackendInstances[i]+",cn=ldbm database,cn=plugins,cn=config",
+						GetLdapBackendCaches(),
+						prometheus.Labels{"database": detectedBackendInstances[i]},
+						connPoolTimeout,
+					)
+				})
 		}
 	}
 
