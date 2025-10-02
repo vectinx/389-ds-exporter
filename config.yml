@@ -1,8 +1,4 @@
 ---
-# List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
-#
-# ds_numsubordinate_records: []
-
 # Default set of collectors.
 # Possible values:
 # - `all`: enables all collectors by default.
@@ -15,6 +11,30 @@
 # Specifying it together with `collectors_default: all` does not make sense, since all collectors are already enabled.
 #
 # collectors_enabled: []
+
+# Database type.
+# If the type is not specified, the exporter will attempt to detect it automatically.
+# If the backend type is known in advance, it is best to specify it explicitly.
+# This will avoid problems, for example, if the LDAP directory is unavailable when the exporter starts
+# and the backend type cannot be detected automatically.
+# Possible values:
+# - `bdb`: Berkeley DB database backend.
+# - `mdb`: LMDB database backend.
+#
+# ds_backend_type: mdb
+
+# List of 389-ds backend databases.
+# If no values ​​are specified, the exporter will attempt to find backends automatically.
+# If the list is known in advance, it is best to specify it explicitly.
+# This will avoid problems, for example, if the LDAP directory is unavailable when the exporter starts
+# and the backend list cannot be detected automatically.
+#
+# ds_backend_dbs: []
+
+
+# List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
+#
+# ds_numsubordinate_records: []
 
 # The maximum duration the server will wait for a graceful shutdown of all resources when the application is stopping.
 # During this period, the server stops accepting new connections, attempts to finish processing ongoing requests,

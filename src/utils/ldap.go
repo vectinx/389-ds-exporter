@@ -7,12 +7,11 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
-	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/connections"
 )
 
 // GetLdapBackendType gets backend parameters from ldap and returns them as a BackendType.
-func GetLdapBackendType(conn *connections.PooledConn) (*config.BackendType, error) {
+func GetLdapBackendType(conn *connections.PooledConn) (*string, error) {
 	if conn == nil {
 		return nil, errors.New("connection is nil")
 	}
@@ -34,7 +33,7 @@ func GetLdapBackendType(conn *connections.PooledConn) (*config.BackendType, erro
 	}
 
 	result := searchResult.Entries[0].GetAttributeValue("nsslapd-backend-implement")
-	return (*config.BackendType)(&result), nil
+	return &result, nil
 }
 
 // GetLdapBackendInstances gets backend instances from ldap and returns them as []string.

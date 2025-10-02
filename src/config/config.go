@@ -9,7 +9,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type BackendType string
 type EnabledCollectorsType string
 
 const (
@@ -29,8 +28,8 @@ const (
 	DefaultLogFileFormat          string = "json"
 	DefaultCollectorsDefault      string = "standard"
 
-	BackendBDB BackendType = "bdb"
-	BackendMDB BackendType = "mdb"
+	BackendBDB string = "bdb"
+	BackendMDB string = "mdb"
 
 	CollectorsAll      EnabledCollectorsType = "all"
 	CollectorsStandard EnabledCollectorsType = "standard"
@@ -38,36 +37,43 @@ const (
 )
 
 type ExporterConfig struct {
-	ShutdownTimeout       int
-	CollectorsDefault     string
-	CollectorsEnabled     []string
-	NumSubordinateRecords []string
+	// YAML tags are needed here for correct marshalling
+	// of the structure when it is necessary to display the final config
 
-	HTTPListenAddress      string
-	HTTPMetricsPath        string
-	HTTPReadTimeout        int
-	HTTPWriteTimeout       int
-	HTTPIdleTimeout        int
-	HTTPInitialReadTimeout int
+	ShutdownTimeout         int      `yaml:"shutdown_timeout"`
+	CollectorsDefault       string   `yaml:"collectors_default"`
+	CollectorsEnabled       []string `yaml:"collectors_enabled"`
+	DSNumSubordinateRecords []string `yaml:"ds_numsubordinate_records"`
+	DSBackendType           string   `yaml:"ds_backend_type"`
+	DSBackendDBs            []string `yaml:"ds_backend_dbs"`
 
-	LDAPServerURL      string
-	LDAPBindDN         string
-	LDAPBindPw         string
-	LDAPPoolConnLimit  int
-	LDAPPoolGetTimeout int
+	HTTPListenAddress      string `yaml:"http_listen_address"`
+	HTTPMetricsPath        string `yaml:"http_metrics_path"`
+	HTTPReadTimeout        int    `yaml:"http_read_timeout"`
+	HTTPWriteTimeout       int    `yaml:"http_write_timeout"`
+	HTTPIdleTimeout        int    `yaml:"http_idle_timeout"`
+	HTTPInitialReadTimeout int    `yaml:"http_initial_read_timeout"`
 
-	LogLevel        string
-	LogHandler      string
-	LogFile         string
-	LogStdoutFormat string
-	LogFileFormat   string
+	LDAPServerURL      string `yaml:"ldap_server_url"`
+	LDAPBindDN         string `yaml:"ldap_bind_dn"`
+	LDAPBindPw         string `yaml:"ldap_bind_pw"`
+	LDAPPoolConnLimit  int    `yaml:"ldap_pool_conn_limit"`
+	LDAPPoolGetTimeout int    `yaml:"ldap_pool_get_timeout"`
+
+	LogLevel        string `yaml:"log_level"`
+	LogHandler      string `yaml:"log_handler"`
+	LogFile         string `yaml:"log_file"`
+	LogStdoutFormat string `yaml:"log_stdout_format"`
+	LogFileFormat   string `yaml:"log_file_format"`
 }
 
 type rawConfig struct {
-	ShutdownTimeout       *int     `yaml:"shutdown_timeout"`
-	CollectorsDefault     *string  `yaml:"collectors_default"`
-	CollectorsEnabled     []string `yaml:"collectors_enabled"`
-	NumSubordinateRecords []string `yaml:"ds_numsubordinate_records"`
+	ShutdownTimeout         *int     `yaml:"shutdown_timeout"`
+	CollectorsDefault       *string  `yaml:"collectors_default"`
+	CollectorsEnabled       []string `yaml:"collectors_enabled"`
+	DSNumSubordinateRecords []string `yaml:"ds_numsubordinate_records"`
+	DSBackendType           *string  `yaml:"ds_backend_type"`
+	DSBackendDBs            []string `yaml:"ds_backend_dbs"`
 
 	HTTPListenAddress      *string `yaml:"http_listen_address"`
 	HTTPMetricsPath        *string `yaml:"http_metrics_path"`
@@ -104,8 +110,16 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	} else {
 		cfg.CollectorsDefault = DefaultCollectorsDefault
 	}
+
+	if r.DSBackendType != nil {
+		cfg.DSBackendType = *r.DSBackendType
+	} else {
+		cfg.DSBackendType = ""
+	}
+
 	cfg.CollectorsEnabled = r.CollectorsEnabled
-	cfg.NumSubordinateRecords = r.NumSubordinateRecords
+	cfg.DSNumSubordinateRecords = r.DSNumSubordinateRecords
+	cfg.DSBackendDBs = r.DSBackendDBs
 
 	// HTTP
 	if r.HTTPListenAddress != nil {
@@ -195,6 +209,11 @@ func (c *ExporterConfig) Validate() error {
 
 	if c.ShutdownTimeout < 0 {
 		return errors.New("shutdown_timeout should be greater than or equal to 0")
+	}
+
+	// Also allow an empty value if the user wants the backend to be automatically detected.
+	if !slices.Contains([]string{BackendBDB, BackendMDB, ""}, c.DSBackendType) {
+		return fmt.Errorf("invalid ds_backend_type: %s (must be 'bdb', 'mdb' or empty)", c.DSBackendType)
 	}
 
 	if c.HTTPInitialReadTimeout <= 0 {
