@@ -86,8 +86,8 @@ func TestLdapPool(t *testing.T) {
 
 				// Closing connection
 				conn.Close()
-				// Closing the connection again should not cause the program to crash
-				conn.Close()
+				// Closing the connection again should cause panic
+				require.Panics(t, func() { conn.Close() })
 
 				require.Equal(t, int32(1), mockConn.BindCount.Load(), "A connection must have one BIND operation after use")
 			}

@@ -3,9 +3,11 @@ package connections
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/go-ldap/ldap/v3"
 )
@@ -56,7 +58,7 @@ type LdapConnectionPool struct {
 	cfg        LdapConnectionPoolConfig
 	connCh     chan LdapConn
 	totalConns atomic.Int32
-	closed     bool
+	closed     atomic.Bool
 	mu         sync.Mutex
 	wg         sync.WaitGroup
 }
@@ -69,13 +71,10 @@ func NewLdapConnectionPool(config LdapConnectionPoolConfig) *LdapConnectionPool 
 }
 
 func (p *LdapConnectionPool) Get(ctx context.Context) (*PooledConn, error) {
-	p.mu.Lock()
-	if p.closed {
-		p.mu.Unlock()
+	if p.closed.Load() {
 		return nil, ErrPoolClosed
 	}
 	p.wg.Add(1)
-	p.mu.Unlock()
 
 	for {
 		conn := p.tryGetFromChan()
@@ -95,23 +94,28 @@ func (p *LdapConnectionPool) Get(ctx context.Context) (*PooledConn, error) {
 		p.mu.Unlock()
 
 		if canCreate {
-			conn, _ := p.cfg.ConnFactory(p.cfg.ServerURL)
-			if conn != nil {
-
-				err := conn.Bind(p.cfg.BindDN, p.cfg.BindPw)
-				if err == nil {
-					return &PooledConn{conn: conn, pool: p}, nil
-				}
-				_ = conn.Unbind()
+			conn, err := p.cfg.ConnFactory(p.cfg.ServerURL)
+			if err != nil {
+				p.totalConns.Add(-1)
+				p.wg.Done()
+				return nil, fmt.Errorf("connection factory failed: %w", err)
 			}
-			p.totalConns.Add(-1)
+
+			err = conn.Bind(p.cfg.BindDN, p.cfg.BindPw)
+			if err != nil {
+				_ = conn.Unbind()
+				p.totalConns.Add(-1)
+				p.wg.Done()
+				return nil, fmt.Errorf("bind failed: %w", err)
+			}
+			return &PooledConn{conn: conn, pool: p}, nil
 		}
 
 		select {
 		case <-ctx.Done():
 			p.wg.Done()
 			return nil, ErrPoolGetTimedOut
-		default:
+		case <-time.After(50 * time.Millisecond):
 		}
 	}
 }
@@ -125,15 +129,11 @@ func (p *LdapConnectionPool) ConnsAtPool() int {
 }
 
 func (p *LdapConnectionPool) Close(ctx context.Context) error {
-	p.mu.Lock()
-	if p.closed {
-		p.mu.Unlock()
 
+	if !p.closed.CompareAndSwap(false, true) {
 		return ErrPoolClosed
 	}
-	p.closed = true
 
-	p.mu.Unlock()
 	doneCh := make(chan struct{})
 	go func() {
 		p.wg.Wait()
@@ -151,11 +151,10 @@ func (p *LdapConnectionPool) Close(ctx context.Context) error {
 	close(p.connCh)
 
 	hasCloseErrors := false
-	errorsCount := 0
+
 	for conn := range p.connCh {
 		if conn.Unbind() != nil {
 			hasCloseErrors = true
-			errorsCount++
 		}
 	}
 
@@ -167,10 +166,7 @@ func (p *LdapConnectionPool) Close(ctx context.Context) error {
 }
 
 func (p *LdapConnectionPool) Closed() bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	return p.closed
+	return p.closed.Load()
 }
 
 func (p *LdapConnectionPool) put(conn LdapConn) error {
