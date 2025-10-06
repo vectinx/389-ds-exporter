@@ -61,7 +61,7 @@ func TestLdapPool(t *testing.T) {
 				BindDN:         "cn=directory manager",
 				BindPw:         "12345678",
 				MaxConnections: 1,
-				ConnFactory: func(string) (LdapConn, error) {
+				ConnFactory: func(string, context.Context, time.Duration) (LdapConn, error) {
 					return &mockConn, nil
 				},
 			}
@@ -175,7 +175,7 @@ func TestLdapPool(t *testing.T) {
 				BindDN:         "cn=directory manager",
 				BindPw:         "12345678",
 				MaxConnections: 10,
-				ConnFactory: func(string) (LdapConn, error) {
+				ConnFactory: func(string, context.Context, time.Duration) (LdapConn, error) {
 					return &mockConn, nil
 				},
 			}

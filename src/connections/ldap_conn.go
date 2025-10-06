@@ -1,6 +1,10 @@
 package connections
 
 import (
+	"context"
+	"net"
+	"time"
+
 	"github.com/go-ldap/ldap/v3"
 )
 
@@ -35,8 +39,19 @@ func (c *RealLdapConn) Unbind() error {
 
 // RealConnectionDialUrl establishes a connection to the LDAP server using the given URL.
 // It returns an LdapConn interface backed by a real connection, or an error if the connection fails.
-func RealConnectionDialUrl(url string) (LdapConn, error) {
-	conn, err := ldap.DialURL(url)
+func RealConnectionDialUrl(url string, ctx context.Context, defaultTimeout time.Duration) (LdapConn, error) {
+	timeout := defaultTimeout
+
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < timeout {
+			timeout = remaining
+		}
+	}
+
+	dialer := &net.Dialer{Timeout: timeout}
+
+	conn, err := ldap.DialURL(url, ldap.DialWithDialer(dialer))
 	if err != nil {
 		return nil, err
 	}

@@ -103,6 +103,11 @@ ldap_bind_pw: "12345678"
 #
 # ldap_pool_get_timeout: 5
 
+# LDAP connection creation timeout.
+# This time doesn't include the binding, only the connection opening.
+#
+# ldap_dial_timeout: 3
+
 # Logging level.
 # Can be DEBUG, INFO, WARNING, or ERROR.
 #

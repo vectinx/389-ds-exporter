@@ -20,7 +20,8 @@ const (
 	DefaultHTTPIdleTimeout        int    = 60
 	DefaultHTTPInitialReadTimeout int    = 3
 	DefaultLDAPPoolConnLimit      int    = 4
-	DefaultLDAPPoolGetTimeout     int    = 3
+	DefaultLDAPPoolGetTimeout     int    = 5
+	DefaultLDAPDialTimeout        int    = 3
 	DefaultLogLevel               string = "INFO"
 	DefaultLogHandler             string = "stdout"
 	DefaultLogFile                string = "/var/log/389-ds-exporter/exporter.log"
@@ -59,6 +60,7 @@ type ExporterConfig struct {
 	LDAPBindPw         string `yaml:"ldap_bind_pw"`
 	LDAPPoolConnLimit  int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout int    `yaml:"ldap_pool_get_timeout"`
+	LDAPDialTimeout    int    `yaml:"ldap_dial_timeout"`
 
 	LogLevel        string `yaml:"log_level"`
 	LogHandler      string `yaml:"log_handler"`
@@ -87,6 +89,7 @@ type rawConfig struct {
 	LDAPBindPw         *string `yaml:"ldap_bind_pw"`
 	LDAPPoolConnLimit  *int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout *int    `yaml:"ldap_pool_get_timeout"`
+	LDAPDialTimeout    *int    `yaml:"ldap_dial_timeout"`
 
 	LogLevel        *string `yaml:"log_level"`
 	LogHandler      *string `yaml:"log_handler"`
@@ -173,6 +176,11 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	} else {
 		cfg.LDAPPoolGetTimeout = DefaultLDAPPoolGetTimeout
 	}
+	if r.LDAPDialTimeout != nil {
+		cfg.LDAPDialTimeout = *r.LDAPDialTimeout
+	} else {
+		cfg.LDAPDialTimeout = DefaultLDAPDialTimeout
+	}
 
 	// Logging
 	if r.LogLevel != nil {
@@ -238,6 +246,10 @@ func (c *ExporterConfig) Validate() error {
 
 	if c.LDAPPoolGetTimeout <= 0 {
 		return errors.New("invalid ldap_pool_get_timeout: must be greater than 0")
+	}
+
+	if c.LDAPDialTimeout <= 0 {
+		return errors.New("invalid ldap_dial_timeout: must be greater than 0")
 	}
 
 	logLevels := []string{"DEBUG", "INFO", "WARNING", "ERROR"}

@@ -51,7 +51,8 @@ type LdapConnectionPoolConfig struct {
 	BindDN         string
 	BindPw         string
 	MaxConnections int
-	ConnFactory    func(url string) (LdapConn, error)
+	DialTimeout    time.Duration
+	ConnFactory    func(url string, ctx context.Context, defaultTimeout time.Duration) (LdapConn, error)
 }
 
 type LdapConnectionPool struct {
@@ -94,7 +95,7 @@ func (p *LdapConnectionPool) Get(ctx context.Context) (*PooledConn, error) {
 		p.mu.Unlock()
 
 		if canCreate {
-			conn, err := p.cfg.ConnFactory(p.cfg.ServerURL)
+			conn, err := p.cfg.ConnFactory(p.cfg.ServerURL, ctx, p.cfg.DialTimeout)
 			if err != nil {
 				p.totalConns.Add(-1)
 				p.wg.Done()
