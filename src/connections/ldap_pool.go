@@ -174,12 +174,11 @@ func (p *LdapConnectionPool) put(conn LdapConn) error {
 
 	select {
 	case p.connCh <- conn:
-
 		return nil
 	default:
 		_ = conn.Unbind()
+		p.totalConns.Add(-1)
 		slog.Debug("Unable to put connection to pool")
-
 		return ErrPoolFull
 	}
 }
