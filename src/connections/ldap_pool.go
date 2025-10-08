@@ -59,7 +59,7 @@ type LdapConnectionPool struct {
 	cfg        LdapConnectionPoolConfig
 	connCh     chan LdapConn
 	totalConns atomic.Int32
-	closed     atomic.Bool
+	closed     bool
 	mu         sync.Mutex
 	wg         sync.WaitGroup
 }
@@ -72,10 +72,13 @@ func NewLdapConnectionPool(config LdapConnectionPoolConfig) *LdapConnectionPool 
 }
 
 func (p *LdapConnectionPool) Get(ctx context.Context) (*PooledConn, error) {
-	if p.closed.Load() {
+	p.mu.Lock()
+	if p.closed {
+		p.mu.Unlock()
 		return nil, ErrPoolClosed
 	}
 	p.wg.Add(1)
+	p.mu.Unlock()
 
 	for {
 		conn := p.tryGetFromChan()
@@ -130,10 +133,13 @@ func (p *LdapConnectionPool) ConnsAtPool() int {
 }
 
 func (p *LdapConnectionPool) Close(ctx context.Context) error {
-
-	if !p.closed.CompareAndSwap(false, true) {
+	p.mu.Lock()
+	if p.closed {
+		p.mu.Unlock()
 		return ErrPoolClosed
 	}
+	p.closed = true
+	p.mu.Unlock()
 
 	doneCh := make(chan struct{})
 	go func() {
@@ -164,10 +170,6 @@ func (p *LdapConnectionPool) Close(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (p *LdapConnectionPool) Closed() bool {
-	return p.closed.Load()
 }
 
 func (p *LdapConnectionPool) put(conn LdapConn) error {
