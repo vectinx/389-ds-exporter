@@ -19,6 +19,7 @@ const (
 	DefaultHTTPWriteTimeout       int    = 15
 	DefaultHTTPIdleTimeout        int    = 60
 	DefaultHTTPInitialReadTimeout int    = 3
+	DefaultLDAPTlsSkipVerify      bool   = false
 	DefaultLDAPPoolConnLimit      int    = 4
 	DefaultLDAPPoolGetTimeout     int    = 5
 	DefaultLDAPPoolIdleTime       int    = 300
@@ -60,6 +61,7 @@ type ExporterConfig struct {
 	LDAPServerURL      string `yaml:"ldap_server_url"`
 	LDAPBindDN         string `yaml:"ldap_bind_dn"`
 	LDAPBindPw         string `yaml:"ldap_bind_pw"`
+	LDAPTlsSkipVerify  bool   `yaml:"ldap_tls_skip_verify"`
 	LDAPPoolConnLimit  int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout int    `yaml:"ldap_pool_get_timeout"`
 	LDAPPoolIdleTime   int    `yaml:"ldap_pool_idle_time"`
@@ -91,6 +93,7 @@ type rawConfig struct {
 	LDAPServerURL      *string `yaml:"ldap_server_url"`
 	LDAPBindDN         *string `yaml:"ldap_bind_dn"`
 	LDAPBindPw         *string `yaml:"ldap_bind_pw"`
+	LDAPTlsSkipVerify  *bool   `yaml:"ldap_tls_skip_verify"`
 	LDAPPoolConnLimit  *int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout *int    `yaml:"ldap_pool_get_timeout"`
 	LDAPPoolIdleTime   *int    `yaml:"ldap_pool_idle_time"`
@@ -171,6 +174,11 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	}
 	if r.LDAPBindPw != nil {
 		cfg.LDAPBindPw = *r.LDAPBindPw
+	}
+	if r.LDAPTlsSkipVerify != nil {
+		cfg.LDAPTlsSkipVerify = *r.LDAPTlsSkipVerify
+	} else {
+		cfg.LDAPTlsSkipVerify = DefaultLDAPTlsSkipVerify
 	}
 	if r.LDAPPoolConnLimit != nil {
 		cfg.LDAPPoolConnLimit = *r.LDAPPoolConnLimit

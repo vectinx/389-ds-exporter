@@ -102,9 +102,11 @@ type LdapConn interface {
 }
 
 type LDAPAuthConfig struct {
-	URL    string
-	BindDN string
-	BindPw string
+	URL           string
+	BindDN        string
+	BindPw        string
+	TlsSkipVerify bool
+	DialTimeout   time.Duration
 }
 
 type LDAPPoolConfig struct {
@@ -113,7 +115,7 @@ type LDAPPoolConfig struct {
 	MaxIdleTime    time.Duration
 	MaxLifeTime    time.Duration
 	DialTimeout    time.Duration
-	ConnFactory    func(*LDAPAuthConfig, time.Duration) (LdapConn, error)
+	ConnFactory    func(*LDAPAuthConfig) (LdapConn, error)
 }
 
 type LDAPPool struct {
@@ -135,7 +137,7 @@ type LDAPPool struct {
 	idleTimeClosedCount atomic.Int64 // number of connections closed by idle time expired
 	waitDuration        atomic.Int64
 
-	connFactory func(*LDAPAuthConfig, time.Duration) (LdapConn, error)
+	connFactory func(*LDAPAuthConfig) (LdapConn, error)
 }
 
 type LDAPPoolStat struct {
@@ -383,7 +385,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 	pool.numOpen++ // optimistically
 	pool.mu.Unlock()
 
-	lc, err := pool.connFactory(&pool.cfg.Auth, pool.cfg.DialTimeout)
+	lc, err := pool.connFactory(&pool.cfg.Auth)
 	if err != nil {
 		pool.mu.Lock()
 		pool.numOpen-- // correct for earlier optimism

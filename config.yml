@@ -91,7 +91,11 @@ ldap_bind_dn: "cn=directory manager"
 
 # Password of the LDAP account.
 #
-ldap_bind_pw: "12345678"
+# ldap_bind_pw: "12345678"
+
+# Whether to perform a TLS check.
+#
+# ldap_tls_skip_verify: false
 
 # Maximum size of the LDAP connection pool.
 # Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.

@@ -33,7 +33,7 @@ func (f *fakeLDAP) Close() error  { f.closed.Store(true); return nil }
 
 func makePool(t *testing.T) *LDAPPool {
 	t.Helper()
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP{}, nil
 	}
 	return NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
@@ -81,7 +81,7 @@ func TestIdempotentClose(t *testing.T) {
 }
 
 func TestIdleAndLifetimeExpiration(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP{}, nil
 	}
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
@@ -130,7 +130,7 @@ func TestPoolClose(t *testing.T) {
 }
 
 func TestConnContextCanceledImmediately(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) { return &fakeLDAP{}, nil }
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -141,7 +141,7 @@ func TestConnContextCanceledImmediately(t *testing.T) {
 }
 
 func TestWaiterContextTimeout(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) { return &fakeLDAP{}, nil }
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
 	baseCtx := context.Background()
 	// occupy the only connection
@@ -158,7 +158,7 @@ func TestWaiterContextTimeout(t *testing.T) {
 }
 
 func TestMaxOpenFairnessBasic(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) { return &fakeLDAP{}, nil }
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 2})
 	ctx := context.Background()
 
@@ -189,7 +189,7 @@ func TestMaxOpenFairnessBasic(t *testing.T) {
 }
 
 func TestIdleLifetimeEdgeBoundaries(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) { return &fakeLDAP{}, nil }
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
@@ -222,7 +222,7 @@ func TestIdleLifetimeEdgeBoundaries(t *testing.T) {
 }
 
 func TestMetricsCountersIncrease(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) { return &fakeLDAP{}, nil }
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
@@ -269,7 +269,7 @@ func TestMetricsCountersIncrease(t *testing.T) {
 func TestDialBindErrorsDoNotExceedMaxOpen(t *testing.T) {
 	// failing factory on first call, then success
 	var calls int64
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		if atomic.AddInt64(&calls, 1) == 1 {
 			return nil, errors.New("dial fail")
 		}
@@ -288,7 +288,7 @@ func TestDialBindErrorsDoNotExceedMaxOpen(t *testing.T) {
 }
 
 func TestConcurrentAcquireRelease(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP{}, nil
 	}
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 5})
@@ -319,7 +319,7 @@ func TestConcurrentAcquireRelease(t *testing.T) {
 }
 
 func TestWaitersServedUnderContention(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP{}, nil
 	}
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 2})
@@ -362,7 +362,7 @@ func TestWaitersServedUnderContention(t *testing.T) {
 }
 
 func TestCloseWhileWaiters(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP{}, nil
 	}
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
@@ -391,7 +391,7 @@ func TestNoLeakOnBadConnUnderConcurrency(t *testing.T) {
 	type fakeLDAP2 struct{ fakeLDAP }
 	var _ LdapConn = (*fakeLDAP2)(nil)
 
-	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
+	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
 		return &fakeLDAP2{}, nil
 	}
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 5})

@@ -82,5 +82,4 @@ func (c *DSCollector) scrape(collector string, channel chan<- prometheus.Metric)
 	} else {
 		channel <- prometheus.MustNewConstMetric(c.scrapeSuccessDesc, prometheus.GaugeValue, 1, collector)
 	}
-
 }

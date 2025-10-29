@@ -148,9 +148,11 @@ func run() int {
 
 	ldapConnPoolConfig := connections.LDAPPoolConfig{
 		Auth: connections.LDAPAuthConfig{
-			URL:    cfg.LDAPServerURL,
-			BindDN: cfg.LDAPBindDN,
-			BindPw: cfg.LDAPBindPw,
+			URL:           cfg.LDAPServerURL,
+			BindDN:        cfg.LDAPBindDN,
+			BindPw:        cfg.LDAPBindPw,
+			DialTimeout:   time.Duration(cfg.LDAPDialTimeout) * time.Second,
+			TlsSkipVerify: cfg.LDAPTlsSkipVerify,
 		},
 		DialTimeout:    time.Duration(cfg.LDAPDialTimeout) * time.Second,
 		MaxConnections: cfg.LDAPPoolConnLimit,

@@ -1,8 +1,10 @@
 package connections
 
 import (
+	"crypto/tls"
+	"fmt"
 	"net"
-	"time"
+	"net/url"
 
 	"github.com/go-ldap/ldap/v3"
 )
@@ -35,10 +37,28 @@ func (c *RealLdapConn) Close() error {
 
 // RealConnectionDialUrl establishes a connection to the LDAP server using the given URL.
 // It returns an LdapConn interface backed by a real connection, or an error if the connection fails.
-func RealConnectionDialUrl(auth *LDAPAuthConfig, timeout time.Duration) (LdapConn, error) {
-	dialer := &net.Dialer{Timeout: timeout}
+func RealConnectionDialUrl(auth *LDAPAuthConfig) (LdapConn, error) {
+	dialer := &net.Dialer{Timeout: auth.DialTimeout}
 
-	conn, err := ldap.DialURL(auth.URL, ldap.DialWithDialer(dialer))
+	var dialOpts []ldap.DialOpt
+
+	parsed, err := url.Parse(auth.URL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ldap url: %w", err)
+	}
+
+	// We specifically disable the warning "G402 (CWE-295): TLS InsecureSkipVerify may be true",
+	// because we specifically leave the option to disable TLS verificationю
+	if parsed.Scheme == "ldaps" { // #nosec G402
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: auth.TlsSkipVerify,
+		}
+		dialOpts = append(dialOpts, ldap.DialWithTLSConfig(tlsConfig))
+	}
+
+	dialOpts = append(dialOpts, ldap.DialWithDialer(dialer))
+
+	conn, err := ldap.DialURL(auth.URL, dialOpts...)
 	if err != nil {
 		return nil, err
 	}
