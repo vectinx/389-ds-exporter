@@ -74,13 +74,19 @@ func HealthHttpResponse(
 		}
 
 		uptime := time.Since(startTime).Seconds()
-
+		var errMsg string
+		if err == nil {
+			errMsg = ""
+		} else {
+			errMsg = err.Error()
+		}
 		healthResponse := map[string]any{
 			"status": map[string]string{
 				"ldap": ldapStatus,
 			},
 			"uptime_seconds": int(uptime),
 			"timestamp":      time.Now().Format(time.RFC3339),
+			"error":          errMsg,
 		}
 
 		if ldapAvailable {
