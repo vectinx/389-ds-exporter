@@ -21,6 +21,8 @@ const (
 	DefaultHTTPInitialReadTimeout int    = 3
 	DefaultLDAPPoolConnLimit      int    = 4
 	DefaultLDAPPoolGetTimeout     int    = 5
+	DefaultLDAPPoolIdleTime       int    = 300
+	DefaultLDAPPoolLifeTime       int    = 3600
 	DefaultLDAPDialTimeout        int    = 3
 	DefaultLogLevel               string = "INFO"
 	DefaultLogHandler             string = "stdout"
@@ -60,6 +62,8 @@ type ExporterConfig struct {
 	LDAPBindPw         string `yaml:"ldap_bind_pw"`
 	LDAPPoolConnLimit  int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout int    `yaml:"ldap_pool_get_timeout"`
+	LDAPPoolIdleTime   int    `yaml:"ldap_pool_idle_time"`
+	LDAPPoolLifeTime   int    `yaml:"ldap_pool_life_time"`
 	LDAPDialTimeout    int    `yaml:"ldap_dial_timeout"`
 
 	LogLevel        string `yaml:"log_level"`
@@ -89,6 +93,8 @@ type rawConfig struct {
 	LDAPBindPw         *string `yaml:"ldap_bind_pw"`
 	LDAPPoolConnLimit  *int    `yaml:"ldap_pool_conn_limit"`
 	LDAPPoolGetTimeout *int    `yaml:"ldap_pool_get_timeout"`
+	LDAPPoolIdleTime   *int    `yaml:"ldap_pool_idle_time"`
+	LDAPPoolLifeTime   *int    `yaml:"ldap_pool_life_time"`
 	LDAPDialTimeout    *int    `yaml:"ldap_dial_timeout"`
 
 	LogLevel        *string `yaml:"log_level"`
@@ -175,6 +181,16 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 		cfg.LDAPPoolGetTimeout = *r.LDAPPoolGetTimeout
 	} else {
 		cfg.LDAPPoolGetTimeout = DefaultLDAPPoolGetTimeout
+	}
+	if r.LDAPPoolIdleTime != nil {
+		cfg.LDAPPoolIdleTime = *r.LDAPPoolIdleTime
+	} else {
+		cfg.LDAPPoolIdleTime = DefaultLDAPPoolIdleTime
+	}
+	if r.LDAPPoolLifeTime != nil {
+		cfg.LDAPPoolLifeTime = *r.LDAPPoolLifeTime
+	} else {
+		cfg.LDAPPoolLifeTime = DefaultLDAPPoolLifeTime
 	}
 	if r.LDAPDialTimeout != nil {
 		cfg.LDAPDialTimeout = *r.LDAPDialTimeout

@@ -108,6 +108,15 @@ ldap_bind_pw: "12345678"
 #
 # ldap_dial_timeout: 3
 
+# The amount of time a connection can remain idle before it is closed.
+#
+# ldap_pool_idle_time: 10
+
+# The lifetime of a connection after which it will be closed.
+#
+# ldap_pool_life_time: 5
+
+
 # Logging level.
 # Can be DEBUG, INFO, WARNING, or ERROR.
 #

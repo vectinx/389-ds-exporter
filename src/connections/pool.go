@@ -109,6 +109,8 @@ type LDAPAuthConfig struct {
 type LDAPPoolConfig struct {
 	Auth           LDAPAuthConfig
 	MaxConnections int
+	MaxIdleTime    time.Duration
+	MaxLifeTime    time.Duration
 	DialTimeout    time.Duration
 	ConnFactory    func(*LDAPAuthConfig, time.Duration) (LdapConn, error)
 }
@@ -156,13 +158,12 @@ func NewLDAPPool(cfg LDAPPoolConfig) *LDAPPool {
 	pool := &LDAPPool{
 		cfg:         cfg,
 		connFactory: cfg.ConnFactory,
-		maxLifetime: 5 * time.Second,  // unlimited by default
-		maxIdleTime: 10 * time.Second, // unlimited by default
+		maxLifetime: cfg.MaxLifeTime,
+		maxIdleTime: cfg.MaxIdleTime,
 		maxOpen:     cfg.MaxConnections,
 		cleanerCh:   nil,
 	}
 
-	// Тут надо будет открыть connOpener и connCleaner
 	return pool
 }
 

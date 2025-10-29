@@ -154,6 +154,8 @@ func run() int {
 		},
 		DialTimeout:    time.Duration(cfg.LDAPDialTimeout) * time.Second,
 		MaxConnections: cfg.LDAPPoolConnLimit,
+		MaxIdleTime:    time.Duration(cfg.LDAPPoolIdleTime) * time.Second,
+		MaxLifeTime:    time.Duration(cfg.LDAPPoolLifeTime) * time.Second,
 		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
