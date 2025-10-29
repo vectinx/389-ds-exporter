@@ -11,7 +11,7 @@ import (
 )
 
 // GetLdapBackendType gets backend parameters from ldap and returns them as a BackendType.
-func GetLdapBackendType(conn *connections.PooledConn) (*string, error) {
+func GetLdapBackendType(conn *connections.Conn) (*string, error) {
 	if conn == nil {
 		return nil, errors.New("connection is nil")
 	}
@@ -37,7 +37,7 @@ func GetLdapBackendType(conn *connections.PooledConn) (*string, error) {
 }
 
 // GetLdapBackendInstances gets backend instances from ldap and returns them as []string.
-func GetLdapBackendInstances(conn *connections.PooledConn) ([]string, error) {
+func GetLdapBackendInstances(conn *connections.Conn) ([]string, error) {
 	if conn == nil {
 		return nil, errors.New("connection is nil")
 	}

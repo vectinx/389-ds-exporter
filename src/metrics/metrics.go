@@ -53,7 +53,7 @@ func registerCollectorIfEnabled(
 func registerGeneralCollectors(
 	cfg *config.ExporterConfig,
 	dsCollector *collectors.DSCollector,
-	connPool *connections.LdapConnectionPool,
+	connPool *connections.LDAPPool,
 	connPoolTimeout time.Duration,
 ) {
 	registerCollectorIfEnabled(dsCollector, "server", cfg, func() *collectors.LdapEntryCollector {
@@ -107,13 +107,13 @@ func registerGeneralCollectors(
 // determineBackendInstances determines the list of backends
 // to use based on the configuration and information in the LDAP directory.
 func determineBackendInstances(cfg *config.ExporterConfig,
-	pool *connections.LdapConnectionPool, timeout time.Duration) ([]string, error) {
+	pool *connections.LDAPPool, timeout time.Duration) ([]string, error) {
 
 	if len(cfg.DSBackendDBs) == 0 {
 		slog.Debug("Backend instances not specified, detecting automatically")
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		ldapConn, err := pool.Get(ctx)
+		ldapConn, err := pool.Conn(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("error getting connection to determine backend parameters: %w", err)
 		}
@@ -137,12 +137,12 @@ func determineBackendInstances(cfg *config.ExporterConfig,
 // determineBackendType determines backend type
 // to use based on the configuration and information in the LDAP directory.
 func determineBackendType(cfg *config.ExporterConfig,
-	pool *connections.LdapConnectionPool, timeout time.Duration) (string, error) {
+	pool *connections.LDAPPool, timeout time.Duration) (string, error) {
 
 	if cfg.DSBackendType == "" {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		ldapConn, err := pool.Get(ctx)
+		ldapConn, err := pool.Conn(ctx)
 		if err != nil {
 			return "", fmt.Errorf("error getting connection to determine backend parameters: %w", err)
 		}
@@ -168,7 +168,7 @@ func determineBackendType(cfg *config.ExporterConfig,
 // SetupPrometheusMetrics creates *prometheus.Registry, adds the required metrics and returns it.
 func SetupPrometheusMetrics(
 	cfg *config.ExporterConfig,
-	connPool *connections.LdapConnectionPool,
+	connPool *connections.LDAPPool,
 	connPoolTimeout time.Duration,
 ) *prometheus.Registry {
 

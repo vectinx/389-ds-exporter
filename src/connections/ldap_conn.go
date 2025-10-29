@@ -1,20 +1,11 @@
 package connections
 
 import (
-	"context"
 	"net"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
 )
-
-// LdapConn defines an interface for interacting with an LDAP server.
-// It includes basic operations such as binding, searching, and unbinding.
-type LdapConn interface {
-	Bind(string, string) error
-	Search(*ldap.SearchRequest) (*ldap.SearchResult, error)
-	Unbind() error
-}
 
 // RealLdapConn is a concrete implementation of the LdapConn interface,
 // using a real ldap.Conn from the go-ldap library.
@@ -23,8 +14,8 @@ type RealLdapConn struct {
 }
 
 // Bind authenticates to the LDAP server using the given bind DN and password.
-func (c *RealLdapConn) Bind(bind_dn string, bind_pw string) error {
-	return c.conn.Bind(bind_dn, bind_pw)
+func (c *RealLdapConn) Bind(auth LDAPAuthConfig) error {
+	return c.conn.Bind(auth.BindDN, auth.BindPw)
 }
 
 // Search executes the given LDAP search request and returns the result.
@@ -37,21 +28,17 @@ func (c *RealLdapConn) Unbind() error {
 	return c.conn.Unbind()
 }
 
+// Close closes the LDAP connection.
+func (c *RealLdapConn) Close() error {
+	return c.conn.Close()
+}
+
 // RealConnectionDialUrl establishes a connection to the LDAP server using the given URL.
 // It returns an LdapConn interface backed by a real connection, or an error if the connection fails.
-func RealConnectionDialUrl(url string, ctx context.Context, defaultTimeout time.Duration) (LdapConn, error) {
-	timeout := defaultTimeout
-
-	if deadline, ok := ctx.Deadline(); ok {
-		remaining := time.Until(deadline)
-		if remaining < timeout {
-			timeout = remaining
-		}
-	}
-
+func RealConnectionDialUrl(auth *LDAPAuthConfig, timeout time.Duration) (LdapConn, error) {
 	dialer := &net.Dialer{Timeout: timeout}
 
-	conn, err := ldap.DialURL(url, ldap.DialWithDialer(dialer))
+	conn, err := ldap.DialURL(auth.URL, ldap.DialWithDialer(dialer))
 	if err != nil {
 		return nil, err
 	}

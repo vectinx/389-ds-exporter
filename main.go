@@ -32,7 +32,7 @@ var (
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
 	LogFile    *os.File
-	ConnPool   *connections.LdapConnectionPool
+	ConnPool   *connections.LDAPPool
 	HttpServer *http.Server
 }
 
@@ -52,7 +52,7 @@ func (r *appResources) shutdown(ctx context.Context) error {
 
 	if r.ConnPool != nil {
 		slog.Debug("Closing LDAP connection pool ...")
-		err := r.ConnPool.Close(ctx)
+		err := r.ConnPool.Close()
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error closing ldap pool: %w", err))
 		}
@@ -146,21 +146,23 @@ func run() int {
 		"bind_dn", cfg.LDAPBindDN,
 	)
 
-	ldapConnPoolConfig := connections.LdapConnectionPoolConfig{
-		ServerURL:      cfg.LDAPServerURL,
-		BindDN:         cfg.LDAPBindDN,
-		BindPw:         cfg.LDAPBindPw,
+	ldapConnPoolConfig := connections.LDAPPoolConfig{
+		Auth: connections.LDAPAuthConfig{
+			URL:    cfg.LDAPServerURL,
+			BindDN: cfg.LDAPBindDN,
+			BindPw: cfg.LDAPBindPw,
+		},
 		DialTimeout:    time.Duration(cfg.LDAPDialTimeout) * time.Second,
 		MaxConnections: cfg.LDAPPoolConnLimit,
 		ConnFactory:    connections.RealConnectionDialUrl,
 	}
 
-	applicationResources.ConnPool = connections.NewLdapConnectionPool(ldapConnPoolConfig)
+	applicationResources.ConnPool = connections.NewLDAPPool(ldapConnPoolConfig)
 
 	dsMetricsRegistry := metrics.SetupPrometheusMetrics(
 		cfg,
 		applicationResources.ConnPool,
-		time.Duration(cfg.LDAPPoolGetTimeout)*time.Second,
+		300*time.Second,
 	)
 
 	// Create HTTP server

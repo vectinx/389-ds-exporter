@@ -46,7 +46,7 @@ type LdapMonitoredAttribute struct {
 
 // LdapCollector collects 389-ds metrics.
 type LdapEntryCollector struct {
-	connectionPool *connections.LdapConnectionPool
+	connectionPool *connections.LDAPPool
 	baseDn         string
 	attributes     map[string]LdapMonitoredAttribute
 	descriptors    map[string]*prometheus.Desc
@@ -57,7 +57,7 @@ type LdapEntryCollector struct {
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
 	subsystem string,
-	connectionPool *connections.LdapConnectionPool,
+	connectionPool *connections.LDAPPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,
@@ -175,7 +175,7 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.poolGetTimeout)
 	defer cancel()
-	conn, err := c.connectionPool.Get(ctx)
+	conn, err := c.connectionPool.Conn(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connection from pool: %w", err)

@@ -34,7 +34,7 @@ func DefaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http
 
 // HealthHttpResponse function performs exporter healcheck and returns its json result.
 func HealthHttpResponse(
-	pool *connections.LdapConnectionPool,
+	pool *connections.LDAPPool,
 	startTime time.Time,
 	timeout time.Duration,
 ) func(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +56,7 @@ func HealthHttpResponse(
 		)
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		conn, err := pool.Get(ctx)
+		conn, err := pool.Conn(ctx)
 
 		if err != nil {
 			slog.Warn("Healthcheck error", "err", err)
