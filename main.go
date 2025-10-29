@@ -164,7 +164,6 @@ func run() int {
 	dsMetricsRegistry := metrics.SetupPrometheusMetrics(
 		cfg,
 		applicationResources.ConnPool,
-		300*time.Second,
 	)
 
 	// Create HTTP server

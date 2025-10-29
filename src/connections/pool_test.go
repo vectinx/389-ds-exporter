@@ -3,7 +3,6 @@ package connections
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -11,7 +10,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 )
 
-// fake LDAP connection for testing
+// fake LDAP connection for testing.
 type fakeLDAP struct {
 	bindOK    bool
 	searchErr atomic.Value // error
@@ -22,7 +21,8 @@ type fakeLDAP struct {
 func (f *fakeLDAP) Bind(_ LDAPAuthConfig) error { f.bindOK = true; return nil }
 func (f *fakeLDAP) Search(_ *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	if f.hasErr.Load() {
-		if err, _ := f.searchErr.Load().(error); err != nil {
+		err, _ := f.searchErr.Load().(error)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -112,14 +112,19 @@ func TestPoolClose(t *testing.T) {
 	p := makePool(t)
 	ctx := context.Background()
 	c, err := p.Conn(ctx)
+
 	if err != nil {
 		t.Fatalf("conn: %v", err)
 	}
 	c.Close()
-	if err := p.Close(); err != nil {
+
+	err = p.Close()
+	if err != nil {
 		t.Fatalf("close: %v", err)
 	}
-	if _, err := p.Conn(ctx); err == nil {
+
+	_, err = p.Conn(ctx)
+	if err == nil {
 		t.Fatalf("expected error after pool close")
 	}
 }
@@ -129,7 +134,8 @@ func TestConnContextCanceledImmediately(t *testing.T) {
 	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := p.Conn(ctx); err == nil {
+	_, err := p.Conn(ctx)
+	if err == nil {
 		t.Fatalf("expected context error")
 	}
 }
@@ -265,7 +271,7 @@ func TestDialBindErrorsDoNotExceedMaxOpen(t *testing.T) {
 	var calls int64
 	factory := func(_ *LDAPAuthConfig, _ time.Duration) (LdapConn, error) {
 		if atomic.AddInt64(&calls, 1) == 1 {
-			return nil, fmt.Errorf("dial fail")
+			return nil, errors.New("dial fail")
 		}
 		return &fakeLDAP{}, nil
 	}

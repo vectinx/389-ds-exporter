@@ -192,11 +192,52 @@ func (pool *LDAPPool) Conn(ctx context.Context) (*Conn, error) {
 		conn: pc,
 	}
 	pool.mu.Lock()
-	slog.Debug("pool counters", "max", pool.maxOpen, "open", pool.numOpen, "waited", pool.waitCount.Load(), "lifetime", pool.lifeTimeClosedCount.Load(), "idletime", pool.idleTimeClosedCount.Load())
+	slog.Debug("pool counters",
+		"max", pool.maxOpen,
+		"open", pool.numOpen,
+		"waited", pool.waitCount.Load(),
+		"lifetime", pool.lifeTimeClosedCount.Load(),
+		"idletime", pool.idleTimeClosedCount.Load(),
+	)
 	pool.mu.Unlock()
 	return conn, nil
 }
 
+// Close closes the pool, rejecting new acquisitions, waking waiters, and
+// closing all idle connections. Active connections will be closed when
+// returned via Conn.Close().
+func (pool *LDAPPool) Close() error {
+	pool.mu.Lock()
+	if pool.closed {
+		pool.mu.Unlock()
+		return nil
+	}
+	pool.closed = true
+
+	// stop cleaner
+	if pool.cleanerCh != nil {
+		close(pool.cleanerCh)
+		pool.cleanerCh = nil
+	}
+
+	// close and clear idle connections
+	idle := pool.freeConns
+	pool.freeConns = nil
+
+	// wake all waiters with closed signal
+	pool.connRequests.CloseAndRemoveAll()
+
+	pool.mu.Unlock()
+
+	for _, pc := range idle {
+		if pc != nil {
+			_ = pc.close()
+		}
+	}
+	return nil
+}
+
+//nolint:gocognit,nestif
 func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*pooledConn, error) {
 	pool.mu.Lock()
 	if pool.closed {
@@ -206,7 +247,8 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 	pool.mu.Unlock()
 
 	// Check if context expired
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return nil, err
 	}
 
@@ -222,7 +264,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 		if pc.bad.Load() {
 			pool.mu.Unlock()
 			pool.lifeTimeClosedCount.Add(1)
-			pc.close()
+			_ = pc.close()
 			return nil, ErrBadConnection
 		}
 
@@ -230,7 +272,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 		if pc.expired(pool.maxLifetime) {
 			pool.mu.Unlock()
 			pool.lifeTimeClosedCount.Add(1)
-			pc.close()
+			_ = pc.close()
 			return nil, ErrBadConnection
 		}
 
@@ -238,7 +280,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 		if pool.maxIdleTime > 0 && pc.returnedAt.Add(pool.maxIdleTime).Before(time.Now()) {
 			pool.mu.Unlock()
 			pool.idleTimeClosedCount.Add(1)
-			pc.close()
+			_ = pc.close()
 			return nil, ErrBadConnection
 		}
 
@@ -295,12 +337,12 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 			if strategy == cachedOrNewConn && ret.err == nil {
 				if (ret.conn != nil && ret.conn.bad.Load()) || ret.conn.expired(pool.maxLifetime) {
 					pool.lifeTimeClosedCount.Add(1)
-					ret.conn.close()
+					_ = ret.conn.close()
 					return nil, ErrBadConnection
 				}
 				if pool.maxIdleTime > 0 && ret.conn.returnedAt.Add(pool.maxIdleTime).Before(time.Now()) {
 					pool.idleTimeClosedCount.Add(1)
-					ret.conn.close()
+					_ = ret.conn.close()
 					return nil, ErrBadConnection
 				}
 			}
@@ -325,7 +367,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 	}
 	err = lc.Bind(pool.cfg.Auth)
 	if err != nil {
-		lc.Close()
+		_ = lc.Close()
 		pool.mu.Lock()
 		pool.numOpen-- // correct for earlier optimism
 		pool.mu.Unlock()
@@ -365,7 +407,7 @@ func (pool *LDAPPool) putConn(pc *pooledConn) {
 		// take care of that.
 		// pool.maybeOpenNewConnections()
 		pool.mu.Unlock()
-		pc.close()
+		_ = pc.close()
 		return
 	}
 
@@ -373,7 +415,7 @@ func (pool *LDAPPool) putConn(pc *pooledConn) {
 	pool.mu.Unlock()
 
 	if !added {
-		pc.close()
+		_ = pc.close()
 		return
 	}
 }
@@ -476,7 +518,7 @@ func (pool *LDAPPool) connectionCleaner(d time.Duration) {
 		d, closing := pool.connectionCleanerRunLocked(d)
 		pool.mu.Unlock()
 		for _, c := range closing {
-			c.close()
+			_ = c.close()
 		}
 
 		if d < minInterval {
@@ -491,40 +533,6 @@ func (pool *LDAPPool) connectionCleaner(d time.Duration) {
 		}
 		t.Reset(d)
 	}
-}
-
-// Close closes the pool, rejecting new acquisitions, waking waiters, and
-// closing all idle connections. Active connections will be closed when
-// returned via Conn.Close().
-func (pool *LDAPPool) Close() error {
-	pool.mu.Lock()
-	if pool.closed {
-		pool.mu.Unlock()
-		return nil
-	}
-	pool.closed = true
-
-	// stop cleaner
-	if pool.cleanerCh != nil {
-		close(pool.cleanerCh)
-		pool.cleanerCh = nil
-	}
-
-	// close and clear idle connections
-	idle := pool.freeConns
-	pool.freeConns = nil
-
-	// wake all waiters with closed signal
-	pool.connRequests.CloseAndRemoveAll()
-
-	pool.mu.Unlock()
-
-	for _, pc := range idle {
-		if pc != nil {
-			pc.close()
-		}
-	}
-	return nil
 }
 
 // connectionCleanerRunLocked removes connections that should be closed from
@@ -648,7 +656,7 @@ func (s *connRequestSet) Add(v chan connRequest) connRequestDelHandle {
 // Delete removes an element from the set.
 //
 // It reports whether the element was deleted. (It can return false if a caller
-// of TakeRandom took it meanwhile, or upon the second call to Delete)
+// of TakeRandom took it meanwhile, or upon the second call to Delete).
 func (s *connRequestSet) Delete(h connRequestDelHandle) bool {
 	idx := *h.idx
 	if idx < 0 {
@@ -656,6 +664,19 @@ func (s *connRequestSet) Delete(h connRequestDelHandle) bool {
 	}
 	s.deleteIndex(idx)
 	return true
+}
+
+// TakeRandom returns and removes a random element from s
+// and reports whether there was one to take. (It returns ok=false
+// if the set is empty.)
+func (s *connRequestSet) TakeRandom() (chan connRequest, bool) {
+	if len(s.s) == 0 {
+		return nil, false
+	}
+	pick := rand.Intn(len(s.s))
+	e := s.s[pick]
+	s.deleteIndex(pick)
+	return e.req, true
 }
 
 func (s *connRequestSet) deleteIndex(idx int) {
@@ -671,17 +692,4 @@ func (s *connRequestSet) deleteIndex(idx int) {
 	// Zero out last element (for GC) before shrinking the slice.
 	s.s[len(s.s)-1] = connRequestAndIndex{}
 	s.s = s.s[:len(s.s)-1]
-}
-
-// TakeRandom returns and removes a random element from s
-// and reports whether there was one to take. (It returns ok=false
-// if the set is empty.)
-func (s *connRequestSet) TakeRandom() (v chan connRequest, ok bool) {
-	if len(s.s) == 0 {
-		return nil, false
-	}
-	pick := rand.Intn(len(s.s))
-	e := s.s[pick]
-	s.deleteIndex(pick)
-	return e.req, true
 }

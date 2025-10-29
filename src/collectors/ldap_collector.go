@@ -194,6 +194,13 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 
 	returnValue := make(map[string][]string)
 
+	if len(searchResult.Entries) < 1 {
+		slog.Warn("LDAP request returned no entries. The configuration may be incorrect or the user may not have permissions",
+			"req_dn", searchAttributesRequest.BaseDN,
+			"req_attrs", searchAttributesRequest.Attributes)
+		return returnValue, nil
+	}
+
 	for _, attr := range searchResult.Entries[0].Attributes {
 		if !slices.Contains(attributeList, attr.Name) {
 			continue

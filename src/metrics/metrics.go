@@ -169,7 +169,6 @@ func determineBackendType(cfg *config.ExporterConfig,
 func SetupPrometheusMetrics(
 	cfg *config.ExporterConfig,
 	connPool *connections.LDAPPool,
-	connPoolTimeout time.Duration,
 ) *prometheus.Registry {
 
 	slog.Info("Creating collectors...")
@@ -178,14 +177,14 @@ func SetupPrometheusMetrics(
 
 	dsCollector := collectors.NewDSCollector()
 
-	registerGeneralCollectors(cfg, dsCollector, connPool, connPoolTimeout)
+	registerGeneralCollectors(cfg, dsCollector, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
 
 	/*
 		Since 389-ds has a different set of monitoring metrics for different backends (Berkley DB and LMDB),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
 
-	backendType, err := determineBackendType(cfg, connPool, connPoolTimeout)
+	backendType, err := determineBackendType(cfg, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
 
 	if err != nil {
 		slog.Error("Error detecting backend type", "err", err)
@@ -202,7 +201,7 @@ func SetupPrometheusMetrics(
 					"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapBDBServerCacheMetrics(),
 					prometheus.Labels{},
-					connPoolTimeout,
+					time.Duration(cfg.LDAPPoolGetTimeout),
 				)
 			})
 
@@ -213,7 +212,7 @@ func SetupPrometheusMetrics(
 					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapBDBDatabaseLDBM(),
 					prometheus.Labels{},
-					connPoolTimeout,
+					time.Duration(cfg.LDAPPoolGetTimeout),
 				)
 			})
 		case config.BackendMDB:
@@ -226,7 +225,7 @@ func SetupPrometheusMetrics(
 					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapMDBDatabaseLDBM(),
 					prometheus.Labels{},
-					connPoolTimeout,
+					time.Duration(cfg.LDAPPoolGetTimeout),
 				)
 			})
 		default:
@@ -238,7 +237,7 @@ func SetupPrometheusMetrics(
 		}
 	}
 
-	detectedBackendInstances, err := determineBackendInstances(cfg, connPool, connPoolTimeout)
+	detectedBackendInstances, err := determineBackendInstances(cfg, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
 	if err != nil {
 		slog.Error("Error detecting backend instances", "err", err)
 	} else {
@@ -251,7 +250,7 @@ func SetupPrometheusMetrics(
 						"cn=monitor,cn="+detectedBackendInstances[i]+",cn=ldbm database,cn=plugins,cn=config",
 						GetLdapBackendCaches(),
 						prometheus.Labels{"database": detectedBackendInstances[i]},
-						connPoolTimeout,
+						time.Duration(cfg.LDAPPoolGetTimeout),
 					)
 				})
 		}
