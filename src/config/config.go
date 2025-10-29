@@ -291,6 +291,7 @@ func (c *ExporterConfig) Validate() error {
 }
 
 func ReadConfig(filename string) (*ExporterConfig, error) {
+	// #nosec G304: path comes from trusted config
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
