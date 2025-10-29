@@ -10,21 +10,21 @@ import (
 
 const exporterNamespace = "ds"
 
-// internalCollector describes the interface of the internal collector that collects data.
-type internalCollector interface {
+// InternalCollector describes the interface of the internal collector that collects data.
+type InternalCollector interface {
 	Get(chan<- prometheus.Metric) error
 }
 
 // DSCollector implements prometheus.Collector interface.
 type DSCollector struct {
-	collectors         map[string]internalCollector
+	collectors         map[string]InternalCollector
 	scrapeDurationDesc *prometheus.Desc
 	scrapeSuccessDesc  *prometheus.Desc
 }
 
 func NewDSCollector() *DSCollector {
 	collector := DSCollector{
-		collectors: make(map[string]internalCollector),
+		collectors: make(map[string]InternalCollector),
 		scrapeDurationDesc: prometheus.NewDesc(
 			prometheus.BuildFQName(exporterNamespace, "scrape", "duration_seconds"),
 			"Duration of a collector scrape",
@@ -60,7 +60,7 @@ func (c *DSCollector) Collect(channel chan<- prometheus.Metric) {
 	wg.Wait()
 }
 
-func (c *DSCollector) Register(name string, collector internalCollector) {
+func (c *DSCollector) Register(name string, collector InternalCollector) {
 	c.collectors[name] = collector
 }
 

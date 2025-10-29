@@ -137,6 +137,14 @@ type LDAPPool struct {
 	connFactory func(*LDAPAuthConfig, time.Duration) (LdapConn, error)
 }
 
+type LDAPPoolStat struct {
+	Open           int
+	ClosedIdleTime int
+	ClosedLifeTime int
+	WaitCount      int
+	WaitDuration   int
+}
+
 // connReuseStrategy determines how (*pool).conn returns database connections.
 type connReuseStrategy uint8
 
@@ -235,6 +243,22 @@ func (pool *LDAPPool) Close() error {
 		}
 	}
 	return nil
+}
+
+// Stat returns pool usage statistics
+func (pool *LDAPPool) Stat() LDAPPoolStat {
+	stat := LDAPPoolStat{}
+
+	pool.mu.Lock()
+	stat.Open = pool.numOpen
+	pool.mu.Unlock()
+
+	stat.WaitCount = int(pool.waitCount.Load())
+	stat.WaitDuration = int(pool.waitDuration.Load())
+	stat.ClosedIdleTime = int(pool.idleTimeClosedCount.Load())
+	stat.ClosedLifeTime = int(pool.lifeTimeClosedCount.Load())
+
+	return stat
 }
 
 //nolint:gocognit,nestif

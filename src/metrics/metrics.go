@@ -23,6 +23,7 @@ func standardCollectors() []string {
 		"ndn-cache",
 		"ldbm-instance",
 		"numsubordinates",
+		"exporter-pool",
 	}
 }
 
@@ -31,7 +32,7 @@ func registerCollectorIfEnabled(
 	dsCollector *collectors.DSCollector,
 	name string,
 	cfg *config.ExporterConfig,
-	collector func() *collectors.LdapEntryCollector,
+	collector func() collectors.InternalCollector,
 ) {
 	collectorEnabled := false
 	switch cfg.CollectorsDefault {
@@ -56,7 +57,11 @@ func registerGeneralCollectors(
 	connPool *connections.LDAPPool,
 	connPoolTimeout time.Duration,
 ) {
-	registerCollectorIfEnabled(dsCollector, "server", cfg, func() *collectors.LdapEntryCollector {
+	registerCollectorIfEnabled(dsCollector, "exporter-pool", cfg, func() collectors.InternalCollector {
+		return collectors.NewPoolCollector("exporter_pool", connPool, prometheus.Labels{})
+	})
+
+	registerCollectorIfEnabled(dsCollector, "server", cfg, func() collectors.InternalCollector {
 		return collectors.NewLdapEntryCollector(
 			"server",
 			connPool,
@@ -67,7 +72,7 @@ func registerGeneralCollectors(
 		)
 	})
 
-	registerCollectorIfEnabled(dsCollector, "snmp-server", cfg, func() *collectors.LdapEntryCollector {
+	registerCollectorIfEnabled(dsCollector, "snmp-server", cfg, func() collectors.InternalCollector {
 		return collectors.NewLdapEntryCollector(
 			"snmp_server",
 			connPool,
@@ -78,7 +83,7 @@ func registerGeneralCollectors(
 		)
 	})
 
-	registerCollectorIfEnabled(dsCollector, "ndn-cache", cfg, func() *collectors.LdapEntryCollector {
+	registerCollectorIfEnabled(dsCollector, "ndn-cache", cfg, func() collectors.InternalCollector {
 		return collectors.NewLdapEntryCollector(
 			"ldbm",
 			connPool,
@@ -91,7 +96,7 @@ func registerGeneralCollectors(
 
 	for _, entry := range cfg.DSNumSubordinateRecords {
 		e := entry
-		registerCollectorIfEnabled(dsCollector, "numsubordinates_"+e, cfg, func() *collectors.LdapEntryCollector {
+		registerCollectorIfEnabled(dsCollector, "numsubordinates_"+e, cfg, func() collectors.InternalCollector {
 			return collectors.NewLdapEntryCollector(
 				"numsubordinates",
 				connPool,
@@ -176,15 +181,16 @@ func SetupPrometheusMetrics(
 	dsMetricsRegistry := prometheus.NewRegistry()
 
 	dsCollector := collectors.NewDSCollector()
+	poolGetTimeout := time.Duration(cfg.LDAPPoolGetTimeout) * time.Second
 
-	registerGeneralCollectors(cfg, dsCollector, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
+	registerGeneralCollectors(cfg, dsCollector, connPool, poolGetTimeout)
 
 	/*
 		Since 389-ds has a different set of monitoring metrics for different backends (Berkley DB and LMDB),
 		at the initialization stage we select the metrics that correspond to the selected backend
 	*/
 
-	backendType, err := determineBackendType(cfg, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
+	backendType, err := determineBackendType(cfg, connPool, poolGetTimeout)
 
 	if err != nil {
 		slog.Error("Error detecting backend type", "err", err)
@@ -194,38 +200,38 @@ func SetupPrometheusMetrics(
 
 			slog.Info("Berkeley DB backend implementation detected")
 
-			registerCollectorIfEnabled(dsCollector, "bdb-caches", cfg, func() *collectors.LdapEntryCollector {
+			registerCollectorIfEnabled(dsCollector, "bdb-caches", cfg, func() collectors.InternalCollector {
 				return collectors.NewLdapEntryCollector(
 					"bdb",
 					connPool,
 					"cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapBDBServerCacheMetrics(),
 					prometheus.Labels{},
-					time.Duration(cfg.LDAPPoolGetTimeout),
+					poolGetTimeout,
 				)
 			})
 
-			registerCollectorIfEnabled(dsCollector, "bdb-internal", cfg, func() *collectors.LdapEntryCollector {
+			registerCollectorIfEnabled(dsCollector, "bdb-internal", cfg, func() collectors.InternalCollector {
 				return collectors.NewLdapEntryCollector(
 					"bdb",
 					connPool,
 					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapBDBDatabaseLDBM(),
 					prometheus.Labels{},
-					time.Duration(cfg.LDAPPoolGetTimeout),
+					poolGetTimeout,
 				)
 			})
 		case config.BackendMDB:
 			slog.Info("LMDB backend implementation detected")
 
-			registerCollectorIfEnabled(dsCollector, "lmdb-internal", cfg, func() *collectors.LdapEntryCollector {
+			registerCollectorIfEnabled(dsCollector, "lmdb-internal", cfg, func() collectors.InternalCollector {
 				return collectors.NewLdapEntryCollector(
 					"lmdb",
 					connPool,
 					"cn=database,cn=monitor,cn=ldbm database,cn=plugins,cn=config",
 					GetLdapMDBDatabaseLDBM(),
 					prometheus.Labels{},
-					time.Duration(cfg.LDAPPoolGetTimeout),
+					poolGetTimeout,
 				)
 			})
 		default:
@@ -237,20 +243,20 @@ func SetupPrometheusMetrics(
 		}
 	}
 
-	detectedBackendInstances, err := determineBackendInstances(cfg, connPool, time.Duration(cfg.LDAPPoolGetTimeout))
+	detectedBackendInstances, err := determineBackendInstances(cfg, connPool, poolGetTimeout)
 	if err != nil {
 		slog.Error("Error detecting backend instances", "err", err)
 	} else {
 		for i := range detectedBackendInstances {
 			registerCollectorIfEnabled(dsCollector, "ldbm-instance_"+detectedBackendInstances[i], cfg,
-				func() *collectors.LdapEntryCollector {
+				func() collectors.InternalCollector {
 					return collectors.NewLdapEntryCollector(
 						"ldbm_instance",
 						connPool,
 						"cn=monitor,cn="+detectedBackendInstances[i]+",cn=ldbm database,cn=plugins,cn=config",
 						GetLdapBackendCaches(),
 						prometheus.Labels{"database": detectedBackendInstances[i]},
-						time.Duration(cfg.LDAPPoolGetTimeout),
+						poolGetTimeout,
 					)
 				})
 		}
