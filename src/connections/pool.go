@@ -2,10 +2,11 @@ package connections
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"log/slog"
-	"math/rand"
+	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -245,7 +246,7 @@ func (pool *LDAPPool) Close() error {
 	return nil
 }
 
-// Stat returns pool usage statistics
+// Stat returns pool usage statistics.
 func (pool *LDAPPool) Stat() LDAPPoolStat {
 	stat := LDAPPoolStat{}
 
@@ -697,9 +698,10 @@ func (s *connRequestSet) TakeRandom() (chan connRequest, bool) {
 	if len(s.s) == 0 {
 		return nil, false
 	}
-	pick := rand.Intn(len(s.s))
-	e := s.s[pick]
-	s.deleteIndex(pick)
+
+	pick, _ := rand.Int(rand.Reader, big.NewInt(int64(len(s.s))))
+	e := s.s[pick.Int64()]
+	s.deleteIndex(int(pick.Int64()))
 	return e.req, true
 }
 

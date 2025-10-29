@@ -1,11 +1,12 @@
 package collectors
 
 import (
-	"389-ds-exporter/src/connections"
 	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	"389-ds-exporter/src/connections"
 )
 
 // PoolCollector collects internal LDAP-pool metrics.
@@ -75,6 +76,10 @@ func (c *PoolCollector) Get(channel chan<- prometheus.Metric) error {
 	channel <- prometheus.MustNewConstMetric(c.descClosedIdle, prometheus.CounterValue, float64(stat.ClosedIdleTime))
 	channel <- prometheus.MustNewConstMetric(c.descClosedLife, prometheus.CounterValue, float64(stat.ClosedLifeTime))
 	channel <- prometheus.MustNewConstMetric(c.descWaitCount, prometheus.CounterValue, float64(stat.WaitCount))
-	channel <- prometheus.MustNewConstMetric(c.descWaitDuration, prometheus.CounterValue, float64(time.Duration(stat.WaitDuration).Milliseconds()))
+	channel <- prometheus.MustNewConstMetric(
+		c.descWaitDuration,
+		prometheus.CounterValue,
+		float64(time.Duration(stat.WaitDuration).Milliseconds()),
+	)
 	return nil
 }

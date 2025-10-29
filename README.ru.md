@@ -1,4 +1,5 @@
 # 389-ds-exporter
+[![CI](https://github.com/vectinx/389-ds-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/vectinx/389-ds-exporter/actions/workflows/ci.yml)
 
 Экспортер Prometheus для 389-ds, собирающий метрики по протоколу LDAP
 
