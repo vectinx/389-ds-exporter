@@ -5,12 +5,16 @@ import (
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/promslog/flag"
 	"github.com/prometheus/common/version"
+	"github.com/prometheus/exporter-toolkit/web"
+	"github.com/prometheus/exporter-toolkit/web/kingpinflag"
 )
 
 type CmdArguments struct {
-	ConfigFile     string
-	IsConfigCheck  bool
-	PromslogConfig *promslog.Config
+	ConfigFile           string
+	IsConfigCheck        bool
+	PromslogConfig       *promslog.Config
+	ExporterToolkitFlags *web.FlagConfig
+	MetricsPath          string
 }
 
 func ParseCmdArguments() *CmdArguments {
@@ -19,6 +23,11 @@ func ParseCmdArguments() *CmdArguments {
 				Default("config.yml").
 				String()
 		checkConfig = kingpin.Flag("check-config", "Validate the current configuration and print it to stdout").Bool()
+		metricsPath = kingpin.Flag(
+			"web.metrics.path",
+			"Path under which to expose metrics.",
+		).Default("/metrics").String()
+		toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9389")
 	)
 	args := &CmdArguments{}
 
@@ -31,6 +40,8 @@ func ParseCmdArguments() *CmdArguments {
 
 	args.ConfigFile = *configFilePath
 	args.IsConfigCheck = *checkConfig
+	args.ExporterToolkitFlags = toolkitFlags
+	args.MetricsPath = *metricsPath
 
 	return args
 }

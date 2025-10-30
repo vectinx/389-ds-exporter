@@ -31,7 +31,6 @@
 #
 # ds_backend_dbs: []
 
-
 # List of LDAP entries for which information about the number of subrecords (numsubordinates) will be collected.
 #
 # ds_numsubordinate_records: []
@@ -43,42 +42,6 @@
 # If the value is 0, it is assumed that the timeout has already expired and graceful shutdown will be skipped.
 #
 # shutdown_timeout: 5
-
-# The address and port on which the server will listen for incoming connections.
-# Use the format <host>:<port>. For example:
-# ":9389" will listen on port 9389 on all network interfaces.
-# "0.0.0.0:9389" will listen on port 9389 on all IPv4 interfaces.
-# "192.168.0.10:9389" will listen on port 9389 only on 192.168.0.10.
-#
-# http_listen_address: "127.0.0.1:9389"
-
-# HTTP endpoint where metrics are exposed.
-#
-# http_metrics_path: "/metrics"
-
-# Maximum duration allowed for reading the entire request, including the body.
-# A zero or negative value means no timeout.
-#
-# http_read_timeout: 10
-
-# Maximum duration before timing out writes of the response.
-# This timeout is reset whenever a new request’s header is read.
-# A zero or negative value means no timeout.
-#
-# http_write_timeout: 15
-
-# Maximum duration to wait for the next request when keep-alives are enabled.
-# If zero, the value of ReadTimeout is used.
-# If negative, or if both this and ReadTimeout are zero or negative, there is no timeout.
-#
-# http_idle_timeout: 60
-
-# Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
-# If the client doesn't send any data within this time, the connection will be closed.
-# A value of 0 disables the timeout, meaning the server will wait indefinitely.
-#
-# http_initial_read_timeout: 3
-
 
 # LDAP server URL in RFC-2255 format. For example:
 # "ldap://localhost:389" or "ldaps://remote-server"

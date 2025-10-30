@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,10 +14,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/version"
+	"github.com/prometheus/exporter-toolkit/web"
 
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
-	"389-ds-exporter/src/connections"
+	expldap "389-ds-exporter/src/ldap"
 	"389-ds-exporter/src/metrics"
 	"389-ds-exporter/src/utils"
 )
@@ -26,7 +26,7 @@ import (
 // appResources struct contains pointers to resources that must be closed when the program terminates.
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
-	ConnPool   *connections.LDAPPool
+	ConnPool   *expldap.LDAPPool
 	HttpServer *http.Server
 }
 
@@ -123,8 +123,8 @@ func run() int {
 
 	slog.Info("LDAP server info", "url", cfg.LDAPServerURL, "bind_dn", cfg.LDAPBindDN)
 
-	ldapConnPoolConfig := connections.LDAPPoolConfig{
-		Auth: connections.LDAPAuthConfig{
+	ldapConnPoolConfig := expldap.LDAPPoolConfig{
+		Auth: expldap.LDAPAuthConfig{
 			URL:           cfg.LDAPServerURL,
 			BindDN:        cfg.LDAPBindDN,
 			BindPw:        cfg.LDAPBindPw,
@@ -135,10 +135,10 @@ func run() int {
 		MaxConnections: cfg.LDAPPoolConnLimit,
 		MaxIdleTime:    time.Duration(cfg.LDAPPoolIdleTime) * time.Second,
 		MaxLifeTime:    time.Duration(cfg.LDAPPoolLifeTime) * time.Second,
-		ConnFactory:    connections.RealConnectionDialUrl,
+		ConnFactory:    expldap.RealConnectionDialUrl,
 	}
 
-	applicationResources.ConnPool = connections.NewLDAPPool(ldapConnPoolConfig)
+	applicationResources.ConnPool = expldap.NewLDAPPool(ldapConnPoolConfig)
 
 	dsMetricsRegistry := metrics.SetupPrometheusMetrics(
 		cfg,
@@ -146,28 +146,37 @@ func run() int {
 	)
 
 	// Create HTTP server
-	applicationResources.HttpServer = &http.Server{
-		Addr:         cfg.HTTPListenAddress,
-		Handler:      http.DefaultServeMux,
-		ReadTimeout:  time.Duration(cfg.HTTPReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(cfg.HTTPWriteTimeout) * time.Second,
-		IdleTimeout:  time.Duration(cfg.HTTPIdleTimeout) * time.Second,
-	}
-
-	// Create HTTP Listener with timeouts
-	listener, err := net.Listen("tcp", cfg.HTTPListenAddress)
-	if err != nil {
-		slog.Error("Failed to start TCP listener", "err", err)
-		return 1
-	}
-	timeoutListener := connections.NewTimeoutListener(
-		listener,
-		time.Duration(cfg.HTTPInitialReadTimeout)*time.Second,
-	)
+	// #nosec G112: HTTP timeouts will be configured later using the exporter-toolkit
+	applicationResources.HttpServer = &http.Server{}
 
 	// Register HTTP endpoinnts
-	http.Handle(cfg.HTTPMetricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
-	http.HandleFunc("/", utils.DefaultHttpResponse(cfg.HTTPMetricsPath))
+	http.Handle(args.MetricsPath, promhttp.HandlerFor(dsMetricsRegistry, promhttp.HandlerOpts{}))
+
+	if args.MetricsPath != "/" {
+		landingConfig := web.LandingConfig{
+			Name:        "389-ds-exporter",
+			Description: "Prometheus exporter for 389 Directory Server",
+			Version:     version.Info(),
+			HeaderColor: "#0c7982",
+			Profiling:   "false",
+			Links: []web.LandingLinks{
+				{
+					Address: args.MetricsPath,
+					Text:    "Metrics",
+				},
+				{
+					Address: "/health",
+					Text:    "Health",
+				},
+			},
+		}
+		landingPage, err := web.NewLandingPage(landingConfig)
+		if err != nil {
+			slog.Error(err.Error())
+			return 1
+		}
+		http.Handle("/", landingPage)
+	}
 
 	http.HandleFunc("/health", utils.HealthHttpResponse(
 		applicationResources.ConnPool,
@@ -182,9 +191,8 @@ func run() int {
 
 	// Start HTTP server
 	go func() {
-		slog.Info("Starting HTTP server at " + cfg.HTTPListenAddress)
-		err := applicationResources.HttpServer.Serve(timeoutListener)
-		if err != nil && err != http.ErrServerClosed {
+		err := web.ListenAndServe(applicationResources.HttpServer, args.ExporterToolkitFlags, logger)
+		if !errors.Is(err, http.ErrServerClosed) {
 			serverErrCh <- err
 		}
 	}()

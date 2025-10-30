@@ -12,20 +12,14 @@ import (
 type EnabledCollectorsType string
 
 const (
-	DefaultGlobalShutdownTimeout  int    = 5
-	DefaultHTTPListenAddress      string = "127.0.0.1:9389"
-	DefaultHTTPMetricsPath        string = "/metrics"
-	DefaultHTTPReadTimeout        int    = 10
-	DefaultHTTPWriteTimeout       int    = 15
-	DefaultHTTPIdleTimeout        int    = 60
-	DefaultHTTPInitialReadTimeout int    = 3
-	DefaultLDAPTlsSkipVerify      bool   = false
-	DefaultLDAPPoolConnLimit      int    = 4
-	DefaultLDAPPoolGetTimeout     int    = 5
-	DefaultLDAPPoolIdleTime       int    = 300
-	DefaultLDAPPoolLifeTime       int    = 3600
-	DefaultLDAPDialTimeout        int    = 3
-	DefaultCollectorsDefault      string = "standard"
+	DefaultGlobalShutdownTimeout int    = 5
+	DefaultLDAPTlsSkipVerify     bool   = false
+	DefaultLDAPPoolConnLimit     int    = 4
+	DefaultLDAPPoolGetTimeout    int    = 5
+	DefaultLDAPPoolIdleTime      int    = 300
+	DefaultLDAPPoolLifeTime      int    = 3600
+	DefaultLDAPDialTimeout       int    = 3
+	DefaultCollectorsDefault     string = "standard"
 
 	BackendBDB string = "bdb"
 	BackendMDB string = "mdb"
@@ -46,13 +40,6 @@ type ExporterConfig struct {
 	DSBackendType           string   `yaml:"ds_backend_type"`
 	DSBackendDBs            []string `yaml:"ds_backend_dbs"`
 
-	HTTPListenAddress      string `yaml:"http_listen_address"`
-	HTTPMetricsPath        string `yaml:"http_metrics_path"`
-	HTTPReadTimeout        int    `yaml:"http_read_timeout"`
-	HTTPWriteTimeout       int    `yaml:"http_write_timeout"`
-	HTTPIdleTimeout        int    `yaml:"http_idle_timeout"`
-	HTTPInitialReadTimeout int    `yaml:"http_initial_read_timeout"`
-
 	LDAPServerURL      string `yaml:"ldap_server_url"`
 	LDAPBindDN         string `yaml:"ldap_bind_dn"`
 	LDAPBindPw         string `yaml:"ldap_bind_pw"`
@@ -72,13 +59,6 @@ type rawConfig struct {
 	DSBackendType           *string  `yaml:"ds_backend_type"`
 	DSBackendDBs            []string `yaml:"ds_backend_dbs"`
 
-	HTTPListenAddress      *string `yaml:"http_listen_address"`
-	HTTPMetricsPath        *string `yaml:"http_metrics_path"`
-	HTTPReadTimeout        *int    `yaml:"http_read_timeout"`
-	HTTPWriteTimeout       *int    `yaml:"http_write_timeout"`
-	HTTPIdleTimeout        *int    `yaml:"http_idle_timeout"`
-	HTTPInitialReadTimeout *int    `yaml:"http_initial_read_timeout"`
-
 	LDAPServerURL      *string `yaml:"ldap_server_url"`
 	LDAPBindDN         *string `yaml:"ldap_bind_dn"`
 	LDAPBindPw         *string `yaml:"ldap_bind_pw"`
@@ -90,7 +70,6 @@ type rawConfig struct {
 	LDAPDialTimeout    *int    `yaml:"ldap_dial_timeout"`
 }
 
-//nolint:gocognit
 func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg := &ExporterConfig{}
 
@@ -115,38 +94,6 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg.CollectorsEnabled = r.CollectorsEnabled
 	cfg.DSNumSubordinateRecords = r.DSNumSubordinateRecords
 	cfg.DSBackendDBs = r.DSBackendDBs
-
-	// HTTP
-	if r.HTTPListenAddress != nil {
-		cfg.HTTPListenAddress = *r.HTTPListenAddress
-	} else {
-		cfg.HTTPListenAddress = DefaultHTTPListenAddress
-	}
-	if r.HTTPMetricsPath != nil {
-		cfg.HTTPMetricsPath = *r.HTTPMetricsPath
-	} else {
-		cfg.HTTPMetricsPath = DefaultHTTPMetricsPath
-	}
-	if r.HTTPReadTimeout != nil {
-		cfg.HTTPReadTimeout = *r.HTTPReadTimeout
-	} else {
-		cfg.HTTPReadTimeout = DefaultHTTPReadTimeout
-	}
-	if r.HTTPWriteTimeout != nil {
-		cfg.HTTPWriteTimeout = *r.HTTPWriteTimeout
-	} else {
-		cfg.HTTPWriteTimeout = DefaultHTTPWriteTimeout
-	}
-	if r.HTTPIdleTimeout != nil {
-		cfg.HTTPIdleTimeout = *r.HTTPIdleTimeout
-	} else {
-		cfg.HTTPIdleTimeout = DefaultHTTPIdleTimeout
-	}
-	if r.HTTPInitialReadTimeout != nil {
-		cfg.HTTPInitialReadTimeout = *r.HTTPInitialReadTimeout
-	} else {
-		cfg.HTTPInitialReadTimeout = DefaultHTTPInitialReadTimeout
-	}
 
 	// LDAP
 	if r.LDAPServerURL != nil {
@@ -202,10 +149,6 @@ func (c *ExporterConfig) Validate() error {
 	// Also allow an empty value if the user wants the backend to be automatically detected.
 	if !slices.Contains([]string{BackendBDB, BackendMDB, ""}, c.DSBackendType) {
 		return fmt.Errorf("invalid ds_backend_type: %s (must be 'bdb', 'mdb' or empty)", c.DSBackendType)
-	}
-
-	if c.HTTPInitialReadTimeout <= 0 {
-		return errors.New("http_initial_read_timeout should be greater than 0")
 	}
 
 	if c.LDAPServerURL == "" {

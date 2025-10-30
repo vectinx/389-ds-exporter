@@ -15,7 +15,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"389-ds-exporter/src/connections"
+	expldap "389-ds-exporter/src/ldap"
 )
 
 /*
@@ -46,7 +46,7 @@ type LdapMonitoredAttribute struct {
 
 // LdapCollector collects 389-ds metrics.
 type LdapEntryCollector struct {
-	connectionPool *connections.LDAPPool
+	connectionPool *expldap.LDAPPool
 	baseDn         string
 	attributes     map[string]LdapMonitoredAttribute
 	descriptors    map[string]*prometheus.Desc
@@ -57,7 +57,7 @@ type LdapEntryCollector struct {
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
 	subsystem string,
-	connectionPool *connections.LDAPPool,
+	connectionPool *expldap.LDAPPool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,

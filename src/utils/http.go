@@ -3,38 +3,18 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"html"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
 
-	"389-ds-exporter/src/connections"
+	expldap "389-ds-exporter/src/ldap"
 )
-
-// DefaultHttpResponse function generates a standard HTML response for the exporter.
-func DefaultHttpResponse(metricsPath string) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := fmt.Fprintf(w, `<html>
-	<head>
-		<title>389-ds-exporter</title>
-	</head>
-	<body>
-		<p>Metrics are <a href="%s">here</a></p>
-	</body>
-</html>
-`, html.EscapeString(metricsPath))
-		if err != nil {
-			slog.Error("Error writing HTTP answer", "err", err)
-		}
-	}
-}
 
 // HealthHttpResponse function performs exporter healcheck and returns its json result.
 func HealthHttpResponse(
-	pool *connections.LDAPPool,
+	pool *expldap.LDAPPool,
 	startTime time.Time,
 	timeout time.Duration,
 ) func(w http.ResponseWriter, r *http.Request) {

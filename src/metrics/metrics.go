@@ -11,7 +11,7 @@ import (
 
 	"389-ds-exporter/src/collectors"
 	"389-ds-exporter/src/config"
-	"389-ds-exporter/src/connections"
+	expldap "389-ds-exporter/src/ldap"
 	"389-ds-exporter/src/utils"
 )
 
@@ -54,7 +54,7 @@ func registerCollectorIfEnabled(
 func registerGeneralCollectors(
 	cfg *config.ExporterConfig,
 	dsCollector *collectors.DSCollector,
-	connPool *connections.LDAPPool,
+	connPool *expldap.LDAPPool,
 	connPoolTimeout time.Duration,
 ) {
 	registerCollectorIfEnabled(dsCollector, "exporter-pool", cfg, func() collectors.InternalCollector {
@@ -112,7 +112,7 @@ func registerGeneralCollectors(
 // determineBackendInstances determines the list of backends
 // to use based on the configuration and information in the LDAP directory.
 func determineBackendInstances(cfg *config.ExporterConfig,
-	pool *connections.LDAPPool, timeout time.Duration) ([]string, error) {
+	pool *expldap.LDAPPool, timeout time.Duration) ([]string, error) {
 
 	if len(cfg.DSBackendDBs) == 0 {
 		slog.Debug("Backend instances not specified, detecting automatically")
@@ -142,7 +142,7 @@ func determineBackendInstances(cfg *config.ExporterConfig,
 // determineBackendType determines backend type
 // to use based on the configuration and information in the LDAP directory.
 func determineBackendType(cfg *config.ExporterConfig,
-	pool *connections.LDAPPool, timeout time.Duration) (string, error) {
+	pool *expldap.LDAPPool, timeout time.Duration) (string, error) {
 
 	if cfg.DSBackendType == "" {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -173,7 +173,7 @@ func determineBackendType(cfg *config.ExporterConfig,
 // SetupPrometheusMetrics creates *prometheus.Registry, adds the required metrics and returns it.
 func SetupPrometheusMetrics(
 	cfg *config.ExporterConfig,
-	connPool *connections.LDAPPool,
+	connPool *expldap.LDAPPool,
 ) *prometheus.Registry {
 
 	slog.Info("Creating collectors...")

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
-	"389-ds-exporter/src/connections"
+	connections "389-ds-exporter/src/ldap"
 )
 
 // GetLdapBackendType gets backend parameters from ldap and returns them as a BackendType.

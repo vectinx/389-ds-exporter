@@ -6,12 +6,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"389-ds-exporter/src/connections"
+	expldap "389-ds-exporter/src/ldap"
 )
 
 // PoolCollector collects internal LDAP-pool metrics.
 type PoolCollector struct {
-	connectionPool   *connections.LDAPPool
+	connectionPool   *expldap.LDAPPool
 	descOpen         *prometheus.Desc
 	descClosedIdle   *prometheus.Desc
 	descClosedLife   *prometheus.Desc
@@ -23,7 +23,7 @@ type PoolCollector struct {
 // NewPoolCollector function create new PoolCollector instance based on provided parameters.
 func NewPoolCollector(
 	subsystem string,
-	connectionPool *connections.LDAPPool,
+	connectionPool *expldap.LDAPPool,
 	labels prometheus.Labels,
 ) *PoolCollector {
 	pool := &PoolCollector{connectionPool: connectionPool}
