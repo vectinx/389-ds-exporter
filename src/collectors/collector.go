@@ -26,13 +26,13 @@ func NewDSCollector() *DSCollector {
 	collector := DSCollector{
 		collectors: make(map[string]InternalCollector),
 		scrapeDurationDesc: prometheus.NewDesc(
-			prometheus.BuildFQName(exporterNamespace, "scrape", "duration_seconds"),
+			prometheus.BuildFQName(exporterNamespace, "exporter_scrape", "duration_seconds"),
 			"Duration of a collector scrape",
 			[]string{"collector"},
 			nil,
 		),
 		scrapeSuccessDesc: prometheus.NewDesc(
-			prometheus.BuildFQName(exporterNamespace, "scrape", "success"),
+			prometheus.BuildFQName(exporterNamespace, "exporter_scrape", "success"),
 			"Whether a collector succeeded",
 			[]string{"collector"},
 			nil,

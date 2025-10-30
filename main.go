@@ -16,6 +16,8 @@ import (
 	"github.com/prometheus/common/version"
 	"github.com/prometheus/exporter-toolkit/web"
 
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
+
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
 	expldap "389-ds-exporter/src/ldap"
@@ -144,6 +146,8 @@ func run() int {
 		cfg,
 		applicationResources.ConnPool,
 	)
+
+	dsMetricsRegistry.MustRegister(versioncollector.NewCollector("ds_exporter"))
 
 	// Create HTTP server
 	// #nosec G112: HTTP timeouts will be configured later using the exporter-toolkit
