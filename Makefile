@@ -1,6 +1,6 @@
 VERSION := $(shell cat ./VERSION)
 COMMIT := $(shell git rev-parse --short HEAD)
-BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 BUILD_USER := $(shell whoami)
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
 
