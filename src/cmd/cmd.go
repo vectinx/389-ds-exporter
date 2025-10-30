@@ -4,6 +4,7 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/promslog/flag"
+	"github.com/prometheus/common/version"
 )
 
 type CmdArguments struct {
@@ -12,7 +13,7 @@ type CmdArguments struct {
 	PromslogConfig *promslog.Config
 }
 
-func ParseCmdArguments(version string) *CmdArguments {
+func ParseCmdArguments() *CmdArguments {
 	var (
 		configFilePath = kingpin.Flag("config", "Path to configuration file").
 				Default("config.yml").
@@ -24,7 +25,7 @@ func ParseCmdArguments(version string) *CmdArguments {
 	args.PromslogConfig = &promslog.Config{}
 	flag.AddFlags(kingpin.CommandLine, args.PromslogConfig)
 
-	kingpin.Version(version)
+	kingpin.Version(version.Print("389-ds-exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 

@@ -14,19 +14,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promslog"
+	"github.com/prometheus/common/version"
 
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
 	"389-ds-exporter/src/connections"
 	"389-ds-exporter/src/metrics"
 	"389-ds-exporter/src/utils"
-)
-
-var (
-	// This variables is filled via ldflags at build time.
-	Version    = "dev"     //nolint:gochecknoglobals
-	BuildTime  = "unknown" //nolint:gochecknoglobals
-	CommitHash = "unknown" //nolint:gochecknoglobals
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
@@ -84,16 +78,9 @@ func run() int {
 	var (
 		applicationResources = appResources{}
 		startTime            = time.Now()
-		args                 = cmd.ParseCmdArguments(
-			fmt.Sprintf(
-				"Version: %s\nCommit: %s\nBuild time: %s",
-				Version,
-				CommitHash,
-				BuildTime,
-			),
-		)
-		signalCh    = make(chan os.Signal, 1)
-		serverErrCh = make(chan error)
+		args                 = cmd.ParseCmdArguments()
+		signalCh             = make(chan os.Signal, 1)
+		serverErrCh          = make(chan error)
 	)
 
 	logger := promslog.New(args.PromslogConfig)
@@ -127,11 +114,14 @@ func run() int {
 
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-	slog.Info("Starting 389-ds-exporter", "version", Version, "commit", CommitHash, "build_time", BuildTime)
-	slog.Info("LDAP server info",
-		"url", cfg.LDAPServerURL,
-		"bind_dn", cfg.LDAPBindDN,
+	slog.Info(
+		"Starting 389-ds-exporter",
+		"version", version.Version,
+		"commit", version.Revision,
+		"build_time", version.BuildDate,
 	)
+
+	slog.Info("LDAP server info", "url", cfg.LDAPServerURL, "bind_dn", cfg.LDAPBindDN)
 
 	ldapConnPoolConfig := connections.LDAPPoolConfig{
 		Auth: connections.LDAPAuthConfig{
