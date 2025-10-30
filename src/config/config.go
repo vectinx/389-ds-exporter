@@ -70,32 +70,29 @@ type rawConfig struct {
 	LDAPDialTimeout    *int    `yaml:"ldap_dial_timeout"`
 }
 
+func setDefaultIfNotDefined[T any](pointer *T, value *T, defaultValue T) {
+	if pointer != nil {
+		*value = *pointer
+	} else {
+		*value = defaultValue
+	}
+}
+
 func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg := &ExporterConfig{}
 
 	// Global
-	if r.ShutdownTimeout != nil {
-		cfg.ShutdownTimeout = *r.ShutdownTimeout
-	} else {
-		cfg.ShutdownTimeout = DefaultGlobalShutdownTimeout
-	}
-	if r.CollectorsDefault != nil {
-		cfg.CollectorsDefault = *r.CollectorsDefault
-	} else {
-		cfg.CollectorsDefault = DefaultCollectorsDefault
-	}
+	setDefaultIfNotDefined(r.ShutdownTimeout, &cfg.ShutdownTimeout, DefaultGlobalShutdownTimeout)
+	setDefaultIfNotDefined(r.CollectorsDefault, &cfg.CollectorsDefault, DefaultCollectorsDefault)
 
-	if r.DSBackendType != nil {
-		cfg.DSBackendType = *r.DSBackendType
-	} else {
-		cfg.DSBackendType = ""
-	}
+	setDefaultIfNotDefined(r.DSBackendType, &cfg.DSBackendType, "")
 
 	cfg.CollectorsEnabled = r.CollectorsEnabled
 	cfg.DSNumSubordinateRecords = r.DSNumSubordinateRecords
 	cfg.DSBackendDBs = r.DSBackendDBs
 
 	// LDAP
+
 	if r.LDAPServerURL != nil {
 		cfg.LDAPServerURL = *r.LDAPServerURL
 	}
@@ -105,36 +102,13 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	if r.LDAPBindPw != nil {
 		cfg.LDAPBindPw = *r.LDAPBindPw
 	}
-	if r.LDAPTlsSkipVerify != nil {
-		cfg.LDAPTlsSkipVerify = *r.LDAPTlsSkipVerify
-	} else {
-		cfg.LDAPTlsSkipVerify = DefaultLDAPTlsSkipVerify
-	}
-	if r.LDAPPoolConnLimit != nil {
-		cfg.LDAPPoolConnLimit = *r.LDAPPoolConnLimit
-	} else {
-		cfg.LDAPPoolConnLimit = DefaultLDAPPoolConnLimit
-	}
-	if r.LDAPPoolGetTimeout != nil {
-		cfg.LDAPPoolGetTimeout = *r.LDAPPoolGetTimeout
-	} else {
-		cfg.LDAPPoolGetTimeout = DefaultLDAPPoolGetTimeout
-	}
-	if r.LDAPPoolIdleTime != nil {
-		cfg.LDAPPoolIdleTime = *r.LDAPPoolIdleTime
-	} else {
-		cfg.LDAPPoolIdleTime = DefaultLDAPPoolIdleTime
-	}
-	if r.LDAPPoolLifeTime != nil {
-		cfg.LDAPPoolLifeTime = *r.LDAPPoolLifeTime
-	} else {
-		cfg.LDAPPoolLifeTime = DefaultLDAPPoolLifeTime
-	}
-	if r.LDAPDialTimeout != nil {
-		cfg.LDAPDialTimeout = *r.LDAPDialTimeout
-	} else {
-		cfg.LDAPDialTimeout = DefaultLDAPDialTimeout
-	}
+
+	setDefaultIfNotDefined(r.LDAPTlsSkipVerify, &cfg.LDAPTlsSkipVerify, DefaultLDAPTlsSkipVerify)
+	setDefaultIfNotDefined(r.LDAPPoolConnLimit, &cfg.LDAPPoolConnLimit, DefaultLDAPPoolConnLimit)
+	setDefaultIfNotDefined(r.LDAPPoolGetTimeout, &cfg.LDAPPoolGetTimeout, DefaultLDAPPoolGetTimeout)
+	setDefaultIfNotDefined(r.LDAPPoolIdleTime, &cfg.LDAPPoolIdleTime, DefaultLDAPPoolIdleTime)
+	setDefaultIfNotDefined(r.LDAPPoolLifeTime, &cfg.LDAPPoolLifeTime, DefaultLDAPPoolLifeTime)
+	setDefaultIfNotDefined(r.LDAPDialTimeout, &cfg.LDAPDialTimeout, DefaultLDAPDialTimeout)
 
 	return cfg
 }
