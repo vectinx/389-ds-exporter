@@ -4895,7 +4895,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 111
+            "y": 18
           },
           "id": 51,
           "options": {
@@ -4922,7 +4922,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_scrape_duration_seconds{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_exporter_scrape_duration_seconds{job=\"$job\", instance=\"$node\"}",
               "instant": false,
               "legendFormat": "{{collector}}",
               "range": true,
@@ -4992,7 +4992,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 111
+            "y": 18
           },
           "id": 52,
           "options": {
@@ -5016,7 +5016,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_scrape_success{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_exporter_scrape_success{job=\"$job\", instance=\"$node\"}",
               "instant": false,
               "legendFormat": "{{collector}}",
               "range": true,
@@ -5080,7 +5080,7 @@
           "type": "prometheus",
           "uid": "${Datasource}"
         },
-        "definition": "label_values(ds_scrape_success{job=\"$job\"},instance)",
+        "definition": "label_values(ds_exporter_scrape_success{job=\"$job\"},instance)",
         "hide": 0,
         "includeAll": false,
         "label": "node",
@@ -5089,7 +5089,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(ds_scrape_success{job=\"$job\"},instance)",
+          "query": "label_values(ds_exporter_scrape_success{job=\"$job\"},instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -5131,6 +5131,6 @@
   "timezone": "browser",
   "title": "389-ds-exporter",
   "uid": "389-ds-exporter",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
