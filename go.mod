@@ -1,6 +1,6 @@
 module 389-ds-exporter
 
-go 1.25
+go 1.25.3
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0

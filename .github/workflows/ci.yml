@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master, develop ]
 
+env:
+  GO_VERSION: 1.25.3
+
 jobs:
   # Checking various aspects related to security - for example, vulnerability scanning
   Security:
@@ -17,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25.2'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Download dependencies
         run: go mod download
@@ -31,13 +34,14 @@ jobs:
       - name: Run GoVulncheck
         uses: golang/govulncheck-action@v1
         with:
-           go-version-input: 1.25.2
+           go-version-input: ${{ env.GO_VERSION }}
            go-package: ./...
 
+      - name: Install Gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@v2.22.10
+
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.22.10
-        with:
-          args: ./...
+        run: gosec ./...
 
   Build:
     runs-on: ubuntu-latest
@@ -49,7 +53,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25.2'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Download dependencies
         run: go mod download
