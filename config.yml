@@ -91,7 +91,7 @@ ldap_bind_dn: "cn=directory manager"
 
 # Password of the LDAP account.
 #
-# ldap_bind_pw: "12345678"
+ldap_bind_pw: "12345678"
 
 # Whether to perform a TLS check.
 #
@@ -119,37 +119,3 @@ ldap_bind_dn: "cn=directory manager"
 # The lifetime of a connection after which it will be closed.
 #
 # ldap_pool_life_time: 5
-
-
-# Logging level.
-# Can be DEBUG, INFO, WARNING, or ERROR.
-#
-# log_level: INFO
-
-# Log output target.
-# Options:
-# 'stdout' - logs are printed to standard output
-# 'file'   - logs are written to a file
-# 'both'   - logs are written to both stdout and a file
-#
-# log_handler: stdout
-
-# Log file path.
-# Only relevant if 'handler' is set to 'file' or 'both'.
-# Make sure the system is configured to rotate this file (e.g., using logrotate).
-#
-# log_file: /var/log/389-ds-exporter/exporter.log
-
-# STDOUT log format.
-# Options: text, json
-# The 'text' format is the default and is convenient for syslog.
-# The 'json' format is useful for parsing logs or sending to external systems.
-# Only applies if 'handler' is 'stdout' or 'both'.
-#
-# log_stdout_format: text
-
-# File log format.
-# Options: text, json
-# Applies only if 'handler' is 'file' or 'both'.
-#
-# log_file_format: json

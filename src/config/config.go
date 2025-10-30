@@ -25,11 +25,6 @@ const (
 	DefaultLDAPPoolIdleTime       int    = 300
 	DefaultLDAPPoolLifeTime       int    = 3600
 	DefaultLDAPDialTimeout        int    = 3
-	DefaultLogLevel               string = "INFO"
-	DefaultLogHandler             string = "stdout"
-	DefaultLogFile                string = "/var/log/389-ds-exporter/exporter.log"
-	DefaultLogStdoutFormat        string = "text"
-	DefaultLogFileFormat          string = "json"
 	DefaultCollectorsDefault      string = "standard"
 
 	BackendBDB string = "bdb"
@@ -67,12 +62,6 @@ type ExporterConfig struct {
 	LDAPPoolIdleTime   int    `yaml:"ldap_pool_idle_time"`
 	LDAPPoolLifeTime   int    `yaml:"ldap_pool_life_time"`
 	LDAPDialTimeout    int    `yaml:"ldap_dial_timeout"`
-
-	LogLevel        string `yaml:"log_level"`
-	LogHandler      string `yaml:"log_handler"`
-	LogFile         string `yaml:"log_file"`
-	LogStdoutFormat string `yaml:"log_stdout_format"`
-	LogFileFormat   string `yaml:"log_file_format"`
 }
 
 type rawConfig struct {
@@ -99,12 +88,6 @@ type rawConfig struct {
 	LDAPPoolIdleTime   *int    `yaml:"ldap_pool_idle_time"`
 	LDAPPoolLifeTime   *int    `yaml:"ldap_pool_life_time"`
 	LDAPDialTimeout    *int    `yaml:"ldap_dial_timeout"`
-
-	LogLevel        *string `yaml:"log_level"`
-	LogHandler      *string `yaml:"log_handler"`
-	LogFile         *string `yaml:"log_file"`
-	LogStdoutFormat *string `yaml:"log_stdout_format"`
-	LogFileFormat   *string `yaml:"log_file_format"`
 }
 
 //nolint:gocognit
@@ -206,33 +189,6 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 		cfg.LDAPDialTimeout = DefaultLDAPDialTimeout
 	}
 
-	// Logging
-	if r.LogLevel != nil {
-		cfg.LogLevel = *r.LogLevel
-	} else {
-		cfg.LogLevel = DefaultLogLevel
-	}
-	if r.LogHandler != nil {
-		cfg.LogHandler = *r.LogHandler
-	} else {
-		cfg.LogHandler = DefaultLogHandler
-	}
-	if r.LogFile != nil {
-		cfg.LogFile = *r.LogFile
-	} else {
-		cfg.LogFile = DefaultLogFile
-	}
-	if r.LogStdoutFormat != nil {
-		cfg.LogStdoutFormat = *r.LogStdoutFormat
-	} else {
-		cfg.LogStdoutFormat = DefaultLogStdoutFormat
-	}
-	if r.LogFileFormat != nil {
-		cfg.LogFileFormat = *r.LogFileFormat
-	} else {
-		cfg.LogFileFormat = DefaultLogFileFormat
-	}
-
 	return cfg
 }
 
@@ -274,25 +230,6 @@ func (c *ExporterConfig) Validate() error {
 
 	if c.LDAPDialTimeout <= 0 {
 		return errors.New("invalid ldap_dial_timeout: must be greater than 0")
-	}
-
-	logLevels := []string{"DEBUG", "INFO", "WARNING", "ERROR"}
-	if !slices.Contains(logLevels, c.LogLevel) {
-		return fmt.Errorf("invalid log.level: '%s' (must be 'DEBUG', 'INFO', 'WARNING' or 'ERROR')", c.LogLevel)
-	}
-
-	logHandlers := []string{"stdout", "file", "both"}
-	if !slices.Contains(logHandlers, c.LogHandler) {
-		return fmt.Errorf("invalid log.handler: '%s' (must be 'stdout', 'file' or 'both')", c.LogHandler)
-	}
-
-	logFormats := []string{"text", "json"}
-
-	if !slices.Contains(logFormats, c.LogStdoutFormat) {
-		return fmt.Errorf("invalid log.stdout_foramt: '%s' (must be 'text' or 'json')", c.LogStdoutFormat)
-	}
-	if !slices.Contains(logFormats, c.LogFileFormat) {
-		return fmt.Errorf("invalid log.file_format: '%s' (must be 'text' or 'json')", c.LogFileFormat)
 	}
 
 	return nil

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/promslog"
 
 	"389-ds-exporter/src/cmd"
 	"389-ds-exporter/src/config"
@@ -31,7 +32,6 @@ var (
 // appResources struct contains pointers to resources that must be closed when the program terminates.
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
-	LogFile    *os.File
 	ConnPool   *connections.LDAPPool
 	HttpServer *http.Server
 }
@@ -96,6 +96,9 @@ func run() int {
 		serverErrCh = make(chan error)
 	)
 
+	logger := promslog.New(args.PromslogConfig)
+	slog.SetDefault(logger)
+
 	cfg, err := readConfig(args.ConfigFile)
 	if err != nil {
 		slog.Error("Error loading config", "err", err)
@@ -120,23 +123,7 @@ func run() int {
 		if err != nil {
 			slog.Error("Shutdown error", "err", err)
 		}
-		if applicationResources.LogFile != nil {
-			// We close the log file last, because we expect logs to be written to it until the very end
-			err := applicationResources.LogFile.Close()
-			if err != nil {
-				slog.Error("Error closing log file", "err", err)
-			}
-		}
 	}()
-
-	logger, logFile, err := utils.SetupLogger(cfg)
-	applicationResources.LogFile = logFile
-
-	if err != nil {
-		slog.Error("Error initializing logging", "err", err)
-		return 1
-	}
-	slog.SetDefault(logger)
 
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
@@ -226,16 +213,6 @@ func run() int {
 				running = false
 			case syscall.SIGHUP:
 				slog.Info("SIGHUP signal received")
-				if applicationResources.LogFile != nil {
-					slog.Info("Reopening log file")
-					newLogFile, err := utils.ReopenLogFile(cfg, applicationResources.LogFile)
-					if err != nil {
-						slog.Error("Error reopening log file")
-						running = false
-					}
-					applicationResources.LogFile = newLogFile
-					slog.Info("Log file reopenedd successfully")
-				}
 			}
 		case err := <-serverErrCh:
 			slog.Error(fmt.Sprintf("HTTP server failed with error: %v", err))
