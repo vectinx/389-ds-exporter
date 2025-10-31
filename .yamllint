@@ -1,0 +1,19 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 150
+    level: warning
+  indentation:
+    spaces: 2
+  trailing-spaces:
+    level: error
+  document-start:
+    present: true
+  truthy:
+    allowed-values: ["true", "false"]
+  quoted-strings:
+    quote-type: double
+    required: false
+    allow-quoted-quotes: false

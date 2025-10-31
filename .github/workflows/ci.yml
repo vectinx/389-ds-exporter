@@ -1,6 +1,8 @@
+---
 name: Testing and building of the exporter
 
-on:
+
+on: # yamllint disable
   push:
     branches: [ master, develop ]
   pull_request:

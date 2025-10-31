@@ -69,13 +69,13 @@ formatters:
       # If `custom-order` is `true`, it follows the order of `sections` option.
       # Default: ["standard", "default"]
       sections:
-        - standard                       # Standard section: captures all standard packages.
-        - default                        # Default section: contains all imports that could not be matched to another section type.
-        - prefix(github.com/org/project) # Custom section: groups all imports with the specified Prefix.
-        - blank                          # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
-        - dot                            # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
-        - alias                          # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
-        - localmodule                    # Local module section: contains all local packages. This section is not present unless explicitly enabled.
+        - standard                        # Standard section: captures all standard packages.
+        - default                         # Default section: contains all imports that could not be matched to another section type.
+        - prefix(github.com/org/project)  # Custom section: groups all imports with the specified Prefix.
+        - blank                           # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
+        - dot                             # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
+        - alias                           # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
+        - localmodule                     # Local module section: contains all local packages. This section is not present unless explicitly enabled.
 
       # Checks that no inline comments are present.
       # Default: false
@@ -102,10 +102,10 @@ formatters:
       # https://pkg.go.dev/cmd/gofmt
       # Default: []
       rewrite-rules:
-        - pattern: 'interface{}'
-          replacement: 'any'
-        - pattern: 'a[b:len(a)]'
-          replacement: 'a[b:]'
+        - pattern: interface{}
+          replacement: any
+        - pattern: a[b:len(a)]
+          replacement: a[b:]
 
     gofumpt:
       # Module path which contains the source code being formatted.
@@ -160,4 +160,3 @@ formatters:
     paths:
       - ".*\\.my\\.go$"
       - lib/bad.go
-
