@@ -94,6 +94,12 @@ func run() int {
 		return 1
 	}
 
+	err = web.Validate(*args.ExporterToolkitFlags.WebConfigFile)
+	if err != nil {
+		slog.Error("Error loading web config", "err", err)
+		return 1
+	}
+
 	if args.IsConfigCheck {
 		fmt.Print(cfg.String())
 		return 0
