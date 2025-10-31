@@ -28,7 +28,7 @@ services:
       - "9389:9389"
     volumes:
       - ./config-mdb.yml:/app/config-mdb.yml:ro
-    command: ["--config", "/app/config-mdb.yml"]
+    command: ["--config.file", "/app/config-mdb.yml"]
     depends_on:
       389ds-mdb:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
       - "9390:9389"
     volumes:
       - ./config-bdb.yml:/app/config-bdb.yml:ro
-    command: ["--config", "/app/config-bdb.yml"]
+    command: ["--config.file", "/app/config-bdb.yml"]
     depends_on:
       389ds-bdb:
         condition: service_healthy
