@@ -2,7 +2,6 @@ package collectors
 
 import (
 	"sync"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -79,7 +78,7 @@ func (c *PoolCollector) Get(channel chan<- prometheus.Metric) error {
 	channel <- prometheus.MustNewConstMetric(
 		c.descWaitDuration,
 		prometheus.CounterValue,
-		float64(time.Duration(stat.WaitDuration).Milliseconds()),
+		float64(stat.WaitDuration.Seconds()),
 	)
 	return nil
 }

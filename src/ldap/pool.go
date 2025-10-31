@@ -145,7 +145,7 @@ type LDAPPoolStat struct {
 	ClosedIdleTime int
 	ClosedLifeTime int
 	WaitCount      int
-	WaitDuration   int
+	WaitDuration   time.Duration
 }
 
 // connReuseStrategy determines how (*pool).conn returns database connections.
@@ -257,7 +257,7 @@ func (pool *LDAPPool) Stat() LDAPPoolStat {
 	pool.mu.Unlock()
 
 	stat.WaitCount = int(pool.waitCount.Load())
-	stat.WaitDuration = int(pool.waitDuration.Load())
+	stat.WaitDuration = time.Duration(pool.waitDuration.Load())
 	stat.ClosedIdleTime = int(pool.idleTimeClosedCount.Load())
 	stat.ClosedLifeTime = int(pool.lifeTimeClosedCount.Load())
 
