@@ -52,6 +52,7 @@ func RealConnectionDialUrl(auth *LDAPAuthConfig) (LdapConn, error) {
 	if parsed.Scheme == "ldaps" { // #nosec G402
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: auth.TlsSkipVerify,
+			MinVersion:         tls.VersionTLS12,
 		}
 		dialOpts = append(dialOpts, ldap.DialWithTLSConfig(tlsConfig))
 	}

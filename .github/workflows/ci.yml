@@ -39,6 +39,14 @@ jobs:
            go-version-input: ${{ env.GO_VERSION }}
            go-package: ./...
 
+      - name: Install Semgrep
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install semgrep
+
+      - name: Run Semgrep
+        run: semgrep ci --config p/default --config p/golang --config p/gosec
+
       - name: Install Gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@v2.22.10
 

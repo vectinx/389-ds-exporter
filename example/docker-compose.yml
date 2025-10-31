@@ -11,11 +11,14 @@ services:
     environment:
       DS_DM_PASSWORD: "12345678"
       SUFFIX_NAME: "dc=example,dc=com"
+    read_only: true
     volumes:
       # Uncommend next line if you want to dirsrv data be saved
-      # - ./389ds-mdb-data:/data
+      - 389ds-mdb-data:/data
       - ./entrypoint.sh:/app/entrypoint.sh:ro
     entrypoint: /app/entrypoint.sh
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD-SHELL", "dsconf localhost backend suffix list | grep -w $$SUFFIX_NAME"]
       interval: 5s
@@ -27,9 +30,12 @@ services:
     container_name: 389ds-exporter-mdb
     ports:
       - "9389:9389"
+    read_only: true
     volumes:
       - ./config-mdb.yml:/app/config-mdb.yml:ro
     command: ["--config.file", "/app/config-mdb.yml"]
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       389ds-mdb:
         condition: service_healthy
@@ -47,11 +53,14 @@ services:
     environment:
       DS_DM_PASSWORD: "12345678"
       SUFFIX_NAME: "dc=example,dc=com"
+    read_only: true
     volumes:
       # Uncommend next line if you want to dirsrv data be saved
-      # - ./389ds-bdb-data:/data
+      - 389ds-bdb-data:/data
       - ./entrypoint.sh:/app/entrypoint.sh:ro
     entrypoint: /app/entrypoint.sh
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD-SHELL", "dsconf localhost backend suffix list | grep -w $$SUFFIX_NAME"]
       interval: 5s
@@ -63,9 +72,12 @@ services:
     container_name: 389ds-exporter-bdb
     ports:
       - "9390:9389"
+    read_only: true
     volumes:
       - ./config-bdb.yml:/app/config-bdb.yml:ro
     command: ["--config.file", "/app/config-bdb.yml"]
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       389ds-bdb:
         condition: service_healthy
@@ -79,8 +91,12 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
+    read_only: true
     volumes:
+      - prometheus-data:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    security_opt:
+      - no-new-privileges:true
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -91,13 +107,17 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    read_only: true
     volumes:
+      - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning/:ro
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
       - GF_USERS_DEFAULT_THEME=light
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:3000/api/health"]
       interval: 30s
@@ -109,16 +129,27 @@ services:
   dashboard-init:
     image: curlimages/curl
     container_name: dashboard-init
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     depends_on:
       grafana:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-        wget https://github.com/vectinx/389-ds-exporter/releases/latest/download/dashboard.json -O dashboard.json &&
-        echo '{\"dashboard\": ' > payload.json &&
-        cat dashboard.json >> payload.json &&
-        echo ', \"overwrite\": true, \"folderId\": 0 }' >> payload.json &&
-        cat payload.json &&
-        curl -X POST -H \"Content-Type: application/json\" -d @payload.json http://grafana:3000/api/dashboards/db
+        wget https://github.com/vectinx/389-ds-exporter/releases/latest/download/dashboard.json -O /tmp/dashboard.json &&
+        echo '{\"dashboard\": ' > /tmp/payload.json &&
+        cat /tmp/dashboard.json >> /tmp/payload.json &&
+        echo ', \"overwrite\": true, \"folderId\": 0 }' >> /tmp/payload.json &&
+        cat /tmp/payload.json &&
+        curl -X POST -H \"Content-Type: application/json\" -d @/tmp/payload.json http://grafana:3000/api/dashboards/db
         curl -X PUT http://grafana:3000/api/org/preferences -H \"Content-Type: application/json\" -d '{ \"homeDashboardUID\": \"389-ds-exporter\" }'
         "
+
+volumes:
+  389ds-mdb-data:
+  389ds-bdb-data:
+  prometheus-data:
+  grafana-data:
