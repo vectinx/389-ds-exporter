@@ -10,37 +10,37 @@ import (
 // specific for BDB backend attributes defining ldap server caches metrics.
 func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
-		"dbcachehits": {
+		"dbcache_hits_total": {
 			LdapName: "dbcachehits",
 			Help:     "Number of requested pages found in the database",
 			Type:     prometheus.CounterValue,
 		},
-		"dbcachetries": {
+		"dbcache_lookups_total": {
 			LdapName: "dbcachetries",
 			Help:     "Total number of cache lookups",
 			Type:     prometheus.CounterValue,
 		},
-		"dbcachehitratio": {
+		"dbcache_hit_ratio": {
 			LdapName: "dbcachehitratio",
 			Help:     "Percentage of requested pages found in the database cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbcachepagein": {
+		"dbcache_pages_in_total": {
 			LdapName: "dbcachepagein",
 			Help:     "Number of pages read into the database cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbcachepageout": {
+		"dbcache_pages_out_total": {
 			LdapName: "dbcachepageout",
 			Help:     "Number of pages written from the database cache to the backing file",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbcacheroevict": {
+		"dbcache_evictions_clean_total": {
 			LdapName: "dbcacheroevict",
 			Help:     "Number of clean pages forced from the cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbcacherwevict": {
+		"dbcache_evictions_dirty_total": {
 			LdapName: "dbcacherwevict",
 			Help:     "Number of dirty pages forced from the cache",
 			Type:     prometheus.GaugeValue,

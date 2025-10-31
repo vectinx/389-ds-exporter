@@ -48,14 +48,14 @@ func NewPoolCollector(
 	)
 
 	pool.descWaitCount = prometheus.NewDesc(
-		prometheus.BuildFQName(exporterNamespace, subsystem, "wait_count"),
+		prometheus.BuildFQName(exporterNamespace, subsystem, "wait_count_total"),
 		"The number of times clients waited for a connection to appear in the pool.",
 		nil,
 		labels,
 	)
 
 	pool.descWaitDuration = prometheus.NewDesc(
-		prometheus.BuildFQName(exporterNamespace, subsystem, "wait_duration"),
+		prometheus.BuildFQName(exporterNamespace, subsystem, "wait_duration_seconds"),
 		"Total time spent waiting for a connection",
 		nil,
 		labels,

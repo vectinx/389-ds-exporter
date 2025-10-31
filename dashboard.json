@@ -19,7 +19,6 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
@@ -53,6 +52,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -69,6 +69,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -85,7 +86,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -133,7 +134,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -141,8 +142,8 @@
             "uid": "${Datasource}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "ds_server_currentconnections{job=\"$job\", instance=\"$node\"}",
+          "editorMode": "code",
+          "expr": "ds_server_connections{job=\"$job\", instance=\"$node\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "Established",
@@ -172,7 +173,7 @@
             "steps": [
               {
                 "color": "blue",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -203,7 +204,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -211,8 +212,8 @@
             "uid": "${Datasource}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "ds_server_currentconnections{job=\"$job\", instance=\"$node\"}",
+          "editorMode": "code",
+          "expr": "ds_server_connections{job=\"$job\", instance=\"$node\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -242,7 +243,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -273,7 +274,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -312,7 +313,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -343,7 +344,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -351,8 +352,8 @@
             "uid": "${Datasource}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "ds_server_nbackends{job=\"$job\", instance=\"$node\"}",
+          "editorMode": "code",
+          "expr": "ds_server_backends{job=\"$job\", instance=\"$node\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -382,7 +383,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -414,7 +415,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -423,7 +424,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "ds_server_currenttime{job=\"$job\", instance=\"$node\"} - ds_server_starttime{job=\"$job\", instance=\"$node\"}",
+          "expr": "ds_server_current_time_seconds{job=\"$job\", instance=\"$node\"} - ds_server_start_time_seconds{job=\"$job\", instance=\"$node\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -453,6 +454,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -469,6 +471,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -485,7 +488,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -578,7 +581,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
@@ -587,7 +590,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "rate(ds_snmp_server_strongauthbinds{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+          "expr": "rate(ds_snmp_server_bind_strong_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -604,7 +607,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "rate(ds_snmp_server_simpleauthbinds{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+          "expr": "rate(ds_snmp_server_bind_simple_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -621,7 +624,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "rate(ds_snmp_server_unauthbinds{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+          "expr": "rate(ds_snmp_server_bind_unauth_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -638,7 +641,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "rate(ds_snmp_server_anonymousbinds{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+          "expr": "rate(ds_snmp_server_bind_anonymous_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -680,6 +683,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -696,6 +700,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -711,7 +716,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -774,7 +780,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -782,7 +788,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_server_opscompleted{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_server_ops_completed_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Completed",
@@ -795,7 +801,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_server_opsinitiated{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_server_ops_initiated_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "legendFormat": "Initiated",
               "range": true,
               "refId": "Initiated"
@@ -822,6 +828,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -838,6 +845,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -853,7 +861,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -965,7 +974,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -974,7 +983,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_searchops{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_search_operations_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "Search",
@@ -988,7 +997,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_modifyentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_modify_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Modify",
@@ -1001,7 +1010,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_addentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_add_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Add",
@@ -1014,7 +1023,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_removeentryops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_delete_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Remove",
@@ -1027,7 +1036,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_modifyrdnops{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_modify_rdn_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Modify RDN",
@@ -1057,6 +1066,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1073,6 +1083,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1088,7 +1099,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1136,7 +1148,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1144,7 +1156,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_server_entriessent{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_server_entries_sent_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "legendFormat": "Sent",
               "range": true,
               "refId": "Entries sent"
@@ -1172,6 +1184,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1188,6 +1201,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1203,7 +1217,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1251,7 +1266,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1259,7 +1274,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_server_readwaiters{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_server_read_waiters{job=\"$job\", instance=\"$node\"}",
               "instant": false,
               "legendFormat": "Count",
               "range": true,
@@ -1288,6 +1303,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1304,6 +1320,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1319,7 +1336,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -1359,7 +1377,7 @@
                     "id": "custom.hideFrom",
                     "value": {
                       "legend": false,
-                      "tooltip": false,
+                      "tooltip": true,
                       "viz": true
                     }
                   }
@@ -1392,7 +1410,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1400,7 +1418,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_server_bytessent{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_server_bytes_sent_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "legendFormat": "Bytes",
               "range": true,
               "refId": "Sent"
@@ -1427,6 +1445,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1443,6 +1462,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1458,7 +1478,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1521,7 +1542,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1530,7 +1551,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_errors{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_errors_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "Errors",
@@ -1545,7 +1566,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_snmp_server_securityerrors{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_snmp_server_bind_security_errors_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1591,6 +1612,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1607,6 +1629,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1622,7 +1645,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -1665,7 +1689,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 36
+            "y": 15
           },
           "id": 18,
           "options": {
@@ -1686,7 +1710,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1742,6 +1766,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1758,6 +1783,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1773,7 +1799,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1815,7 +1842,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 36
+            "y": 15
           },
           "id": 21,
           "options": {
@@ -1836,7 +1863,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -1892,6 +1919,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1908,6 +1936,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1924,7 +1953,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -1979,7 +2009,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 36
+            "y": 15
           },
           "id": 19,
           "options": {
@@ -2000,7 +2030,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2049,6 +2079,7 @@
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2065,6 +2096,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2080,7 +2112,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -2153,7 +2186,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 37
+            "y": 16
           },
           "id": 4,
           "options": {
@@ -2174,7 +2207,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2182,7 +2215,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_maxdncachesize{job=\"$job\", instance=\"$node\", database=\"$database\"}",
+              "expr": "ds_ldbm_instance_entry_cache_max_size_bytes{job=\"$job\", instance=\"$node\", database=\"$database\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "total",
@@ -2196,7 +2229,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_currentdncachesize{job=\"$job\", instance=\"$node\", database=\"$database\"}",
+              "expr": "ds_ldbm_instance_entry_cache_size_bytes{job=\"$job\", instance=\"$node\", database=\"$database\"}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -2227,6 +2260,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2246,6 +2280,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2261,7 +2296,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2333,7 +2369,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 37
+            "y": 16
           },
           "id": 8,
           "options": {
@@ -2354,7 +2390,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2363,7 +2399,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_instance_entrycachetries{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_instance_entry_cache_lookups_total{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "tries",
@@ -2378,7 +2414,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_instance_entrycachehits{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_instance_entry_cache_hits_total{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -2412,6 +2448,7 @@
                 "axisSoftMax": 100,
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2431,6 +2468,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2446,7 +2484,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -2489,7 +2528,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 37
+            "y": 16
           },
           "id": 12,
           "options": {
@@ -2510,7 +2549,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2519,7 +2558,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_dncachehitratio{job=\"$job\", database=\"$database\", instance=\"$node\"}",
+              "expr": "ds_ldbm_instance_entry_cache_hit_ratio{job=\"$job\", database=\"$database\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "hit ratio",
@@ -2549,6 +2588,7 @@
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2565,6 +2605,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2580,7 +2621,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -2627,7 +2669,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 45
+            "y": 24
           },
           "id": 10,
           "options": {
@@ -2648,7 +2690,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2657,7 +2699,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_maxdncachesize{job=\"$job\", database=\"$database\", instance=\"$node\"}",
+              "expr": "ds_ldbm_instance_dn_cache_max_size_bytes{job=\"$job\", database=\"$database\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -2674,7 +2716,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_currentdncachesize{job=\"$job\", database=\"$database\", instance=\"$node\"}",
+              "expr": "ds_ldbm_instance_dn_cache_size_bytes{job=\"$job\", database=\"$database\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "interval": "",
@@ -2704,6 +2746,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2723,6 +2766,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2738,7 +2782,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2780,7 +2825,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 45
+            "y": 24
           },
           "id": 13,
           "options": {
@@ -2801,7 +2846,7 @@
               "sort": "desc"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2810,7 +2855,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_instance_dncachetries{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_instance_dn_cache_lookups_total{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "tries",
@@ -2825,7 +2870,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_instance_dncachehits{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_instance_dn_cache_hits_total{job=\"$job\", database=\"$database\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -2857,6 +2902,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -2876,6 +2922,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2892,7 +2939,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -2920,7 +2968,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 45
+            "y": 24
           },
           "id": 11,
           "options": {
@@ -2941,7 +2989,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "10.2.3",
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -2950,7 +2998,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_instance_entrycachehitratio{job=\"$job\", database=\"$database\", instance=\"$node\"}",
+              "expr": "ds_ldbm_instance_dn_cache_hit_ratio{job=\"$job\", database=\"$database\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "hit ratio",
@@ -2964,7 +3012,6 @@
         }
       ],
       "repeat": "database",
-      "repeatDirection": "h",
       "title": "Backend caches - $database",
       "type": "row"
     },
@@ -2974,7 +3021,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 32
       },
       "id": 38,
       "panels": [
@@ -2996,6 +3043,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 24,
                 "gradientMode": "none",
@@ -3012,6 +3060,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3027,7 +3076,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3074,7 +3124,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 62
+            "y": 33
           },
           "id": 35,
           "options": {
@@ -3090,10 +3140,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3116,7 +3168,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_bdb_pages_in_use{job=\"$job\", instance=\"$node\"} * 4096",
+              "expr": "ds_bdb_cache_pages_in_use{job=\"$job\", instance=\"$node\"} * 4096",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -3148,6 +3200,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3164,6 +3217,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3180,7 +3234,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -3208,7 +3263,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 62
+            "y": 33
           },
           "id": 37,
           "options": {
@@ -3224,10 +3279,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3236,7 +3293,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_bdb_dbcachehitratio{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_bdb_dbcache_hit_ratio{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -3267,6 +3324,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3283,6 +3341,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3298,7 +3357,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3344,7 +3404,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 70
+            "y": 41
           },
           "id": 36,
           "options": {
@@ -3360,10 +3420,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3371,7 +3433,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "rate(ds_bdb_dbcachetries{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_dbcache_lookups_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "hide": false,
               "instant": false,
               "legendFormat": "Tries",
@@ -3385,7 +3447,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_dbcachehits{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_dbcache_hits_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -3416,6 +3478,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3432,6 +3495,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3447,7 +3511,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3494,7 +3559,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 70
+            "y": 41
           },
           "id": 47,
           "options": {
@@ -3510,10 +3575,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3522,7 +3589,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_bdb_clean_pages{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_bdb_cache_pages_clean{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -3539,7 +3606,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_bdb_dirty_pages{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_bdb_cache_pages_dirty{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -3570,6 +3637,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3586,6 +3654,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3601,7 +3670,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3648,7 +3718,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 78
+            "y": 49
           },
           "id": 48,
           "options": {
@@ -3664,10 +3734,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3676,7 +3748,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_page_ro_evict_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_cache_page_ro_evict_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -3692,7 +3764,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_page_rw_evict_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_cache_page_rw_evict_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -3724,6 +3796,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3740,6 +3813,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3755,7 +3829,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3787,7 +3862,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 78
+            "y": 49
           },
           "id": 49,
           "options": {
@@ -3803,10 +3878,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3815,7 +3892,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_page_trickle_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_cache_page_trickle_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -3847,6 +3924,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -3863,6 +3941,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3878,7 +3957,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3925,7 +4005,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 86
+            "y": 57
           },
           "id": 39,
           "options": {
@@ -3941,10 +4021,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -3953,7 +4035,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_commit_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_txn_commit_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -3969,7 +4051,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_abort_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_txn_abort_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4001,6 +4083,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4017,6 +4100,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4032,7 +4116,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4060,7 +4145,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 86
+            "y": 57
           },
           "id": 40,
           "options": {
@@ -4076,10 +4161,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4088,7 +4175,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_bdb_active_txns{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_bdb_txn_active{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -4119,6 +4206,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4135,6 +4223,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4150,7 +4239,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4223,7 +4313,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 94
+            "y": 65
           },
           "id": 41,
           "options": {
@@ -4239,10 +4329,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4322,6 +4414,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4338,6 +4431,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4353,7 +4447,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4411,7 +4506,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 94
+            "y": 65
           },
           "id": 42,
           "options": {
@@ -4427,10 +4522,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4439,7 +4536,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_lock_request_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_lock_request_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4456,7 +4553,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_lock_conflicts{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_lock_conflicts_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4473,7 +4570,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_deadlock_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_deadlock_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4505,6 +4602,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4521,6 +4619,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4536,7 +4635,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4564,7 +4664,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 102
+            "y": 73
           },
           "id": 44,
           "options": {
@@ -4580,10 +4680,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4592,7 +4694,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_log_write_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_log_write_bytes_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4624,6 +4726,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -4640,6 +4743,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4655,7 +4759,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4728,7 +4833,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 102
+            "y": 73
           },
           "id": 43,
           "options": {
@@ -4744,10 +4849,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4756,7 +4863,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_lock_region_wait_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_lock_region_wait_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4773,7 +4880,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_cache_region_wait_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_cache_region_wait_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4790,7 +4897,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_log_region_wait_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_log_region_wait_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4807,7 +4914,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_bdb_txn_region_wait_rate{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_bdb_txn_region_wait_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -4831,7 +4938,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 33
       },
       "id": 50,
       "panels": [
@@ -4853,6 +4960,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 24,
                 "gradientMode": "none",
@@ -4869,6 +4977,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4883,7 +4992,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4895,7 +5005,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 34
           },
           "id": 51,
           "options": {
@@ -4911,10 +5021,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -4950,6 +5062,7 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 24,
                 "gradientMode": "none",
@@ -4966,6 +5079,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4980,7 +5094,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -4992,7 +5107,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 34
           },
           "id": 52,
           "options": {
@@ -5005,10 +5120,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.2.1",
           "targets": [
             {
               "datasource": {
@@ -5031,25 +5148,22 @@
       "type": "row"
     }
   ],
+  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [
     "389-ds"
   ],
   "templating": {
     "list": [
       {
-        "hide": 0,
         "includeAll": false,
         "label": "Datasource",
-        "multi": false,
         "name": "Datasource",
         "options": [],
         "query": "prometheus",
-        "queryValue": "",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
@@ -5058,10 +5172,8 @@
           "uid": "${Datasource}"
         },
         "definition": "label_values(up,job)",
-        "hide": 0,
         "includeAll": false,
         "label": "job",
-        "multi": false,
         "name": "job",
         "options": [],
         "query": {
@@ -5071,8 +5183,6 @@
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
@@ -5080,22 +5190,18 @@
           "type": "prometheus",
           "uid": "${Datasource}"
         },
-        "definition": "label_values(ds_exporter_scrape_success{job=\"$job\"},instance)",
-        "hide": 0,
+        "definition": "label_values(ds_exporter_scrape_duration_seconds{job=\"$job\"},instance)",
         "includeAll": false,
         "label": "node",
-        "multi": false,
         "name": "node",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(ds_exporter_scrape_success{job=\"$job\"},instance)",
+          "query": "label_values(ds_exporter_scrape_duration_seconds{job=\"$job\"},instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
@@ -5103,8 +5209,7 @@
           "type": "prometheus",
           "uid": "${Datasource}"
         },
-        "definition": "label_values(ds_ldbm_instance_maxdncachesize{job=\"$job\", instance=\"$node\"},database)",
-        "hide": 0,
+        "definition": "label_values(ds_ldbm_instance_dn_cache_size_bytes{job=\"$job\", instance=\"$node\"},database)",
         "includeAll": true,
         "label": "database",
         "multi": true,
@@ -5112,13 +5217,11 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(ds_ldbm_instance_maxdncachesize{job=\"$job\", instance=\"$node\"},database)",
+          "query": "label_values(ds_ldbm_instance_dn_cache_size_bytes{job=\"$job\", instance=\"$node\"},database)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       }
     ]
@@ -5131,6 +5234,5 @@
   "timezone": "browser",
   "title": "389-ds-exporter",
   "uid": "389-ds-exporter",
-  "version": 4,
-  "weekStart": ""
+  "version": 4
 }

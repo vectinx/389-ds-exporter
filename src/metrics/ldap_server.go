@@ -14,22 +14,22 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 			Help:     "Current number of active threads used for handling requests",
 			Type:     prometheus.GaugeValue,
 		},
-		"currentconnections": {
+		"connections": {
 			LdapName: "currentconnections",
 			Help:     "Current established connections",
 			Type:     prometheus.GaugeValue,
 		},
-		"totalconnections": {
+		"connections_total": {
 			LdapName: "totalconnections",
 			Help:     "Number of connections the server handles after it starts",
 			Type:     prometheus.CounterValue,
 		},
-		"currentconnectionsatmaxthreads": {
+		"connections_max_threads": {
 			LdapName: "currentconnectionsatmaxthreads",
 			Help:     "Number of connections currently utilizing the maximum allowed threads per connection",
 			Type:     prometheus.GaugeValue,
 		},
-		"maxthreadsperconnhits": {
+		"max_threads_per_conn_hits_total": {
 			LdapName: "maxthreadsperconnhits",
 			Help:     "Displays how many times a connection hit max thread",
 			Type:     prometheus.GaugeValue,
@@ -39,44 +39,44 @@ func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 			Help:     "The number of file descriptors available to the directory",
 			Type:     prometheus.GaugeValue,
 		},
-		"readwaiters": {
+		"read_waiters": {
 			LdapName: "readwaiters",
 			Help: `Number of connections where some requests are pending
 and not currently being serviced by a thread in Directory Server`,
 			Type: prometheus.GaugeValue,
 		},
-		"opsinitiated": {
+		"ops_initiated_total": {
 			LdapName: "opsinitiated",
 			Help:     "Number of operations the server has initiated since it started",
 			Type:     prometheus.CounterValue,
 		},
-		"opscompleted": {
+		"ops_completed_total": {
 			LdapName: "opscompleted",
 			Help:     "Number of operations the server has completed since it started.",
 			Type:     prometheus.CounterValue,
 		},
-		"entriessent": {
+		"entries_sent_total": {
 			LdapName: "entriessent",
 			Help:     "Number of entries sent to clients since the server started",
 			Type:     prometheus.CounterValue,
 		},
-		"bytessent": {
+		"bytes_sent_total": {
 			LdapName: "bytessent",
 			Help:     "Number of bytes sent to clients after the server starts",
 			Type:     prometheus.CounterValue,
 		},
-		"nbackends": {
+		"backends": {
 			LdapName: "nbackends",
 			Help:     "Number of back ends (databases) the server services",
 			Type:     prometheus.GaugeValue,
 		},
-		"currenttime": {
+		"current_time_seconds": {
 			LdapName: "currenttime",
 			LdapType: collectors.Iso8601CompactString,
 			Help:     "Current time of the server. The time is displayed in Greenwich Mean Time (GMT) in UTC format",
 			Type:     prometheus.CounterValue,
 		},
-		"starttime": {
+		"start_time_seconds": {
 			LdapName: "starttime",
 			LdapType: collectors.Iso8601CompactString,
 			Help:     "Time when the server started. The time is displayed in Greenwich Mean Time (GMT) in UTC format",
