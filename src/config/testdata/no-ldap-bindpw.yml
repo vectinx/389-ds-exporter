@@ -1,0 +1,4 @@
+---
+ldap_server_url: "ldap://localhost:389"
+ldap_bind_dn: "cn=directory manager"
+

@@ -1,0 +1,20 @@
+---
+collectors_default: none
+collectors_enabled:
+  - server
+  - snmp-server
+ds_backend_type: mdb
+ds_backend_dbs:
+  - userRoot
+ds_numsubordinate_records:
+  - cn=users,cn=accounts,dc=example,dc=com
+shutdown_timeout: 5
+ldap_server_url: "ldap://localhost:389"
+ldap_bind_dn: "cn=directory manager"
+ldap_bind_pw: "12345678"
+ldap_tls_skip_verify: false
+ldap_pool_conn_limit: 5
+ldap_pool_get_timeout: 5
+ldap_dial_timeout: 3
+ldap_pool_idle_time: 600
+ldap_pool_life_time: 3600

@@ -11,15 +11,19 @@ import (
 
 type EnabledCollectorsType string
 
+var (
+	ErrNoRequiredValue = errors.New("required field is not specified")
+)
+
 const (
-	DefaultGlobalShutdownTimeout int    = 5
-	DefaultLDAPTlsSkipVerify     bool   = false
-	DefaultLDAPPoolConnLimit     int    = 4
-	DefaultLDAPPoolGetTimeout    int    = 5
-	DefaultLDAPPoolIdleTime      int    = 300
-	DefaultLDAPPoolLifeTime      int    = 3600
-	DefaultLDAPDialTimeout       int    = 3
-	DefaultCollectorsDefault     string = "standard"
+	DefaultShutdownTimeout    int    = 5
+	DefaultLDAPTlsSkipVerify  bool   = false
+	DefaultLDAPPoolConnLimit  int    = 4
+	DefaultLDAPPoolGetTimeout int    = 5
+	DefaultLDAPPoolIdleTime   int    = 300
+	DefaultLDAPPoolLifeTime   int    = 3600
+	DefaultLDAPDialTimeout    int    = 3
+	DefaultCollectorsDefault  string = "standard"
 
 	BackendBDB string = "bdb"
 	BackendMDB string = "mdb"
@@ -82,7 +86,7 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg := &ExporterConfig{}
 
 	// Global
-	setDefaultIfNotDefined(r.ShutdownTimeout, &cfg.ShutdownTimeout, DefaultGlobalShutdownTimeout)
+	setDefaultIfNotDefined(r.ShutdownTimeout, &cfg.ShutdownTimeout, DefaultShutdownTimeout)
 	setDefaultIfNotDefined(r.CollectorsDefault, &cfg.CollectorsDefault, DefaultCollectorsDefault)
 
 	setDefaultIfNotDefined(r.DSBackendType, &cfg.DSBackendType, "")
@@ -126,15 +130,15 @@ func (c *ExporterConfig) Validate() error {
 	}
 
 	if c.LDAPServerURL == "" {
-		return errors.New("ldap_server_url is required")
+		return fmt.Errorf("ldap_server_url: %w", ErrNoRequiredValue)
 	}
 
 	if c.LDAPBindDN == "" {
-		return errors.New("ldap_bind_dn is required")
+		return fmt.Errorf("ldap_bind_dn: %w", ErrNoRequiredValue)
 	}
 
 	if c.LDAPBindPw == "" {
-		return errors.New("ldap_bind_pw is required")
+		return fmt.Errorf("ldap_bind_pw: %w", ErrNoRequiredValue)
 	}
 
 	if c.LDAPPoolConnLimit <= 0 {

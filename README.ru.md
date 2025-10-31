@@ -1,5 +1,7 @@
 # 389-ds-exporter
-[![CI](https://github.com/vectinx/389-ds-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/vectinx/389-ds-exporter/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://img.shields.io/github/actions/workflow/status/vectinx/389-ds-exporter/ci.yml?label=ci&?branch=master)](https://github.com/vectinx/389-ds-exporter/actions/workflows/ci.yml)
+
 
 Экспортер Prometheus для 389-ds, собирающий метрики по протоколу LDAP
 
