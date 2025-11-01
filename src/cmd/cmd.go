@@ -17,37 +17,36 @@ type CmdArguments struct {
 	MetricsPath          string
 }
 
-func ParseCmdArguments() *CmdArguments {
-	var (
-		configFilePath = new(string)
-		checkConfig    = kingpin.Flag("config.check", "Validate the current configuration and print it to stdout").Bool()
-		metricsPath    = kingpin.Flag(
-			"web.metrics.path",
-			"Path under which to expose metrics.",
-		).Default("/metrics").String()
-		toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9389")
-	)
-	kingpin.Flag("config.file", "Path to configuration file").
-		Default("config.yml").
-		StringVar(configFilePath)
-
-	kingpin.Flag("config", "[DEPRECATED]. Use --config.file instead. Path to configuration file").
-		Default("config.yml").
-		StringVar(configFilePath)
-
+func ParseCmdArguments() (*kingpin.Application, *CmdArguments) {
+	app := kingpin.New("389-ds-exporter", "389 Directory Server Prometheus exporter")
 	args := &CmdArguments{}
 
+	configFilePath := new(string)
+	checkConfig := app.Flag("config.check", "Validate the current configuration and print it to stdout").Bool()
+	metricsPath := app.Flag("web.metrics.path", "Path under which to expose metrics.").Default("/metrics").String()
+	toolkitFlags := kingpinflag.AddFlags(app, ":9389")
+
+	app.Flag("config.file", "Path to configuration file").
+		Default("config.yml").
+		StringVar(configFilePath)
+
+	app.Flag("config", "[DEPRECATED]. Use --config.file instead.").
+		Hidden().Default("config.yml").
+		StringVar(configFilePath)
+
 	args.PromslogConfig = &promslog.Config{}
-	flag.AddFlags(kingpin.CommandLine, args.PromslogConfig)
+	flag.AddFlags(app, args.PromslogConfig)
 
-	kingpin.Version(version.Print("389-ds-exporter"))
-	kingpin.HelpFlag.Short('h')
-	kingpin.Parse()
+	app.Version(version.Print("389-ds-exporter"))
+	app.HelpFlag.Short('h')
 
-	args.ConfigFile = *configFilePath
-	args.IsConfigCheck = *checkConfig
-	args.ExporterToolkitFlags = toolkitFlags
-	args.MetricsPath = *metricsPath
+	app.Action(func(*kingpin.ParseContext) error {
+		args.ConfigFile = *configFilePath
+		args.IsConfigCheck = *checkConfig
+		args.ExporterToolkitFlags = toolkitFlags
+		args.MetricsPath = *metricsPath
+		return nil
+	})
 
-	return args
+	return app, args
 }

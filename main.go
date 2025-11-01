@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/version"
@@ -80,10 +81,12 @@ func run() int {
 	var (
 		applicationResources = appResources{}
 		startTime            = time.Now()
-		args                 = cmd.ParseCmdArguments()
+		cli, args            = cmd.ParseCmdArguments()
 		signalCh             = make(chan os.Signal, 1)
 		serverErrCh          = make(chan error)
 	)
+
+	kingpin.MustParse(cli.Parse(os.Args[1:]))
 
 	logger := promslog.New(args.PromslogConfig)
 	slog.SetDefault(logger)
