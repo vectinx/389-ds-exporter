@@ -1,6 +1,22 @@
 # CHANGELOG.md
 
-## 0.3.0 (02.10.2025)
+## v2.0.0 (01.07.2025)
+
+### Features
+- Added support for HTTPS and Basic Auth
+- Updated metric names according to Prometheus recommendations
+- Added the ability to skip TLS verification when using LDAPS
+- Added automatic closing of LDAP connections when idle
+- Added error information output in the `/health` endpoint
+
+### Fixes
+- Fixed concurrency issues in the LDAP pool that could cause exporter failures
+- Fixed minor issues in the dashboard
+
+### Security
+- Upgraded Go to version 1.25.3 to address the vulnerability [GO-2025-4007](https://pkg.go.dev/vuln/GO-2025-4007)
+
+## v1.0.0 (02.10.2025)
 
 ### Features
 - Improve stability of ldap-pool
@@ -12,7 +28,6 @@
 ### Fixes
 - Fix mismatch between metric types and their actual values
 - Fix errors when using empty sections of the configuration file
-
 
 ## 0.2.0 (18.09.2025)
 
