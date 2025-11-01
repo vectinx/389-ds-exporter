@@ -52,37 +52,37 @@ func GetLdapBDBServerCacheMetrics() map[string]collectors.LdapMonitoredAttribute
 // of server NDN cache metrics.
 func GetNdnCacheMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
-		"normalizeddncachetries": {
+		"ndn_cache_lookups_total": {
 			LdapName: "normalizeddncachetries",
 			Help:     "Total number of cache lookups since the server was started",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
-		"normalizeddncachehits": {
+		"ndn_cache_hits_total": {
 			LdapName: "normalizeddncachehits",
 			Help:     "Normalized DNs found within the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
-		"normalizeddncachemisses": {
+		"ndn_cache_misses_total": {
 			LdapName: "normalizeddncachemisses",
 			Help:     "Normalized DNs not found within the cache",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
-		"normalizeddncachehitratio": {
+		"ndn_cache_hit_ratio": {
 			LdapName: "normalizeddncachehitratio",
 			Help:     "Percentage of the normalized DNs found in the cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"currentnormalizeddncachesize": {
+		"ndn_cache_size_bytes": {
 			LdapName: "currentnormalizeddncachesize",
 			Help:     "Current size of the normalized DN cache in bytes",
 			Type:     prometheus.GaugeValue,
 		},
-		"maxnormalizeddncachesize": {
+		"ndn_cache_max_size_bytes": {
 			LdapName: "maxnormalizeddncachesize",
 			Help:     "Maximum size of NDn cache",
 			Type:     prometheus.GaugeValue,
 		},
-		"currentnormalizeddncachecount": {
+		"ndn_cache_entries": {
 			LdapName: "currentnormalizeddncachecount",
 			Help:     "Number of normalized cached DNs",
 			Type:     prometheus.GaugeValue,

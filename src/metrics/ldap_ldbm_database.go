@@ -105,12 +105,12 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		"log_region_wait_total": {
 			LdapName: "nsslapd-db-log-region-wait-rate",
 			Help:     "Number of times that a thread of control was forced to wait before obtaining the region lock.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"log_write_bytes_total": {
 			LdapName: "nsslapd-db-log-write-rate",
 			Help:     "Number of bytes written to the log since the last checkpoint.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_hash_longest_chain": {
 			LdapName: "nsslapd-db-longest-chain-length",
@@ -120,32 +120,32 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		"cache_page_create_total": {
 			LdapName: "nsslapd-db-page-create-rate",
 			Help:     "Pages created in the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_page_read_total": {
 			LdapName: "nsslapd-db-page-read-rate",
 			Help:     "Pages read into the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_page_ro_evict_total": {
 			LdapName: "nsslapd-db-page-ro-evict-rate",
 			Help:     "Clean pages forced from the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_page_rw_evict_total": {
 			LdapName: "nsslapd-db-page-rw-evict-rate",
 			Help:     "Dirty pages forced from the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_page_trickle_total": {
 			LdapName: "nsslapd-db-page-trickle-rate",
 			Help:     "Dirty pages written using the memp_trickle interface.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_page_write_total": {
 			LdapName: "nsslapd-db-page-write-rate",
 			Help:     "Pages read into the cache.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"cache_pages_in_use": {
 			LdapName: "nsslapd-db-pages-in-use",
@@ -155,7 +155,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		"txn_region_wait_total": {
 			LdapName: "nsslapd-db-txn-region-wait-rate",
 			Help:     "Number of times that a thread of control was force to wait before obtaining the region lock.",
-			Type:     prometheus.GaugeValue,
+			Type:     prometheus.CounterValue,
 		},
 		"lock_objects_current": {
 			LdapName: "nsslapd-db-current-lock-objects",
@@ -173,92 +173,92 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 // GetLdapMDBDatabaseLDBM function returns map of attributes defining specific ldap server ldbm database LMDB metrics.
 func GetLdapMDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
-		"dbenvmapsize": {
+		"env_map_size_bytes": {
 			LdapName: "dbenvmapsize",
 			Help:     "LMDB Size of the data file in bytes.",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbenvlastpageno": {
+		"env_last_page_number": {
 			LdapName: "dbenvlastpageno",
 			Help:     "LMDB Number of pages used",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbenvlasttxnid": {
+		"env_last_txn_id": {
 			LdapName: "dbenvlasttxnid",
 			Help:     "LMDB Last transaction ID",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbenvmaxreaders": {
+		"env_max_readers": {
 			LdapName: "dbenvmaxreaders",
 			Help:     "LMDB Max readers",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbenvnumreaders": {
+		"env_num_readers": {
 			LdapName: "dbenvnumreaders",
 			Help:     "LMDB Number of readers used",
 			Type:     prometheus.GaugeValue,
 		},
-		"dbenvnumdbis": {
+		"env_num_dbis": {
 			LdapName: "dbenvnumdbis",
 			Help:     "Number of DBIs (named databases) within the LMDB environment",
 			Type:     prometheus.GaugeValue,
 		},
-		"waitingrwtxn": {
+		"rw_txn_waiting": {
 			LdapName: "waitingrwtxn",
 			Help:     "LMDB Waiting RW transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"activerwtxn": {
+		"rw_txn_active": {
 			LdapName: "activerwtxn",
 			Help:     "LMDB Active RW transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"abortrwtxn": {
+		"rw_txn_aborted": {
 			LdapName: "abortrwtxn",
 			Help:     "LMDB Aborted RW transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"commitrwtxn": {
+		"rw_txn_committed": {
 			LdapName: "commitrwtxn",
 			Help:     "LMDB Committed RW transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"granttimerwtxn": {
+		"rw_txn_grant_time": {
 			LdapName: "granttimerwtxn",
 			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
-		"lifetimerwtxn": {
+		"rw_txn_lifetime": {
 			LdapName: "lifetimerwtxn",
 			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
-		"waitingrotxn": {
+		"ro_txn_waiting": {
 			LdapName: "waitingrotxn",
 			Help:     "MDB Waiting RO transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"activerotxn": {
+		"ro_txn_active": {
 			LdapName: "activerotxn",
 			Help:     "LMDB Active RO transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"abortrotxn": {
+		"ro_txn_aborted": {
 			LdapName: "abortrotxn",
 			Help:     "LMDB Aborted RO transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"commitrotxn": {
+		"ro_txn_committed": {
 			LdapName: "commitrotxn",
 			Help:     "LMDB Committed RO transactions",
 			Type:     prometheus.GaugeValue,
 		},
-		"granttimerotxn": {
+		"ro_txn_grant_time": {
 			LdapName: "granttimerotxn",
 			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,
 		},
-		"lifetimerotxn": {
+		"ro_txn_lifetime": {
 			LdapName: "lifetimerotxn",
 			Help:     "", // There is no clear explanation for this parameter yet.
 			Type:     prometheus.GaugeValue,

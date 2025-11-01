@@ -19,6 +19,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
@@ -52,7 +53,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -69,7 +69,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -86,7 +85,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               }
             ]
           }
@@ -173,7 +172,7 @@
             "steps": [
               {
                 "color": "blue",
-                "value": 0
+                "value": null
               }
             ]
           }
@@ -204,7 +203,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -243,7 +242,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               }
             ]
           }
@@ -274,7 +273,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -313,7 +312,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               }
             ]
           }
@@ -344,7 +343,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -383,7 +382,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               }
             ]
           },
@@ -415,7 +414,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -454,7 +453,6 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -471,7 +469,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -488,7 +485,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               }
             ]
           }
@@ -683,7 +680,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -700,7 +696,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -717,7 +712,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               }
@@ -828,7 +823,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -845,7 +839,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -862,7 +855,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1066,7 +1059,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1083,7 +1075,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1100,7 +1091,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               }
@@ -1184,7 +1175,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1201,7 +1191,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1218,7 +1207,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               }
@@ -1303,7 +1292,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1320,7 +1308,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1337,7 +1324,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               },
@@ -1445,7 +1432,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1462,7 +1448,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1479,7 +1464,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               }
@@ -1612,7 +1597,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1629,7 +1613,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1646,7 +1629,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               },
@@ -1689,7 +1672,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 15
+            "y": 36
           },
           "id": 18,
           "options": {
@@ -1719,7 +1702,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_maxnormalizeddncachesize{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_ldbm_ndn_cache_max_size_bytes{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1736,7 +1719,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "ds_ldbm_currentnormalizeddncachesize{job=\"$job\", instance=\"$node\"}",
+              "expr": "ds_ldbm_ndn_cache_size_bytes{job=\"$job\", instance=\"$node\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "Used",
@@ -1766,7 +1749,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1783,7 +1765,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1800,7 +1781,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   }
                 ]
               }
@@ -1842,7 +1823,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 15
+            "y": 36
           },
           "id": 21,
           "options": {
@@ -1872,7 +1853,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_normalizeddncachetries{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_ndn_cache_lookups_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "Tries",
@@ -1887,7 +1868,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "rate(ds_ldbm_normalizeddncachehits{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
+              "expr": "rate(ds_ldbm_ndn_cache_hits_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1919,7 +1900,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "none",
@@ -1936,7 +1916,6 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1954,7 +1933,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": 0
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2009,7 +1988,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 15
+            "y": 36
           },
           "id": 19,
           "options": {
@@ -2038,7 +2017,7 @@
                 "uid": "${Datasource}"
               },
               "editorMode": "code",
-              "expr": "ds_ldbm_normalizeddncachehitratio{job=\"$job\",instance=\"$node\"}",
+              "expr": "ds_ldbm_ndn_cache_hit_ratio{job=\"$job\",instance=\"$node\"}",
               "legendFormat": "Hit ratio",
               "range": true,
               "refId": "A"
@@ -3021,7 +3000,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 16
       },
       "id": 38,
       "panels": [
@@ -4938,7 +4917,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 17
       },
       "id": 50,
       "panels": [
@@ -5148,22 +5127,24 @@
       "type": "row"
     }
   ],
-  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 42,
+  "schemaVersion": 39,
   "tags": [
     "389-ds"
   ],
   "templating": {
     "list": [
       {
+        "hide": 0,
         "includeAll": false,
         "label": "Datasource",
+        "multi": false,
         "name": "Datasource",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "type": "datasource"
       },
       {
@@ -5172,8 +5153,10 @@
           "uid": "${Datasource}"
         },
         "definition": "label_values(up,job)",
+        "hide": 0,
         "includeAll": false,
         "label": "job",
+        "multi": false,
         "name": "job",
         "options": [],
         "query": {
@@ -5183,6 +5166,8 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
@@ -5191,8 +5176,10 @@
           "uid": "${Datasource}"
         },
         "definition": "label_values(ds_exporter_scrape_duration_seconds{job=\"$job\"},instance)",
+        "hide": 0,
         "includeAll": false,
         "label": "node",
+        "multi": false,
         "name": "node",
         "options": [],
         "query": {
@@ -5202,6 +5189,8 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
@@ -5210,6 +5199,7 @@
           "uid": "${Datasource}"
         },
         "definition": "label_values(ds_ldbm_instance_dn_cache_size_bytes{job=\"$job\", instance=\"$node\"},database)",
+        "hide": 0,
         "includeAll": true,
         "label": "database",
         "multi": true,
@@ -5222,6 +5212,8 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       }
     ]
@@ -5234,5 +5226,6 @@
   "timezone": "browser",
   "title": "389-ds-exporter",
   "uid": "389-ds-exporter",
-  "version": 4
+  "version": 4,
+  "weekStart": ""
 }
