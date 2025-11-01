@@ -1,142 +1,108 @@
-# Configuration File
+# Configuration file
 
-The 389-ds-exporter is configured via a YAML file. This file defines global settings, HTTP server options, LDAP connection details, and logging parameters.
+389-ds-exporter is configured using two YAML files:
+- `config.yml` — exporter configuration (LDAP connection parameters, list of collectors, etc.)
+- `web-config.yml` — web configuration based on [Prometheus web.config.file](https://prometheus.io/docs/prometheus/latest/configuration/https/) (TLS, HTTP, BasicAuth parameters, etc.)
 
-## Global settings
+## Exporter configuration file parameters
 
-The 'global' section defines general exporter parameters.
+### collectors_default
+Set of collectors enabled by default.
+Possible values:
+- `all` — enables all available collectors;
+- `none` — disables all collectors;
+- `standard` — enables the standard set of collectors.
 
-```yaml
-global:
-  ds_numsubordinate_records: []
-  shutdown_timeout: 5
-```
+Default value: `standard`
+
+---
 
 ### ds_numsubordinate_records
-List of LDAP entries for which the number of subordinates (numSubordinates) will be collected.
+List of LDAP entries for which the number of subordinate entries (`numSubordinates`) will be collected.
 Default value: `[]`
 
+---
+
+### collectors_enabled
+List of explicitly enabled collectors.
+Used to enable specific collectors when `collectors_default` is not set to `all`.
+
+---
+
 ### shutdown_timeout
-Timeout (in seconds) for graceful shutdown. If 0, shutdown happens immediately.
+Maximum time (in seconds) the server waits for graceful shutdown of all resources during application termination.
+During this period, the server stops accepting new connections, completes ongoing requests, and cleanly closes the HTTP server, LDAP connection pool, and other resources.
+If the timeout is exceeded, remaining connections will be forcibly closed.
+A value of `0` means graceful shutdown is skipped.
+
 Default value: `5`
 
-## HTTP server configuration
+## LDAP
 
-The 'http' section defines the parameters of the HTTP server that provides metrics.
-
-```yaml
-http:
-  listen_address: ":9389"
-  metrics_path: "/metrics"
-  read_timeout: 10
-  write_timeout: 15
-  idle_timeout: 60
-  initial_read_timeout: 3
-```
-
-### listen_address
-Address and port to bind the HTTP server (e.g., :9389, 0.0.0.0:9389).
-
-Default value: `127.0.0.1:9389`
-
-### metrics_path
-Path to expose Prometheus metrics (default: /metrics).
-
-Default value: `/metrics`
-
-### read_timeout
-Maximum duration allowed for reading the entire request, including the body.
-A zero or negative value means no timeout.
-
-Default value: `10`
-
-### write_timeout
-Maximum duration before timing out writes of the response.
-This timeout is reset whenever a new request’s header is read.
-A zero or negative value means no timeout.
-
-Default value: `15`
-
-### idle_timeout
-Maximum duration to wait for the next request when keep-alives are enabled.
-If zero, the value of ReadTimeout is used.
-If negative, or if both this and ReadTimeout are zero or negative, there is no timeout.
-
-Default value: `60`
-
-### initial_read_timeout
-Maximum duration to wait for the client to send the beginning of the request after a connection is accepted.
-If the client doesn't send any data within this time, the connection will be closed.
-A value of 0 disables the timeout, meaning the server will wait indefinitely.
-
-Default value: `3`
-
-## LDAP Configuration
-
-The 'ldap' section defines the parameters of the connection to the LDAP server.
-
-```
-ldap:
-  server_url: "ldap://localhost:389"
-  bind_dn: "cn=directory manager"
-  bind_pw: "12345678"
-  pool_conn_limit: 4
-```
-### server_url
-LDAP server URI (e.g., ldap://localhost:389 or ldaps://example.com)
+### ldap_server_url
+LDAP server address in RFC-2255 format.
+Examples: `ldap://localhost:389` or `ldaps://remote-server`
 
 Default value: `ldap://localhost:389`
 
-### bind_dn
-DN of the account used to authenticate with the LDAP server.
+---
 
-### bind_pw
-Password of the LDAP account.
+### ldap_bind_dn
+DN of the account used for LDAP authentication.
 
-### pool_conn_limit:
+---
+
+### ldap_bind_pw
+Password for the LDAP account.
+
+---
+
+### ldap_tls_skip_verify
+Skip TLS certificate verification when connecting to LDAP.
+
+Default value: `false`
+
+---
+
+### ldap_pool_conn_limit
 Maximum size of the LDAP connection pool.
-Connections are created as needed and deleted when their lifetime or idle time is exceeded.
-Recommended and default value is 4. If set lower, metric collectors may block waiting for connections, slowing down the exporter.
-Values above 4 have no effect, as the current version of the exporter does not use more than 4 connections at once.
+The recommended and standard value is `5`.
+If set lower, metric collectors may block while waiting for connections, slowing down the exporter.
 
-Default value: `4`
+Default value: `5`
 
+---
 
-## Logging
-The 'log' section defines logging parameters.
+### ldap_pool_get_timeout
+Timeout (in seconds) for obtaining a connection from the pool.
+If a connection cannot be acquired within this time, an error is returned.
 
-### level
-Logging level.
-Options: `DEBUG`, `INFO`, `WARNING`, or `ERROR`.
+Default value: `5`
 
-Default value: `INFO`
+---
 
-### handler: both
-Log output target.
-Options:
-- `stdout` - logs are printed to standard output
-- `file`   - logs are written to a file
-- `both`   - logs are written to both stdout and a file
+### ldap_dial_timeout
+Timeout for establishing an LDAP connection.
+This time does not include the BIND operation, only socket opening.
 
-Defeault value: `both`
+Default value: `3`
 
-### file
-Log file path.
-Only relevant if 'handler' is set to 'file' or 'both'.
-Make sure the system is configured to rotate this file (e.g., using logrotate).
+---
 
-Default value: `/var/log/389-ds-exporter/exporter.log`
+### ldap_pool_idle_time
+The amount of time an idle connection remains in the pool.
+If the connection is not used by any request during this period, it will be closed.
 
-### stdout_format
-STDOUT log format.
-Options: `text`, `json`
-Only applies if 'handler' is `stdout` or `both`.
+Default value: `600`
 
-Default value: `text`
+---
 
-### file_format
-File log format.
-Options: `text`, `json`
-Applies only if 'handler' is `file` or `both`.
+### ldap_pool_life_time
+The maximum lifetime of a connection. After this time, the connection is closed.
 
-Default value: `json`
+Default value: `3600`
+
+## WEB configuration parameters
+
+Web configuration parameters are defined using the standard Prometheus `web-config.yml` file.
+Detailed parameter descriptions are available [here](https://prometheus.io/docs/prometheus/latest/configuration/https/).

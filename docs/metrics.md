@@ -1,795 +1,785 @@
 # Metrics collected by the exporter
 
 To collect metrics, the exporter uses collectors. A *collector* is a component of the exporter responsible for collecting specific server metrics.
-Below is a list of collectors available in the current version of `389-ds-exporter` and their purpose:
-- [server](#server) - collects core server metrics.
+Below is a list of collectors available in the current version of 389-ds-exporter and their purposes:
+- [server](#server) - collects basic server metrics.
 - [snmp-server](#snmp-server) - collects extended server metrics. Complements but does not replace the `server` collector.
-- [numsubordinates](#numsubordinates) - collects information about the number of entries in the configured DNs ([see config.md](config.md#global-settings)).
+- [numsubordinates](#numsubordinates) - collects information about the number of entries in the DNs specified in the configuration ([see config.md](config.md#global-settings)).
 - [ndn-cache](#ndn-cache) - collects information about the usage of the Normalized DN Cache.
-- [ldbm-instance](#ldbm-instance) - collects database backend metrics.
-- [bdb-cache](#bdb-cache) - collects Berkeley DB cache information.
+- [ldbm-instance](#ldbm-instance) - collects backend database metrics.
+- [bdb-cache](#bdb-cache) - collects information about Berkeley DB caches.
 - [bdb-internal](#bdb-internal) - collects internal Berkeley DB metrics.
 - [lmdb-internal](#lmdb-internal) - collects internal LMDB metrics.
 
 Below is a detailed description of the metrics collected by each collector.
 
 ## `server`
-The `server` collector collects core server metrics.</br>
+The `server` collector collects basic server metrics</br>
 Source: `cn=monitor`
 
-### Metrics
-
 #### ds_server_threads
-Type: `gauge`
+
+Type: `gauge`</br>
 Attribute: `threads`
-Current number of threads used to handle requests.
 
-#### ds_server_currentconnections
-Type: `gauge`
+The current number of threads used to process requests.
+
+#### ds_server_connections
+
+Type: `gauge`</br>
 Attribute: `currentconnections`
-Number of established connections.
 
----
+The number of established connections.
 
-#### ds_server_totalconnections
-Type: `counter`
+#### ds_server_connections_total
+
+Type: `counter`</br>
 Attribute: `totalconnections`
-Number of connections established by the server since startup.
 
----
+The total number of connections established by the server since startup.
 
-#### ds_server_currentconnectionsatmaxthreads
-Type: `gauge`
+#### ds_server_connections_max_threads
+
+Type: `gauge`</br>
 Attribute: `currentconnectionsatmaxthreads`
-Current number of connections using the maximum allowed threads per connection.
 
----
+The current number of connections using the maximum allowed number of threads per connection.
 
-#### ds_server_maxthreadsperconnhits
-Type: `gauge`
+#### ds_server_max_threads_per_conn_hits_total
+
+Type: `gauge`</br>
 Attribute: `maxthreadsperconnhits`
-Shows how many times connections reached the thread-per-connection limit.
 
----
+Shows the number of times connections reached the thread limit per connection.
 
 #### ds_server_dtablesize
-Type: `gauge`
+
+Type: `gauge`</br>
 Attribute: `dtablesize`
-Number of file descriptors available to the server.
 
----
+The number of file descriptors available to the server.
 
-#### ds_server_readwaiters
-Type: `gauge`
+#### ds_server_read_waiters
+
+Type: `gauge`</br>
 Attribute: `readwaiters`
-Number of connections with some requests waiting, not currently served by a server thread.
 
----
+The number of connections with some requests in a waiting state and not currently being served by a thread on the server.
 
-#### ds_server_opsinitiated
-Type: `counter`
+#### ds_server_ops_initiated_total
+
+Type: `counter`</br>
 Attribute: `opsinitiated`
-Number of operations initiated by the server since startup.
 
----
+The total number of operations initiated by the server since startup.
 
-#### ds_server_opscompleted
-Type: `counter`
+#### ds_server_ops_completed_total
+
+Type: `counter`</br>
 Attribute: `opscompleted`
-Number of operations completed by the server since startup.
 
----
+The total number of operations completed by the server since startup.
 
-#### ds_server_entriessent
-Type: `counter`
+#### ds_server_entries_sent_total
+
+Type: `counter`</br>
 Attribute: `entriessent`
-Number of entries sent to clients since startup.
 
----
+The total number of entries sent to clients since startup.
 
-#### ds_server_bytessent
-Type: `counter`
+#### ds_server_bytes_sent_total
+
+Type: `counter`</br>
 Attribute: `bytessent`
-Number of bytes sent to clients since startup.
 
----
+The total number of bytes sent to clients since startup.
 
-#### ds_server_nbackends
-Type: `gauge`
+#### ds_server_backends
+
+Type: `gauge`</br>
 Attribute: `nbackends`
-Number of backends (databases, suffixes) served by the server.
 
----
+The number of backends (databases, suffixes) served by the server.
 
-#### ds_server_currenttime
-Type: `gauge`
+#### ds_server_current_time_seconds
+
+Type: `gauge`</br>
 Attribute: `currenttime`
-Current server time in UTC+0, Unix Timestamp format.
 
----
+The current server time in UTC+0 timezone in Unix Timestamp format.
 
-#### ds_server_starttime
-Type: `gauge`
+#### ds_server_start_time_seconds
+
+Type: `gauge`</br>
 Attribute: `starttime`
-Server startup time in UTC+0, Unix Timestamp format.
 
----
+The server startup time in UTC+0 timezone in Unix Timestamp format.
 
 ## `snmp-server`
-The `snmp-server` collector collects extended server metrics. Complements but does not replace the `server` collector.</br>
-Source: `cn=snmp,cn=monitor`
+The `snmp-server` collector collects extended server metrics. It complements but does not replace the `server` collector</br>
+Metrics source: `cn=snmp,cn=monitor`
 
-### Metrics
+#### ds_snmp_server_bind_anonymous_total
 
-#### ds_snmp_server_anonymousbinds
-Type: `counter`
+Type: `counter`</br>
 Attribute: `anonymousbinds`
-Number of anonymous BIND operations since server startup.
 
----
+The total number of anonymous BIND operations since server startup.
 
-#### ds_snmp_server_unauthbinds
-Type: `counter`
+#### ds_snmp_server_bind_unauth_total
+
+Type: `counter`</br>
 Attribute: `unauthbinds`
-Number of unauthenticated BIND operations since server startup.
 
----
+The total number of unauthenticated BIND operations since server startup.
 
-#### ds_snmp_server_simpleauthbinds
-Type: `counter`
+#### ds_snmp_server_bind_simple_total
+
+Type: `counter`</br>
 Attribute: `simpleauthbinds`
-Number of simple BIND operations since server startup.
 
----
+The total number of simple authentication BIND operations since server startup.
 
-#### ds_snmp_server_strongauthbinds
-Type: `counter`
+#### ds_snmp_server_bind_strong_total
+
+Type: `counter`</br>
 Attribute: `strongauthbinds`
-Number of strongauth BIND operations since server startup.
 
----
+The total number of strong authentication BIND operations since server startup.
 
-#### ds_snmp_server_bindsecurityerrors
-Type: `counter`
+#### ds_snmp_server_bind_security_errors_total
+
+Type: `counter`</br>
 Attribute: `bindsecurityerrors`
-Number of times an incorrect password was specified in a BIND request.
 
----
+The number of times an incorrect password was provided in a BIND request.
 
-#### ds_snmp_server_compareops
-Type: `counter`
+#### ds_snmp_server_compare_operations_total
+
+Type: `counter`</br>
 Attribute: `compareops`
-Number of LDAP compare requests since server startup.
 
----
+The total number of LDAP compare requests since server startup.
 
-#### ds_snmp_server_addentryops
-Type: `counter`
+#### ds_snmp_server_add_operations_total
+
+Type: `counter`</br>
 Attribute: `addentryops`
-Number of LDAP add requests since server startup.
 
----
+The total number of LDAP add requests since server startup.
 
-#### ds_snmp_server_removeentryops
-Type: `counter`
+#### ds_snmp_server_delete_operations_total
+
+Type: `counter`</br>
 Attribute: `removeentryops`
-Number of LDAP delete requests since server startup.
 
----
+The total number of LDAP delete requests since server startup.
 
-#### ds_snmp_server_modifyentryops
-Type: `counter`
+#### ds_snmp_server_modify_operations_total
+
+Type: `counter`</br>
 Attribute: `modifyentryops`
-Number of LDAP modify requests since server startup.
 
----
+The total number of LDAP modify requests since server startup.
 
-#### ds_snmp_server_modifyrdnops
-Type: `counter`
+#### ds_snmp_server_modify_rdn_operations_total
+
+Type: `counter`</br>
 Attribute: `modifyrdnops`
-Number of LDAP modrdn requests since server startup.
 
----
+The total number of LDAP modrdn requests since server startup.
 
-#### ds_snmp_server_searchops
-Type: `counter`
+#### ds_snmp_server_search_operations_total
+
+Type: `counter`</br>
 Attribute: `searchops`
-Number of LDAP search requests since server startup.
 
----
+The total number of LDAP search requests since server startup.
 
-#### ds_snmp_server_onelevelsearchops
-Type: `counter`
+#### ds_snmp_server_search_onelevel_operations_total
+
+Type: `counter`</br>
 Attribute: `onelevelsearchops`
-Number of one-level search requests since server startup.
 
----
+The total number of one-level search requests since server startup.
 
-#### ds_snmp_server_wholesubtreesearchops
-Type: `counter`
+#### ds_snmp_server_search_whole_subtree_operations_total
+
+Type: `counter`</br>
 Attribute: `wholesubtreesearchops`
-Number of subtree-level search requests since server startup.
 
----
+The total number of subtree-level search requests since server startup.
 
-#### ds_snmp_server_securityerrors
-Type: `counter`
+#### ds_snmp_server_security_errors_total
+
+Type: `counter`</br>
 Attribute: `securityerrors`
-Number of returned security-related errors, such as wrong passwords, invalid authentication methods, or higher security requirements.
 
----
+The number of security-related errors returned, such as incorrect passwords, incorrect authentication methods, or requirements for higher security levels.
 
-#### ds_snmp_server_errors
-Type: `counter`
+#### ds_snmp_server_errors_total
+
+Type: `counter`</br>
 Attribute: `errors`
-Number of returned errors.
 
----
+The total number of errors returned.
 
 ## `numsubordinates`
-Collects information about the number of entries in the configured DNs.</br>
-Source: configured DN
-
-### Metrics
+The `numsubordinates` collector collects information about the number of entries in the DNs specified in the configuration.</br>
+Metrics source: DNs specified in the configuration
 
 #### ds_numsubordinates_count
-Type: `gauge`
-Attribute: `numsubordinates`
-Number of child entries in the DN.
 
----
+Type: `gauge`</br>
+Attribute: `numsubordinates`
+
+The number of child DN entries.
 
 ## `ndn-cache`
-Collects information about the usage of the Normalized DN Cache.</br>
+The `ndn-cache` collector collects information about the usage of the Normalized DN Cache.</br>
 Source: `cn=monitor,cn=ldbm database,cn=plugins,cn=config`
 
-### Metrics
+#### ds_ldbm_ndn_cache_lookups_total
 
-#### ds_ldbm_normalizeddncachetries
-Type: `gauge`
+Type: `counter`</br>
 Attribute: `normalizeddncachetries`
-Total number of NDN cache accesses since server startup.
 
----
+The total number of lookups to the NDN cache since server startup.
 
-#### ds_ldbm_normalizeddncachehits
-Type: `gauge`
+#### ds_ldbm_ndn_cache_hits_total
+
+Type: `counter`</br>
 Attribute: `normalizeddncachehits`
-Number of normalized DNs found in cache since server startup.
 
----
+The number of normalized DNs found in the cache since server startup.
 
-#### ds_ldbm_normalizeddncachemisses
-Type: `gauge`
+#### ds_ldbm_ndn_cache_misses_total
+
+Type: `counter`</br>
 Attribute: `normalizeddncachemisses`
-Number of normalized DNs not found in cache since server startup.
 
----
+The number of normalized DNs not found in the cache since server startup.
 
-#### ds_ldbm_normalizeddncachehitratio
-Type: `gauge`
+#### ds_ldbm_ndn_cache_hit_ratio
+
+Type: `gauge`</br>
 Attribute: `normalizeddncachehitratio`
-Percentage of normalized DNs found in cache.
 
----
+The percentage of normalized DNs found in the cache.
 
-#### ds_ldbm_currentnormalizeddncachesize
-Type: `gauge`
+#### ds_ldbm_ndn_cache_size_bytes
+
+Type: `gauge`</br>
 Attribute: `currentnormalizeddncachesize`
-Current size of NDN cache in bytes.
 
----
+The current size of the NDN cache in bytes.
 
-#### ds_ldbm_maxnormalizeddncachesize
-Type: `gauge`
+#### ds_ldbm_ndn_cache_max_size_bytes
+
+Type: `gauge`</br>
 Attribute: `maxnormalizeddncachesize`
-Configured maximum size of NDN cache.
 
----
+The configured maximum size of the NDN cache.
 
-#### ds_ldbm_currentnormalizeddncachecount
-Type: `gauge`
+#### ds_ldbm_ndn_cache_entries
+
+Type: `gauge`</br>
 Attribute: `currentnormalizeddncachecount`
-Number of normalized DNs currently cached.
 
----
+The number of normalized DNs currently cached.
 
 ## `ldbm-instance`
-Collects database backend metrics. Database list is retrieved automatically at exporter startup.
-Source: `cn=monitor,cn=<database_name>,cn=ldbm database,cn=plugins,cn=config`
+The `ldbm-instance` collector collects backend database metrics. The list of databases is obtained automatically when the exporter starts.</br>
+Metrics source: `cn=monitor,cn=<database name>,cn=ldbm database,cn=plugins,cn=config`
 
-### Metrics
+#### ds_ldbm_instance_entry_cache_hits_total
 
-#### ds_ldbm_instance_entrycachehits
-Type: `counter`
+Type: `counter`</br>
 Attribute: `entrycachehits`
-Total number of successful entry cache accesses.
 
----
+The total number of successful entry cache hits.
 
-#### ds_ldbm_instance_entrycachetries
-Type: `counter`
+#### ds_ldbm_instance_entry_cache_lookups_total
+
+Type: `counter`</br>
 Attribute: `entrycachetries`
-Total number of entry cache access attempts since server startup.
 
----
+The total number of attempts to access the entry cache since server startup.
 
-#### ds_ldbm_instance_entrycachehitratio
-Type: `gauge`
+#### ds_ldbm_instance_entry_cache_hit_ratio
+
+Type: `gauge`</br>
 Attribute: `entrycachehitratio`
-Ratio of successful entry cache accesses to total attempts.
 
----
+The ratio of successful entry cache hits to the total number of attempts.
 
-#### ds_ldbm_instance_currententrycachesize
-Type: `gauge`
+#### ds_ldbm_instance_entry_cache_size_bytes
+
+Type: `gauge`</br>
 Attribute: `currententrycachesize`
-Current size of entry cache in bytes.
 
----
+The current size of the entry cache in bytes.
 
-#### ds_ldbm_instance_maxentrycachesize
-Type: `gauge`
+#### ds_ldbm_instance_entry_cache_max_size_bytes
+
+Type: `gauge`</br>
 Attribute: `maxentrycachesize`
-Maximum size of entry cache in bytes.
 
----
+The maximum size of the entry cache in bytes.
 
-#### ds_ldbm_instance_currententrycachecount
-Type: `gauge`
+#### ds_ldbm_instance_entry_cache_count
+
+Type: `gauge`</br>
 Attribute: `currententrycachecount`
-Current number of entries stored in entry cache.
 
----
+The current number of entries stored in the entry cache.
 
-#### ds_ldbm_instance_dncachehits
-Type: `counter`
+#### ds_ldbm_instance_dn_cache_hits_total
+
+Type: `counter`</br>
 Attribute: `dncachehits`
-Number of accesses where the entry was found in DN cache.
 
----
+The number of hits when an entry was found in the cache.
 
-#### ds_ldbm_instance_dncachetries
-Type: `counter`
+#### ds_ldbm_instance_dn_cache_lookups_total
+
+Type: `counter`</br>
 Attribute: `dncachetries`
-Total number of DN cache accesses since server startup.
 
----
+The total number of accesses to the DN cache since server startup.
 
-#### ds_ldbm_instance_dncachehitratio
-Type: `gauge`
+#### ds_ldbm_instance_dn_cache_hit_ratio
+
+Type: `gauge`</br>
 Attribute: `dncachehitratio`
-Ratio of successful DN cache accesses to total accesses.
 
----
+The ratio of successful DN cache hits to the total number of accesses.
 
-#### ds_ldbm_instance_currentdncachesize
-Type: `gauge`
+#### ds_ldbm_instance_dn_cache_size_bytes
+
+Type: `gauge`</br>
 Attribute: `currentdncachesize`
-Current size of DN cache in bytes.
 
----
+The current size of the DN cache in bytes.
 
-#### ds_ldbm_instance_maxdncachesize
-Type: `gauge`
+#### ds_ldbm_instance_dn_cache_max_size_bytes
+
+Type: `gauge`</br>
 Attribute: `maxdncachesize`
-Maximum size of DN cache in bytes.
 
----
+The maximum size of the DN cache in bytes.
 
-#### ds_ldbm_instance_currentdncachecount
-Type: `gauge`
+#### ds_ldbm_instance_dn_cache_count
+
+Type: `gauge`</br>
 Attribute: `currentdncachecount`
-Current number of entries in DN cache.
 
----
+The current number of entries in the DN cache.
 
-## `bdb-caches`
-Collects Berkeley DB cache metrics.</br>
-Source: `cn=monitor,cn=bdb,cn=ldbm database,cn=plugins,cn=config`
+## `bdb-cache`
+The `bdb-cache` collector collects BerkeleyDB cache metrics.</br>
+Metrics source: `cn=monitor,cn=bdb,cn=ldbm database,cn=plugins,cn=config`
 
-### Metrics
+#### ds_bdb_dbcache_hits_total
 
-#### ds_bdb_cachehits
-Type: `counter`
+Type: `counter`</br>
 Attribute: `dbcachehits`
-Number of pages found in the database cache without accessing disk files.
 
----
+The number of pages found in the database cache without accessing disk files.
 
-#### ds_bdb_cachetries
-Type: `counter`
+#### ds_bdb_dbcache_lookups_total
+
+Type: `counter`</br>
 Attribute: `dbcachetries`
-Total number of database cache accesses since server startup.
 
----
+The total number of cache accesses since server startup.
 
-#### ds_bdb_cachehitratio
-Type: `gauge`
+#### ds_bdb_dbcache_hit_ratio
+
+Type: `gauge`</br>
 Attribute: `dbcachehitratio`
-Percentage of page requests found in the database cache.
 
----
+The percentage of page requests found in the database cache. Higher values indicate more efficient cache usage.
 
-#### ds_bdb_cachepagein
-Type: `gauge`
+#### ds_bdb_dbcache_pages_in_total
+
+Type: `gauge`</br>
 Attribute: `dbcachepagein`
-Number of pages loaded into the database cache from disk.
 
----
+The number of pages loaded into the database cache from disk.
 
-#### ds_bdb_cachepageout
-Type: `gauge`
+#### ds_bdb_dbcache_pages_out_total
+
+Type: `gauge`</br>
 Attribute: `dbcachepageout`
-Number of pages removed from the database cache to disk.
 
----
+The number of pages evicted from the database cache to disk.
 
-#### ds_bdb_cacheroevict
-Type: `gauge`
+#### ds_bdb_dbcache_evictions_clean_total
+
+Type: `gauge`</br>
 Attribute: `dbcacheroevict`
-Number of clean pages removed from cache.
 
----
+The number of "clean" (no disk write required) pages evicted from the cache.
 
-#### ds_bdb_cacherwevict
-Type: `gauge`
+#### ds_bdb_dbcache_evictions_dirty_total
+
+Type: `gauge`</br>
 Attribute: `dbcacherwevict`
-Number of dirty pages removed from cache.
 
----
+The number of "dirty" (disk write required) pages evicted from the cache.
 
 ## `bdb-internal`
-Collects internal Berkeley DB metrics related to transactions, locks, pages, and transaction log.</br>
-Source: `cn=monitor,cn=bdb,cn=ldbm database,cn=plugins,cn=config`
+The `bdb-internal` collector collects internal BerkeleyDB metrics related to transactions, locks, pages, and transaction logs.</br>
+Metrics source: `cn=monitor,cn=bdb,cn=ldbm database,cn=plugins,cn=config`
 
-### Metrics
+#### ds_bdb_txn_abort_total
 
-#### ds_bdb_abort_rate
-Type: `counter`
+Type: `counter`</br>
 Attribute: `nsslapd-db-abort-rate`
-Number of aborted transactions.
 
----
+The number of aborted transactions.
 
-#### ds_bdb_active_txns
-Type: `gauge`
+#### ds_bdb_txn_active
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-active-txns`
-Number of transactions currently active and used by the database.
 
----
+The number of transactions currently active and in use by the database.
 
 #### ds_bdb_cache_size_bytes
-Type: `gauge`
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-cache-size-bytes`
-Configured maximum size of database cache in bytes.
 
----
+The maximum configured size of the database cache in bytes.
 
-#### ds_bdb_cache_region_wait_rate
-Type: `gauge`
+#### ds_bdb_cache_region_wait_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-cache-region-wait-rate`
-Number of cases when a thread had to wait for a cache region lock.
 
----
+The number of times a thread had to wait to acquire a cache region lock.
 
-#### ds_bdb_clean_pages
-Type: `gauge`
+#### ds_bdb_cache_pages_clean
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-clean-pages`
-Number of clean pages in the database cache.
 
----
+The number of "clean" pages in the database cache.
 
-#### ds_bdb_commit_rate
-Type: `counter`
+#### ds_bdb_txn_commit_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-commit-rate`
-Number of committed transactions.
 
----
+The number of committed transactions.
 
-#### ds_bdb_deadlock_rate
-Type: `gauge`
+#### ds_bdb_deadlock_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-deadlock-rate`
-Total number of detected deadlocks since server startup.
 
----
+The total number of deadlocks detected since server startup.
 
-#### ds_bdb_dirty_pages
-Type: `gauge`
+#### ds_bdb_cache_pages_dirty
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-dirty-pages`
-Number of dirty pages in the database cache.
 
----
+The number of "dirty" pages in the database cache.
 
-#### ds_bdb_hash_buckets
-Type: `gauge`
+#### ds_bdb_cache_hash_buckets
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-hash-buckets`
-Number of hash buckets in the buffer hash table.
 
----
+The number of hash buckets in the buffer hash table.
 
-#### ds_bdb_hash_elements_examine_rate
-Type: `gauge`
+#### ds_bdb_cache_hash_elements_examined_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-hash-elements-examine-rate`
-Number of hash elements examined during hash table searches.
 
----
+The number of hash elements examined during searches in the hash table.
 
-#### ds_bdb_hash_search_rate
-Type: `gauge`
+#### ds_bdb_cache_hash_lookups_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-hash-search-rate`
-Number of searches in the buffer hash table.
 
----
+The number of searches in the buffer hash table.
 
-#### ds_bdb_lock_conflicts
-Type: `gauge`
+#### ds_bdb_lock_conflicts_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-lock-conflicts`
-Number of times a lock could not be granted due to a conflict.
 
----
+The number of times a lock could not be granted due to a conflict.
 
-#### ds_bdb_lock_region_wait_rate
-Type: `gauge`
+#### ds_bdb_lock_region_wait_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-lock-region-wait-rate`
-Number of lock region waits.
 
----
+The number of region lock wait cases.
 
-#### ds_bdb_lock_request_rate
-Type: `gauge`
+#### ds_bdb_lock_request_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-lock-request-rate`
-Total number of lock requests.
 
----
+The total number of lock request attempts.
 
 #### ds_bdb_lockers
-Type: `gauge`
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-lockers`
-Number of current lockers (subjects holding locks).
 
----
+The number of current "lockers" (entities holding locks).
 
-#### ds_bdb_configured_locks
-Type: `gauge`
+#### ds_bdb_locks_configured
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-configured-locks`
-Configured number of locks.
 
----
+The configured number of locks.
 
-#### ds_bdb_current_locks
-Type: `gauge`
+#### ds_bdb_locks_current
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-current-locks`
-Number of locks currently in use.
 
----
+The number of locks currently in use.
 
-#### ds_bdb_max_locks
-Type: `gauge`
+#### ds_bdb_locks_max
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-max-locks`
-Maximum number of locks used simultaneously since server startup.
 
----
+The maximum number of locks used simultaneously since server startup.
 
-#### ds_bdb_log_region_wait_rate
-Type: `gauge`
+#### ds_bdb_log_region_wait_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-log-region-wait-rate`
-Number of transaction log region waits.
 
----
+The number of waits for transaction log region locks.
 
-#### ds_bdb_log_write_rate
-Type: `gauge`
+#### ds_bdb_log_write_bytes_total
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-log-write-rate`
-Number of bytes written to the transaction log since the last checkpoint.
 
----
+The number of bytes written to the log since the last transaction log checkpoint.
 
-#### ds_bdb_longest_chain_length
-Type: `gauge`
+#### ds_bdb_cache_hash_longest_chain
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-longest-chain-length`
-Maximum chain length during hash table searches.
 
----
+The maximum length of a chain during a search in the buffer hash table.
 
-#### ds_bdb_page_create_rate
-Type: `gauge`
+#### ds_bdb_cache_page_create_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-create-rate`
-Number of pages created in cache.
 
----
+The number of pages created in the cache.
 
-#### ds_bdb_page_read_rate
-Type: `gauge`
+#### ds_bdb_cache_page_read_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-read-rate`
-Number of pages read into cache.
 
----
+The number of pages read into the cache.
 
-#### ds_bdb_page_ro_evict_rate
-Type: `gauge`
+#### ds_bdb_cache_page_ro_evict_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-ro-evict-rate`
-Number of clean pages removed from cache.
-> This duplicates `ds_bdb_cacheroevict`. Retained as in 389ds.
 
----
+The number of "clean" pages evicted from the cache.
+> This value duplicates the `ds_bdb_cacheroevict` metric. It would be possible to keep only one of these metrics,
+but 389ds duplicates it for some reason, so let's keep it here as well.
 
-#### ds_bdb_page_rw_evict_rate
-Type: `gauge`
+#### ds_bdb_cache_page_rw_evict_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-rw-evict-rate`
-Number of dirty pages removed from cache.
-> This duplicates `ds_bdb_cacherwevict`. Retained as in 389ds.
 
----
+The number of "dirty" pages evicted from the cache.
+> This value duplicates the `ds_bdb_cacherwevict` metric. It would be possible to keep only one of these metrics,
+but 389ds duplicates it for some reason, so let's keep it here as well.
 
-#### ds_bdb_page_trickle_rate
-Type: `gauge`
+#### ds_bdb_cache_page_trickle_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-trickle-rate`
-Number of dirty pages written using `memp_trickle`.
 
----
+The number of "dirty" pages written using the `memp_trickle` interface.
 
-#### ds_bdb_page_write_rate
-Type: `gauge`
+#### ds_bdb_cache_page_write_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-page-write-rate`
-Number of pages written from cache.
 
----
+The number of pages written from the cache.
 
-#### ds_bdb_pages_in_use
-Type: `gauge`
+#### ds_bdb_cache_pages_in_use
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-pages-in-use`
-Total number of pages (clean and dirty) currently used by cache.
 
----
+The total number of pages (both clean and dirty) currently in use by the cache.
 
-#### ds_bdb_txn_region_wait_rate
-Type: `gauge`
+#### ds_bdb_txn_region_wait_total
+
+Type: `counter`</br>
 Attribute: `nsslapd-db-txn-region-wait-rate`
-Number of transaction region wait cases.
 
----
+The number of waits for transaction region locks.
 
-#### ds_bdb_current_lock_objects
-Type: `gauge`
+#### ds_bdb_lock_objects_current
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-current-lock-objects`
-Current number of lock objects.
 
----
+The current number of lock objects.
 
-#### ds_bdb_max_lock_objects
-Type: `gauge`
+#### ds_bdb_lock_objects_max
+
+Type: `gauge`</br>
 Attribute: `nsslapd-db-max-lock-objects`
-Maximum number of lock objects recorded since server startup.
 
----
+The maximum number of lock objects recorded since server startup.
 
 ## `lmdb-internal`
-Collects internal LMDB metrics related to transactions, files, and environment resources.</br>
-Source: `cn=monitor,cn=mdb,cn=ldbm database,cn=plugins,cn=config`
+The `lmdb-internal` collector collects internal LMDB metrics related to transactions, files, and environment resources.</br>
+Metrics source: `cn=monitor,cn=mdb,cn=ldbm database,cn=plugins,cn=config`
 
-### Metrics
+#### ds_lmdb_env_map_size_bytes
 
-#### ds_mdb_dbenvmapsize
-Type: `gauge`
+Type: `gauge`</br>
 Attribute: `dbenvmapsize`
-LMDB data file size in bytes.
 
----
+The size of the LMDB data file in bytes.
 
-#### ds_mdb_dbenvlastpageno
-Type: `gauge`
+#### ds_lmdb_env_last_page_number
+
+Type: `gauge`</br>
 Attribute: `dbenvlastpageno`
-Number of pages used in the LMDB database file.
 
----
+The number of pages used in the LMDB database file.
 
-#### ds_mdb_dbenvlasttxnid
-Type: `gauge`
+#### ds_lmdb_env_last_txn_id
+
+Type: `gauge`</br>
 Attribute: `dbenvlasttxnid`
-Last LMDB transaction ID.
 
----
+The ID of the last LMDB transaction.
 
-#### ds_mdb_dbenvmaxreaders
-Type: `gauge`
+#### ds_lmdb_env_max_readers
+
+Type: `gauge`</br>
 Attribute: `dbenvmaxreaders`
-Maximum number of allowed read threads in LMDB environment.
 
----
+The maximum number of reader threads allowed in the LMDB environment.
 
-#### ds_mdb_dbenvnumreaders
-Type: `gauge`
+#### ds_lmdb_env_num_readers
+
+Type: `gauge`</br>
 Attribute: `dbenvnumreaders`
-Current number of read threads used in LMDB environment.
 
----
+The current number of reader threads in use in the LMDB environment.
 
-#### ds_mdb_dbenvnumdbis
-Type: `gauge`
+#### ds_lmdb_env_num_dbis
+
+Type: `gauge`</br>
 Attribute: `dbenvnumdbis`
-Number of DBI (named databases) open in LMDB environment.
 
----
+The number of DBI (named databases) opened in the LMDB environment.
 
-#### ds_mdb_waitingrwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_waiting
+
+Type: `gauge`</br>
 Attribute: `waitingrwtxn`
-Number of RW transactions currently waiting.
 
----
+The number of RW (read/write) transactions waiting.
 
-#### ds_mdb_activerwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_active
+
+Type: `gauge`</br>
 Attribute: `activerwtxn`
-Number of active RW transactions.
 
----
+The number of active RW (read/write) transactions.
 
-#### ds_mdb_abortrwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_aborted
+
+Type: `gauge`</br>
 Attribute: `abortrwtxn`
-Number of aborted RW transactions.
 
----
+The number of aborted RW transactions.
 
-#### ds_mdb_commitrwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_committed
+
+Type: `gauge`</br>
 Attribute: `commitrwtxn`
-Number of committed RW transactions.
 
----
+The number of successfully committed RW transactions.
 
-#### ds_mdb_granttimerwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_grant_time
+
+Type: `gauge`</br>
 Attribute: `granttimerwtxn`
-Description unavailable. If you know this attribute, please create an Issue in the project with a description or documentation link.
 
----
+Description unavailable. Documentation could not be found for this attribute. If you know what this attribute means, please create an Issue in the project with a description or documentation link.
 
-#### ds_mdb_lifetimerwtxn
-Type: `gauge`
+#### ds_lmdb_rw_txn_lifetime
+
+Type: `gauge`</br>
 Attribute: `lifetimerwtxn`
-Description unavailable. If you know this attribute, please create an Issue in the project with a description or documentation link.
 
----
+Description unavailable. Documentation could not be found for this attribute. If you know what this attribute means, please create an Issue in the project with a description or documentation link.
 
-#### ds_mdb_waitingrotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_waiting
+
+Type: `gauge`</br>
 Attribute: `waitingrotxn`
-Number of RO transactions currently waiting.
 
----
+The number of RO (read-only) transactions waiting.
 
-#### ds_mdb_activerotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_active
+
+Type: `gauge`</br>
 Attribute: `activerotxn`
-Number of active RO transactions.
 
----
+The number of active RO transactions.
 
-#### ds_mdb_abortrotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_aborted
+
+Type: `gauge`</br>
 Attribute: `abortrotxn`
-Number of aborted RO transactions.
 
----
+The number of aborted RO transactions.
 
-#### ds_mdb_commitrotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_committed
+
+Type: `gauge`</br>
 Attribute: `commitrotxn`
-Number of committed RO transactions.
 
----
+The number of successfully committed RO transactions.
 
-#### ds_mdb_granttimerotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_grant_time
+
+Type: `gauge`</br>
 Attribute: `granttimerotxn`
-Description unavailable. If you know this attribute, please create an Issue in the project with a description or documentation link.
 
----
+Description unavailable. Documentation could not be found for this attribute. If you know what this attribute means, please create an Issue in the project with a description or documentation link.
 
-#### ds_mdb_lifetimerotxn
-Type: `gauge`
+#### ds_lmdb_ro_txn_lifetime
+
+Type: `gauge`</br>
 Attribute: `lifetimerotxn`
-Description unavailable. If you know this attribute, please create an Issue in the project with a description or documentation link.
+
+Description unavailable. Documentation could not be found for this attribute. If you know what this attribute means, please create an Issue in the project with a description or documentation link.

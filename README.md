@@ -21,7 +21,7 @@ A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol
 
 Requirements:
 
-- Go >= 1.24.3
+- Go >= 1.25.3
 - make
 
 ```bash
@@ -66,14 +66,25 @@ docker logs 389-ds-exporter
 
 The CLI is self-documented and available via the `-h` (`--help`) option:
 ```bash
-389-ds-exporter --help
 usage: 389-ds-exporter [<flags>]
+389 Directory Server Prometheus exporter
 
 Flags:
-  -h, --[no-]help            Show context-sensitive help (also try --help-long and --help-man).
-      --config="config.yml"  Path to configuration file
-      --[no-]check-config    Validate the current configuration and print it to stdout
-      --[no-]version         Show application version.
+  -h, --[no-]help                Show context-sensitive help (also try --help-long and --help-man).
+      --[no-]config.check        Validate the current configuration and print it to stdout
+      --web.metrics.path="/metrics"
+                                 Path under which to expose metrics.
+      --[no-]web.systemd-socket  Use systemd socket activation listeners instead of port listeners (Linux only).
+      --web.listen-address=:9389 ...
+                                 Addresses on which to expose metrics and web interface. Repeatable for multiple addresses. Examples: `:9100` or `[::1]:9100` for http,
+                                 `vsock://:9100` for vsock
+      --web.config.file=""       Path to configuration file that can enable TLS or authentication. See:
+                                 https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
+      --config.file="config.yml"
+                                 Path to configuration file
+      --log.level=info           Only log messages with the given severity or above. One of: [debug, info, warn, error]
+      --log.format=logfmt        Output format of log messages. One of: [logfmt, json]
+      --[no-]version             Show application version.
 ```
 
 ## Example
