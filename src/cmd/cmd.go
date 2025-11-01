@@ -19,16 +19,22 @@ type CmdArguments struct {
 
 func ParseCmdArguments() *CmdArguments {
 	var (
-		configFilePath = kingpin.Flag("config.file", "Path to configuration file").
-				Default("config.yml").
-				String()
-		checkConfig = kingpin.Flag("config.check", "Validate the current configuration and print it to stdout").Bool()
-		metricsPath = kingpin.Flag(
+		configFilePath = new(string)
+		checkConfig    = kingpin.Flag("config.check", "Validate the current configuration and print it to stdout").Bool()
+		metricsPath    = kingpin.Flag(
 			"web.metrics.path",
 			"Path under which to expose metrics.",
 		).Default("/metrics").String()
 		toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9389")
 	)
+	kingpin.Flag("config.file", "Path to configuration file").
+		Default("config.yml").
+		StringVar(configFilePath)
+
+	kingpin.Flag("config", "[DEPRECATED]. Use --config.file instead. Path to configuration file").
+		Default("config.yml").
+		StringVar(configFilePath)
+
 	args := &CmdArguments{}
 
 	args.PromslogConfig = &promslog.Config{}
