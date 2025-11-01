@@ -5,6 +5,12 @@ global:
 
 scrape_configs:
   - job_name: 389ds-exporter
+    scheme: https
+    tls_config:
+      ca_file: /etc/ssl/certs/ca.crt
+    basic_auth:
+      username: exporter
+      password: SecretPassword
     static_configs:
       - targets: [389ds-exporter-mdb:9389]
       - targets: [389ds-exporter-bdb:9389]

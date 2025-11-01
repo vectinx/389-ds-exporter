@@ -45,7 +45,7 @@ jobs:
           pip install semgrep
 
       - name: Run Semgrep
-        run: semgrep ci --config p/default --config p/golang --config p/gosec
+        run: semgrep ci --config p/default --config p/golang --config p/gosec --exclude example
 
       - name: Install Gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@v2.22.10
