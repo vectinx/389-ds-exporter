@@ -1,0 +1,8 @@
+---
+collectors_default: none
+ds_numsubordinate_records:
+  - cn=users,cn=accounts,dc=example,dc=com
+shutdown_timeout: -5
+ldap_server_url: "ldap://localhost:389"
+ldap_bind_dn: "cn=directory manager"
+ldap_bind_pw: "12345678"

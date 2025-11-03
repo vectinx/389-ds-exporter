@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -72,4 +73,46 @@ func TestNoRequiredConfigValues(t *testing.T) {
 	err = config.Validate()
 	require.ErrorIs(t, err, ErrNoRequiredValue, "Validation configuration without mandatory should fail")
 	require.ErrorContains(t, err, "ldap_bind_pw")
+}
+
+func TestConfigPrinting(t *testing.T) {
+	config := getConf(t, "testdata/valid.yml")
+	require.Contains(t, config.String(), "ldap_bind_pw: '*****'")
+}
+
+func TestConfigFileReadErrors(t *testing.T) {
+	config, err := ReadConfig("testdata/no-exist.yml")
+	require.ErrorIs(t, err, os.ErrNotExist, "Attempting to open a non-existent configuration file should fail")
+	require.Nil(t, config, "If there is an error reading the file, the configuration must be nil")
+
+	config, err = ReadConfig("testdata/no-valid-yml.yml")
+	require.Error(t, err, "Attempting to open a non-existent configuration file should fail")
+	require.Nil(t, config, "If there is an error reading the file, the configuration must be nil")
+}
+
+func TestFieldValuesValidation(t *testing.T) {
+	config := getConf(t, "testdata/invalid-shutdown-timeout.yml")
+	err := config.Validate()
+	require.ErrorIs(t, err, ErrInvalidFieldValue, "Validation configuration with invalid field should fail")
+	require.ErrorContains(t, err, "shutdown_timeout")
+
+	config = getConf(t, "testdata/invalid-ldap-limit.yml")
+	err = config.Validate()
+	require.ErrorIs(t, err, ErrInvalidFieldValue, "Validation configuration with invalid field should fail")
+	require.ErrorContains(t, err, "ldap_pool_conn_limit")
+
+	config = getConf(t, "testdata/invalid-ldap-get-timeout.yml")
+	err = config.Validate()
+	require.ErrorIs(t, err, ErrInvalidFieldValue, "Validation configuration with invalid field should fail")
+	require.ErrorContains(t, err, "ldap_pool_get_timeout")
+
+	config = getConf(t, "testdata/invalid-ldap-dial-timeout.yml")
+	err = config.Validate()
+	require.ErrorIs(t, err, ErrInvalidFieldValue, "Validation configuration with invalid field should fail")
+	require.ErrorContains(t, err, "ldap_dial_timeout")
+
+	config = getConf(t, "testdata/invalid-backend-type.yml")
+	err = config.Validate()
+	require.ErrorIs(t, err, ErrInvalidFieldValue, "Validation configuration with invalid field should fail")
+	require.ErrorContains(t, err, "invalid ds_backend_type:")
 }

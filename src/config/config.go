@@ -12,7 +12,8 @@ import (
 type EnabledCollectorsType string
 
 var (
-	ErrNoRequiredValue = errors.New("required field is not specified")
+	ErrNoRequiredValue   = errors.New("required field is not specified")
+	ErrInvalidFieldValue = errors.New("invalid field value specified")
 )
 
 const (
@@ -121,12 +122,16 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 func (c *ExporterConfig) Validate() error {
 
 	if c.ShutdownTimeout < 0 {
-		return errors.New("shutdown_timeout should be greater than or equal to 0")
+		return fmt.Errorf("%w: shutdown_timeout should be greater than or equal to 0", ErrInvalidFieldValue)
 	}
 
 	// Also allow an empty value if the user wants the backend to be automatically detected.
 	if !slices.Contains([]string{BackendBDB, BackendMDB, ""}, c.DSBackendType) {
-		return fmt.Errorf("invalid ds_backend_type: %s (must be 'bdb', 'mdb' or empty)", c.DSBackendType)
+		return fmt.Errorf(
+			"%w: invalid ds_backend_type: %s (must be 'bdb', 'mdb' or empty)",
+			ErrInvalidFieldValue,
+			c.DSBackendType,
+		)
 	}
 
 	if c.LDAPServerURL == "" {
@@ -142,15 +147,15 @@ func (c *ExporterConfig) Validate() error {
 	}
 
 	if c.LDAPPoolConnLimit <= 0 {
-		return errors.New("invalid ldap_pool_conn_limit: must be greater than 0")
+		return fmt.Errorf("%w: invalid ldap_pool_conn_limit: must be greater than 0", ErrInvalidFieldValue)
 	}
 
 	if c.LDAPPoolGetTimeout <= 0 {
-		return errors.New("invalid ldap_pool_get_timeout: must be greater than 0")
+		return fmt.Errorf("%w: invalid ldap_pool_get_timeout: must be greater than 0", ErrInvalidFieldValue)
 	}
 
 	if c.LDAPDialTimeout <= 0 {
-		return errors.New("invalid ldap_dial_timeout: must be greater than 0")
+		return fmt.Errorf("%w: invalid ldap_dial_timeout: must be greater than 0", ErrInvalidFieldValue)
 	}
 
 	return nil

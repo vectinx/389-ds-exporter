@@ -1,0 +1,5 @@
+---
+ldap_server_url: "ldap://localhost:389"
+ldap_bind_dn: "cn=directory manager"
+ldap_bind_pw: "12345678"
+ldap_dial_timeout: 0
