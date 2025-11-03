@@ -34,10 +34,6 @@ services:
     depends_on:
       389ds-mdb:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9389/health"]
-      interval: 30s
-      timeout: 10s
 
   389ds-bdb:
     # Using dirsrv with BDB support by default
@@ -71,10 +67,6 @@ services:
     depends_on:
       389ds-bdb:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9389/health"]
-      interval: 30s
-      timeout: 10s
 
   prometheus:
     image: prom/prometheus:v3.5.0
