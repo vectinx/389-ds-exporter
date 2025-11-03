@@ -28,10 +28,10 @@ const dateTimeLayout string = "20060102150405Z"
 
 const (
 	_ LdapAttrValueType = iota
-	// NumericValue type corresponds a simple numeric value.
-	NumericValue
 	// Iso8601CompactString type corresponds a string containing the date and time in the 'YYYYMMDDThhmmssZ' format.
 	Iso8601CompactString
+	// Non-numeric metric. Exported as a metric label.
+	NotNumberMetric
 )
 
 // LdapMonitoredAttribute implements a container for storing
@@ -66,10 +66,14 @@ func NewLdapEntryCollector(
 	metricsDescriptors := make(map[string]*prometheus.Desc)
 
 	for key, val := range attributes {
+		dynamicLabels := []string{}
+		if val.LdapType == NotNumberMetric {
+			dynamicLabels = append(dynamicLabels, key)
+		}
 		metricsDescriptors[key] = prometheus.NewDesc(
 			prometheus.BuildFQName(exporterNamespace, subsystem, key),
 			val.Help,
-			nil,
+			dynamicLabels,
 			labels,
 		)
 	}
@@ -98,59 +102,50 @@ func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
 		attributeValues, ok := ldapEntries[value.LdapName]
 		if !ok {
 			slog.Debug("Attribute was not found in LDAP response. ", "attr_name", value.LdapName)
-
 			continue
 		}
 
 		if len(attributeValues) > 1 {
-			slog.Debug("Attribute has more than one value, the first one will be used", "attr_name", key)
+			slog.Warn("Attribute has more than one value, the first one will be used", "attr_name", key)
 		}
 
 		var converted float64
 
-		if value.LdapType == Iso8601CompactString {
-			parsedTime, err := time.Parse(dateTimeLayout, attributeValues[0])
-			if err != nil {
-				slog.Debug(
-					"Error converting date to type float64",
-					"attr_name",
-					key,
-					"attr_value",
-					attributeValues[0],
-					"err",
-					err,
-				)
+		// If the value has type NotNumberMetric, it does not need parsing and is immediately passed for export.
+		if value.LdapType == NotNumberMetric {
+			converted = 1
+			labels := []string{attributeValues[0]}
+			channel <- prometheus.MustNewConstMetric(c.descriptors[key],
+				c.attributes[key].Type, converted, labels...)
+			continue
+		}
 
-				result = fmt.Errorf(
-					"error converting attribute value to float64: %w",
-					err,
-				)
-				continue
-			}
-
-			converted = float64(parsedTime.Unix())
-		} else {
-			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
-			if err != nil {
-				slog.Debug(
-					"Error converting attribute value to type float64",
-					"attr_name",
-					key,
-					"attr_value",
-					ldapEntries[value.LdapName],
-				)
-				result = fmt.Errorf(
-					"error converting attribute value to float64: %w",
-					err,
-				)
-				continue
-			}
+		converted, err := c.parseValue(value.LdapType, attributeValues[0])
+		if err != nil {
+			slog.Warn("Error converting attribute %v to float64: %v", key, err.Error())
+			result = err
+			continue
 		}
 
 		channel <- prometheus.MustNewConstMetric(c.descriptors[key],
 			c.attributes[key].Type, converted)
 	}
 	return result
+}
+
+func (c *LdapEntryCollector) parseValue(t LdapAttrValueType, raw string) (float64, error) {
+	switch t {
+	case Iso8601CompactString:
+		tm, err := time.Parse(dateTimeLayout, raw)
+		if err != nil {
+			return 0, err
+		}
+		return float64(tm.Unix()), nil
+	case NotNumberMetric:
+		return 1, nil
+	default:
+		return strconv.ParseFloat(raw, 64)
+	}
 }
 
 // getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap.
