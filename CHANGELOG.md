@@ -1,6 +1,13 @@
 # CHANGELOG.md
 
-## v2.0.0 (01.07.2025)
+## v2.0.1 (05.11.2025)
+
+### Fixes
+- Fixed set of metrics used by the dashboard (31)
+- Fixed health check in containers in examples
+- Added unit tests for configuration modules
+
+## v2.0.0 (01.11.2025)
 
 ### Features
 - Added support for HTTPS and Basic Auth
