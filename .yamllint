@@ -1,6 +1,9 @@
 ---
 extends: default
 
+ignore: |
+  src/config/testdata/no-valid-yml.yml
+
 rules:
   line-length:
     max: 150
