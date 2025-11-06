@@ -1,5 +1,7 @@
 VERSION := $(shell cat ./VERSION)
-COMMIT := $(shell git rev-parse --short HEAD)
+GIT_COMMIT := $(shell git rev-parse --short=7 HEAD 2>/dev/null || echo unknown)
+GIT_DIRTY := $(shell git diff --quiet --ignore-submodules -- || echo -dirty)
+COMMIT := $(GIT_COMMIT)$(GIT_DIRTY)
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 BUILD_USER := $(shell whoami)
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
