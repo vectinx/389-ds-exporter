@@ -10,7 +10,7 @@ on: # yamllint disable
     branches: [ master, develop ]
 
 env:
-  GO_VERSION: 1.25.3
+  GO_VERSION: 1.25.4
   GOSEC_VERSION: v2.22.10
 
 jobs:
