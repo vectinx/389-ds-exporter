@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## v2.0.2 (14.11.2025)
+
+### Features
+
+- Upgraded go to version 1.25.4
+
+### Fixes
+- Fixed the build of docker images - added explicit file permissions
+- Fixed build pipelines to meet safety requirements
+
 ## v2.0.1 (05.11.2025)
 
 ### Fixes
