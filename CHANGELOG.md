@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## v2.0.3 (26.11.2025)
+
+### Security
+- `golang.org/x/crypto` updated to v0.45.0 to fix CVE-2025-58181 and CVE-2025-47914 vulnerabilities
+
 ## v2.0.2 (14.11.2025)
 
 ### Features
