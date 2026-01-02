@@ -32,6 +32,8 @@ const (
 	NumericValue
 	// Iso8601CompactString type corresponds a string containing the date and time in the 'YYYYMMDDThhmmssZ' format.
 	Iso8601CompactString
+	// StringLabel type corresponds ещ a string value that should be presented as a variable label.
+	StringLabel
 )
 
 // LdapMonitoredAttribute implements a container for storing
@@ -66,12 +68,21 @@ func NewLdapEntryCollector(
 	metricsDescriptors := make(map[string]*prometheus.Desc)
 
 	for key, val := range attributes {
-		metricsDescriptors[key] = prometheus.NewDesc(
-			prometheus.BuildFQName(exporterNamespace, subsystem, key),
-			val.Help,
-			nil,
-			labels,
-		)
+		if val.LdapType == StringLabel {
+			metricsDescriptors[key] = prometheus.NewDesc(
+				prometheus.BuildFQName(exporterNamespace, subsystem, key),
+				val.Help,
+				[]string{key},
+				labels,
+			)
+		} else {
+			metricsDescriptors[key] = prometheus.NewDesc(
+				prometheus.BuildFQName(exporterNamespace, subsystem, key),
+				val.Help,
+				nil,
+				labels,
+			)
+		}
 	}
 
 	return &LdapEntryCollector{
@@ -95,7 +106,10 @@ func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
 	var result error = nil
 
 	for key, value := range c.attributes {
+
 		attributeValues, ok := ldapEntries[value.LdapName]
+		var labelValues = []string{}
+
 		if !ok {
 			slog.Debug("Attribute was not found in LDAP response. ", "attr_name", value.LdapName)
 
@@ -129,6 +143,9 @@ func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
 			}
 
 			converted = float64(parsedTime.Unix())
+		} else if value.LdapType == StringLabel {
+			converted = 1
+			labelValues = append(labelValues, attributeValues[0])
 		} else {
 			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
 			if err != nil {
@@ -148,7 +165,7 @@ func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
 		}
 
 		channel <- prometheus.MustNewConstMetric(c.descriptors[key],
-			c.attributes[key].Type, converted)
+			c.attributes[key].Type, converted, labelValues...)
 	}
 	return result
 }

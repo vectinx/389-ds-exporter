@@ -9,6 +9,12 @@ import (
 // GetLdapServerMetrics is a map of attributes defining ldap server metrics.
 func GetLdapServerMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
+		"version": {
+			LdapName: "version",
+			Help:     "A metric with a constant '1' value labeled by 389 Directory Server version",
+			Type:     prometheus.GaugeValue,
+			LdapType: collectors.StringLabel,
+		},
 		"threads": {
 			LdapName: "threads",
 			Help:     "Current number of active threads used for handling requests",

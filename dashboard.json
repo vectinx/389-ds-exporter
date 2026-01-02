@@ -1,4 +1,47 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.2.1"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -18,8 +61,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": null,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
@@ -53,6 +96,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -69,6 +113,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -85,7 +130,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -138,7 +183,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -172,7 +217,7 @@
             "steps": [
               {
                 "color": "blue",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -181,7 +226,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 2,
         "x": 12,
         "y": 1
       },
@@ -203,12 +248,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -242,7 +287,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -251,8 +296,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 15,
+        "w": 2,
+        "x": 14,
         "y": 1
       },
       "id": 14,
@@ -273,12 +318,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -312,7 +357,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -321,8 +366,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 18,
+        "w": 2,
+        "x": 16,
         "y": 1
       },
       "id": 20,
@@ -343,12 +388,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -382,7 +427,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -392,8 +437,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 21,
+        "w": 2,
+        "x": 18,
         "y": 1
       },
       "id": 23,
@@ -414,12 +459,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.2.3",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -434,6 +479,93 @@
       ],
       "title": "Uptime",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 54,
+      "options": {
+        "cellHeight": "lg",
+        "showHeader": false
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "ds_server_version{job=\"$job\", instance=\"$node\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "title": "Directory Server vesrion",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "instance": true,
+              "job": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -453,6 +585,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 25,
             "gradientMode": "none",
@@ -469,6 +602,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -485,7 +619,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -583,7 +717,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -617,7 +751,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -665,7 +799,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Averate number of operations per second executed by server",
           "fieldConfig": {
@@ -711,8 +845,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -793,7 +926,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_server_ops_initiated_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
@@ -854,8 +987,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -972,7 +1104,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1000,7 +1132,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_snmp_server_add_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
@@ -1026,7 +1158,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_snmp_server_modify_rdn_operations_total{job=\"$job\",instance=\"$node\"}[$__rate_interval])",
@@ -1090,8 +1222,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -1144,7 +1275,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_server_entries_sent_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
@@ -1206,8 +1337,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -1260,7 +1390,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "ds_server_read_waiters{job=\"$job\", instance=\"$node\"}",
@@ -1323,8 +1453,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1402,7 +1531,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_server_bytes_sent_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
@@ -1463,8 +1592,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -1532,7 +1660,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1582,7 +1710,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Available and used cache sizes of normalized DNs",
           "fieldConfig": {
@@ -1628,8 +1756,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1715,7 +1842,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1780,8 +1907,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -1849,7 +1975,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1885,7 +2011,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Cache hit ratio",
           "fieldConfig": {
@@ -1932,8 +2058,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2043,7 +2168,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -2204,7 +2329,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2374,7 +2499,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2410,7 +2535,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -2552,7 +2677,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -2691,7 +2816,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2830,7 +2955,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2866,7 +2991,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -3000,14 +3125,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 32
       },
       "id": 38,
       "panels": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Available and used DB cache sizes",
           "fieldConfig": {
@@ -3103,7 +3228,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 33
+            "y": 113
           },
           "id": 35,
           "options": {
@@ -3143,7 +3268,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -3242,7 +3367,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 33
+            "y": 113
           },
           "id": 37,
           "options": {
@@ -3268,7 +3393,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -3383,7 +3508,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 41
+            "y": 121
           },
           "id": 36,
           "options": {
@@ -3409,7 +3534,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "rate(ds_bdb_dbcache_lookups_total{job=\"$job\", instance=\"$node\"}[$__rate_interval])",
@@ -3442,7 +3567,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Number of pages in the database cache",
           "fieldConfig": {
@@ -3538,7 +3663,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 41
+            "y": 121
           },
           "id": 47,
           "options": {
@@ -3581,7 +3706,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -3697,7 +3822,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 49
+            "y": 129
           },
           "id": 48,
           "options": {
@@ -3723,7 +3848,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -3760,7 +3885,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Average number of dirty pages written to disk per second by Berkeley DB using memp_trickle",
           "fieldConfig": {
@@ -3841,7 +3966,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 49
+            "y": 129
           },
           "id": 49,
           "options": {
@@ -3888,7 +4013,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Number of transactions performed by server per second",
           "fieldConfig": {
@@ -3984,7 +4109,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 57
+            "y": 137
           },
           "id": 39,
           "options": {
@@ -4026,7 +4151,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -4124,7 +4249,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 57
+            "y": 137
           },
           "id": 40,
           "options": {
@@ -4150,7 +4275,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -4292,7 +4417,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 65
+            "y": 145
           },
           "id": 41,
           "options": {
@@ -4318,7 +4443,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "ds_bdb_lockers{job=\"$job\", instance=\"$node\"}",
@@ -4347,7 +4472,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "ds_bdb_lock_objects_current{job=\"$job\", instance=\"$node\"}",
@@ -4378,7 +4503,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Number of lock requests, lock conflicts, and deadlocks",
           "fieldConfig": {
@@ -4485,7 +4610,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 65
+            "y": 145
           },
           "id": 42,
           "options": {
@@ -4528,7 +4653,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -4566,7 +4691,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Average amount of data written to the transaction log per second",
           "fieldConfig": {
@@ -4643,7 +4768,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 73
+            "y": 153
           },
           "id": 44,
           "options": {
@@ -4690,7 +4815,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Datasource}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "The number of times threads were forced to wait to acquire a region lock per second, split by region type",
           "fieldConfig": {
@@ -4812,7 +4937,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 73
+            "y": 153
           },
           "id": 43,
           "options": {
@@ -4855,7 +4980,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -4889,7 +5014,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -4917,7 +5042,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 33
       },
       "id": 50,
       "panels": [
@@ -4984,7 +5109,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 34
+            "y": 114
           },
           "id": 51,
           "options": {
@@ -5010,7 +5135,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "ds_exporter_scrape_duration_seconds{job=\"$job\", instance=\"$node\"}",
@@ -5086,7 +5211,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 34
+            "y": 114
           },
           "id": 52,
           "options": {
@@ -5109,7 +5234,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${Datasource}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
               "expr": "ds_exporter_scrape_success{job=\"$job\", instance=\"$node\"}",
@@ -5128,35 +5253,32 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 39,
+  "schemaVersion": 42,
   "tags": [
     "389-ds"
   ],
   "templating": {
     "list": [
       {
-        "hide": 0,
+        "current": {},
         "includeAll": false,
         "label": "Datasource",
-        "multi": false,
         "name": "Datasource",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
+        "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "${Datasource}"
         },
         "definition": "label_values(up,job)",
-        "hide": 0,
         "includeAll": false,
         "label": "job",
-        "multi": false,
         "name": "job",
         "options": [],
         "query": {
@@ -5166,20 +5288,17 @@
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${Datasource}"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(ds_exporter_scrape_duration_seconds{job=\"$job\"},instance)",
-        "hide": 0,
         "includeAll": false,
         "label": "node",
-        "multi": false,
         "name": "node",
         "options": [],
         "query": {
@@ -5189,17 +5308,15 @@
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
+        "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "${Datasource}"
         },
         "definition": "label_values(ds_ldbm_instance_dn_cache_size_bytes{job=\"$job\", instance=\"$node\"},database)",
-        "hide": 0,
         "includeAll": true,
         "label": "database",
         "multi": true,
@@ -5212,20 +5329,18 @@
         },
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "389-ds-exporter",
   "uid": "389-ds-exporter",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }
