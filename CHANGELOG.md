@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## v2.0.4 (03.01.2025)
+
+### Features
+- The `ds_server_version` metric has been added, reflecting the 389-ds version that the exporter is working with
+
+### Security
+- Updated the go version to 1.25.5, fixing vulnerabilities GO-2025-4175 and GO-2025-4155
+- Updated dependency versions
+
+
 ## v2.0.3 (26.11.2025)
 
 ### Security
