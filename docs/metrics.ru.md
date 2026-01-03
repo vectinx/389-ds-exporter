@@ -17,6 +17,13 @@
 Коллектор `server` собирает основные метрики сервера</br>
 Источник: `cn=monitor`
 
+#### ds_server_version
+
+Тип: `gauge`</br>
+Атрибут: `version`
+
+Метрика с константным значением '1' и меткой, содержащий версию 389 Directory Server.
+
 #### ds_server_threads
 
 Тип: `gauge`</br>

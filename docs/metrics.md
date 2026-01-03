@@ -17,6 +17,13 @@ Below is a detailed description of the metrics collected by each collector.
 The `server` collector collects basic server metrics</br>
 Source: `cn=monitor`
 
+#### ds_server_version
+
+Type: `gauge`</br>
+Attribute: `version`
+
+A metric with a constant '1' value labeled by 389 Directory Server version.
+
 #### ds_server_threads
 
 Type: `gauge`</br>
