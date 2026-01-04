@@ -1,6 +1,6 @@
 # CHANGELOG.md
 
-## v2.0.4 (03.01.2025)
+## v2.0.4 (03.01.2026)
 
 ### Features
 - The `ds_server_version` metric has been added, reflecting the 389-ds version that the exporter is working with
