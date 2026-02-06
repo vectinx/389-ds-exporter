@@ -10,8 +10,8 @@ on: # yamllint disable
     branches: [ master, develop ]
 
 env:
-  GO_VERSION: 1.25.5
-  GOSEC_VERSION: v2.22.10
+  GO_VERSION: 1.25.7
+  GOSEC_VERSION: v2.22.11
 
 jobs:
   # Checking various aspects related to lint and security
