@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## v2.0.5 (07.02.2026)
+
+### Features
+- Optimized the size of the compiled exporter binary
+
+### Security
+- Updated the go version to 1.25.7, fixing vulnerabilities GO-2026-4341, GO-2026-4340, GO-2026-4337
+- Updated dependency versions
+
 ## v2.0.4 (03.01.2026)
 
 ### Features
