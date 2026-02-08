@@ -18,7 +18,7 @@ type fakeLDAP struct {
 	closed    atomic.Bool
 }
 
-func (f *fakeLDAP) Bind(_ LDAPAuthConfig) error { f.bindOK = true; return nil }
+func (f *fakeLDAP) Bind(_ AuthConfig) error { f.bindOK = true; return nil }
 func (f *fakeLDAP) Search(_ *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	if f.hasErr.Load() {
 		err, _ := f.searchErr.Load().(error)
@@ -31,12 +31,12 @@ func (f *fakeLDAP) Search(_ *ldap.SearchRequest) (*ldap.SearchResult, error) {
 func (f *fakeLDAP) Unbind() error { f.closed.Store(true); return nil }
 func (f *fakeLDAP) Close() error  { f.closed.Store(true); return nil }
 
-func makePool(t *testing.T) *LDAPPool {
+func makePool(t *testing.T) *Pool {
 	t.Helper()
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP{}, nil
 	}
-	return NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	return NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 }
 
 func TestBadConnMarkingOnTransportError(t *testing.T) {
@@ -81,10 +81,10 @@ func TestIdempotentClose(t *testing.T) {
 }
 
 func TestIdleAndLifetimeExpiration(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	// set small times to trigger expiration quickly
 	p.maxIdleTime = 10 * time.Millisecond
 	p.maxLifetime = 10 * time.Millisecond
@@ -130,8 +130,8 @@ func TestPoolClose(t *testing.T) {
 }
 
 func TestConnContextCanceledImmediately(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	factory := func(_ *AuthConfig) (Conn, error) { return &fakeLDAP{}, nil }
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err := p.Conn(ctx)
@@ -141,8 +141,8 @@ func TestConnContextCanceledImmediately(t *testing.T) {
 }
 
 func TestWaiterContextTimeout(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	factory := func(_ *AuthConfig) (Conn, error) { return &fakeLDAP{}, nil }
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	baseCtx := context.Background()
 	// occupy the only connection
 	c, _ := p.Conn(baseCtx)
@@ -158,8 +158,8 @@ func TestWaiterContextTimeout(t *testing.T) {
 }
 
 func TestMaxOpenFairnessBasic(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 2})
+	factory := func(_ *AuthConfig) (Conn, error) { return &fakeLDAP{}, nil }
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 2})
 	ctx := context.Background()
 
 	// take all
@@ -189,8 +189,8 @@ func TestMaxOpenFairnessBasic(t *testing.T) {
 }
 
 func TestIdleLifetimeEdgeBoundaries(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	factory := func(_ *AuthConfig) (Conn, error) { return &fakeLDAP{}, nil }
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
 	// set precise small durations
@@ -222,8 +222,8 @@ func TestIdleLifetimeEdgeBoundaries(t *testing.T) {
 }
 
 func TestMetricsCountersIncrease(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) { return &fakeLDAP{}, nil }
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	factory := func(_ *AuthConfig) (Conn, error) { return &fakeLDAP{}, nil }
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
 	// set very small times to trigger cleaner/fast-path closes
@@ -269,13 +269,13 @@ func TestMetricsCountersIncrease(t *testing.T) {
 func TestDialBindErrorsDoNotExceedMaxOpen(t *testing.T) {
 	// failing factory on first call, then success
 	var calls int64
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		if atomic.AddInt64(&calls, 1) == 1 {
 			return nil, errors.New("dial fail")
 		}
 		return &fakeLDAP{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
 	// first attempt fails, second should succeed and not exceed maxOpen
@@ -288,10 +288,10 @@ func TestDialBindErrorsDoNotExceedMaxOpen(t *testing.T) {
 }
 
 func TestConcurrentAcquireRelease(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 5})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 5})
 	ctx := context.Background()
 
 	const workers = 100
@@ -319,10 +319,10 @@ func TestConcurrentAcquireRelease(t *testing.T) {
 }
 
 func TestWaitersServedUnderContention(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 2})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 2})
 	ctx := context.Background()
 
 	c1, _ := p.Conn(ctx)
@@ -362,10 +362,10 @@ func TestWaitersServedUnderContention(t *testing.T) {
 }
 
 func TestCloseWhileWaiters(t *testing.T) {
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 1})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 1})
 	ctx := context.Background()
 
 	c, _ := p.Conn(ctx)
@@ -389,12 +389,12 @@ func TestCloseWhileWaiters(t *testing.T) {
 
 func TestNoLeakOnBadConnUnderConcurrency(t *testing.T) {
 	type fakeLDAP2 struct{ fakeLDAP }
-	var _ LdapConn = (*fakeLDAP2)(nil)
+	var _ Conn = (*fakeLDAP2)(nil)
 
-	factory := func(_ *LDAPAuthConfig) (LdapConn, error) {
+	factory := func(_ *AuthConfig) (Conn, error) {
 		return &fakeLDAP2{}, nil
 	}
-	p := NewLDAPPool(LDAPPoolConfig{ConnFactory: factory, MaxConnections: 5})
+	p := NewLDAPPool(PoolConfig{ConnFactory: factory, MaxConnections: 5})
 	ctx := context.Background()
 
 	const workers = 50

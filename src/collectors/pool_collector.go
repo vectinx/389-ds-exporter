@@ -10,7 +10,7 @@ import (
 
 // PoolCollector collects internal LDAP-pool metrics.
 type PoolCollector struct {
-	connectionPool   *expldap.LDAPPool
+	connectionPool   *expldap.Pool
 	descOpen         *prometheus.Desc
 	descClosedIdle   *prometheus.Desc
 	descClosedLife   *prometheus.Desc
@@ -22,7 +22,7 @@ type PoolCollector struct {
 // NewPoolCollector function create new PoolCollector instance based on provided parameters.
 func NewPoolCollector(
 	subsystem string,
-	connectionPool *expldap.LDAPPool,
+	connectionPool *expldap.Pool,
 	labels prometheus.Labels,
 ) *PoolCollector {
 	pool := &PoolCollector{connectionPool: connectionPool}

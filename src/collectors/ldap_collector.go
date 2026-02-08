@@ -46,9 +46,9 @@ type LdapMonitoredAttribute struct {
 	Labels   prometheus.Labels
 }
 
-// LdapCollector collects 389-ds metrics.
+// LdapEntryCollector collects 389-ds metrics.
 type LdapEntryCollector struct {
-	connectionPool *expldap.LDAPPool
+	connectionPool *expldap.Pool
 	baseDn         string
 	attributes     map[string]LdapMonitoredAttribute
 	descriptors    map[string]*prometheus.Desc
@@ -59,7 +59,7 @@ type LdapEntryCollector struct {
 // NewLdapEntryCollector function create new LdapEntryCollector instance based on provided parameters.
 func NewLdapEntryCollector(
 	subsystem string,
-	connectionPool *expldap.LDAPPool,
+	connectionPool *expldap.Pool,
 	entryBaseDn string,
 	attributes map[string]LdapMonitoredAttribute,
 	labels prometheus.Labels,

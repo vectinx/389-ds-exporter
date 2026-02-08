@@ -14,7 +14,7 @@ import (
 
 // HealthHttpResponse function performs exporter healcheck and returns its json result.
 func HealthHttpResponse(
-	pool *expldap.LDAPPool,
+	pool *expldap.Pool,
 	startTime time.Time,
 	timeout time.Duration,
 ) func(w http.ResponseWriter, r *http.Request) {

@@ -6,7 +6,7 @@ import (
 	"389-ds-exporter/src/collectors"
 )
 
-// LdapServerSnmpMetrics returns a map of attributes defining ldap server backend metrics.
+// GetLdapServerSnmpMetrics returns a map of attributes defining ldap server backend metrics.
 func GetLdapServerSnmpMetrics() map[string]collectors.LdapMonitoredAttribute {
 	return map[string]collectors.LdapMonitoredAttribute{
 		"bind_anonymous_total": {

@@ -16,7 +16,7 @@ type RealLdapConn struct {
 }
 
 // Bind authenticates to the LDAP server using the given bind DN and password.
-func (c *RealLdapConn) Bind(auth LDAPAuthConfig) error {
+func (c *RealLdapConn) Bind(auth AuthConfig) error {
 	return c.conn.Bind(auth.BindDN, auth.BindPw)
 }
 
@@ -37,7 +37,7 @@ func (c *RealLdapConn) Close() error {
 
 // RealConnectionDialUrl establishes a connection to the LDAP server using the given URL.
 // It returns an LdapConn interface backed by a real connection, or an error if the connection fails.
-func RealConnectionDialUrl(auth *LDAPAuthConfig) (LdapConn, error) {
+func RealConnectionDialUrl(auth *AuthConfig) (Conn, error) {
 	dialer := &net.Dialer{Timeout: auth.DialTimeout}
 
 	var dialOpts []ldap.DialOpt
@@ -48,7 +48,7 @@ func RealConnectionDialUrl(auth *LDAPAuthConfig) (LdapConn, error) {
 	}
 
 	// We specifically disable the warning "G402 (CWE-295): TLS InsecureSkipVerify may be true",
-	// because we specifically leave the option to disable TLS verificationю
+	// because we specifically leave the option to disable TLS verification.
 	if parsed.Scheme == "ldaps" { // #nosec G402
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: auth.TlsSkipVerify,

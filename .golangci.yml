@@ -49,6 +49,14 @@ linters:
     - predeclared
     - promlinter
     - reassign
+    - revive
+
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: false
+          severity: error
 
 formatters:
   # Enable specific formatter.

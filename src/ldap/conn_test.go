@@ -8,7 +8,7 @@ import (
 )
 
 func TestUrlParseError(t *testing.T) {
-	auth := &LDAPAuthConfig{URL: ":::bad-url"}
+	auth := &AuthConfig{URL: ":::bad-url"}
 
 	_, err := RealConnectionDialUrl(auth)
 	require.Error(t, err, "Passing invalid URL should fail")
@@ -18,7 +18,7 @@ func TestUrlParseError(t *testing.T) {
 }
 
 func TestDialFail(t *testing.T) {
-	auth := &LDAPAuthConfig{
+	auth := &AuthConfig{
 		URL:         "ldap://127.0.0.1:389",
 		DialTimeout: 1 * time.Second,
 	}

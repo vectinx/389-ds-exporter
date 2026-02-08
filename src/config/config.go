@@ -9,31 +9,34 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// EnabledCollectorsType is a declared type intended
+// to give a type of constants semantic meaning.
 type EnabledCollectorsType string
 
 var (
-	ErrNoRequiredValue   = errors.New("required field is not specified")
+	// ErrNoRequiredValue indicates that the required field is not provided in the configuration.
+	ErrNoRequiredValue = errors.New("required field is not specified")
+	// ErrInvalidFieldValue indicates that the configuration has provided an incorrect value for the field.
 	ErrInvalidFieldValue = errors.New("invalid field value specified")
 )
 
 const (
-	DefaultShutdownTimeout    int    = 5
-	DefaultLDAPTlsSkipVerify  bool   = false
-	DefaultLDAPPoolConnLimit  int    = 4
-	DefaultLDAPPoolGetTimeout int    = 5
-	DefaultLDAPPoolIdleTime   int    = 300
-	DefaultLDAPPoolLifeTime   int    = 3600
-	DefaultLDAPDialTimeout    int    = 3
-	DefaultCollectorsDefault  string = "standard"
+	defaultShutdownTimeout    int    = 5
+	defaultLDAPTlsSkipVerify  bool   = false
+	defaultLDAPPoolConnLimit  int    = 4
+	defaultLDAPPoolGetTimeout int    = 5
+	defaultLDAPPoolIdleTime   int    = 300
+	defaultLDAPPoolLifeTime   int    = 3600
+	defaultLDAPDialTimeout    int    = 3
+	defaultCollectorsDefault  string = "standard"
 
+	// BackendBDB corresponds to the Berkeley DB backend database.
 	BackendBDB string = "bdb"
+	// BackendMDB corresponds to the LMDB backend database.
 	BackendMDB string = "mdb"
-
-	CollectorsAll      EnabledCollectorsType = "all"
-	CollectorsStandard EnabledCollectorsType = "standard"
-	CollectorsNone     EnabledCollectorsType = "none"
 )
 
+// ExporterConfig is a structure representing the parsed configuration of the exporter.
 type ExporterConfig struct {
 	// YAML tags are needed here for correct marshalling
 	// of the structure when it is necessary to display the final config
@@ -87,8 +90,8 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 	cfg := &ExporterConfig{}
 
 	// Global
-	setDefaultIfNotDefined(r.ShutdownTimeout, &cfg.ShutdownTimeout, DefaultShutdownTimeout)
-	setDefaultIfNotDefined(r.CollectorsDefault, &cfg.CollectorsDefault, DefaultCollectorsDefault)
+	setDefaultIfNotDefined(r.ShutdownTimeout, &cfg.ShutdownTimeout, defaultShutdownTimeout)
+	setDefaultIfNotDefined(r.CollectorsDefault, &cfg.CollectorsDefault, defaultCollectorsDefault)
 
 	setDefaultIfNotDefined(r.DSBackendType, &cfg.DSBackendType, "")
 
@@ -108,12 +111,12 @@ func (r *rawConfig) toConfig() *ExporterConfig {
 		cfg.LDAPBindPw = *r.LDAPBindPw
 	}
 
-	setDefaultIfNotDefined(r.LDAPTlsSkipVerify, &cfg.LDAPTlsSkipVerify, DefaultLDAPTlsSkipVerify)
-	setDefaultIfNotDefined(r.LDAPPoolConnLimit, &cfg.LDAPPoolConnLimit, DefaultLDAPPoolConnLimit)
-	setDefaultIfNotDefined(r.LDAPPoolGetTimeout, &cfg.LDAPPoolGetTimeout, DefaultLDAPPoolGetTimeout)
-	setDefaultIfNotDefined(r.LDAPPoolIdleTime, &cfg.LDAPPoolIdleTime, DefaultLDAPPoolIdleTime)
-	setDefaultIfNotDefined(r.LDAPPoolLifeTime, &cfg.LDAPPoolLifeTime, DefaultLDAPPoolLifeTime)
-	setDefaultIfNotDefined(r.LDAPDialTimeout, &cfg.LDAPDialTimeout, DefaultLDAPDialTimeout)
+	setDefaultIfNotDefined(r.LDAPTlsSkipVerify, &cfg.LDAPTlsSkipVerify, defaultLDAPTlsSkipVerify)
+	setDefaultIfNotDefined(r.LDAPPoolConnLimit, &cfg.LDAPPoolConnLimit, defaultLDAPPoolConnLimit)
+	setDefaultIfNotDefined(r.LDAPPoolGetTimeout, &cfg.LDAPPoolGetTimeout, defaultLDAPPoolGetTimeout)
+	setDefaultIfNotDefined(r.LDAPPoolIdleTime, &cfg.LDAPPoolIdleTime, defaultLDAPPoolIdleTime)
+	setDefaultIfNotDefined(r.LDAPPoolLifeTime, &cfg.LDAPPoolLifeTime, defaultLDAPPoolLifeTime)
+	setDefaultIfNotDefined(r.LDAPDialTimeout, &cfg.LDAPDialTimeout, defaultLDAPDialTimeout)
 
 	return cfg
 }
@@ -161,6 +164,7 @@ func (c *ExporterConfig) Validate() error {
 	return nil
 }
 
+// ReadConfig reads the configuration and returns it as a structure.
 func ReadConfig(filename string) (*ExporterConfig, error) {
 	// #nosec G304: path comes from trusted config
 	data, err := os.ReadFile(filename)
@@ -177,6 +181,7 @@ func ReadConfig(filename string) (*ExporterConfig, error) {
 	return raw.toConfig(), nil
 }
 
+// String returns the configuration as a string containing the yaml document.
 func (c *ExporterConfig) String() string {
 	safeCfg := *c
 	if safeCfg.LDAPBindPw != "" {

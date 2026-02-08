@@ -7,7 +7,7 @@ import (
 )
 
 func TestDefaultValues(t *testing.T) {
-	app, args := ParseCmdArguments()
+	app, args := ParseArguments()
 	_, err := app.Parse([]string{})
 	require.NoError(t, err, "Empty cmd args should be parsed successfully")
 	require.Equal(t, "config.yml", args.ConfigFile, "--config.file default value should be config.yml")
@@ -15,7 +15,7 @@ func TestDefaultValues(t *testing.T) {
 }
 
 func TestDeprecatedConfigFlag(t *testing.T) {
-	app, args := ParseCmdArguments()
+	app, args := ParseArguments()
 	_, err := app.Parse([]string{"--config", "old.yml"})
 	require.NoError(t, err, "Parsing args with deprecated backward-compatibility '--config' flag should not fail")
 	require.Equal(t, "old.yml", args.ConfigFile, "--config value should be correctly parsed to args")

@@ -9,7 +9,8 @@ import (
 	"github.com/prometheus/exporter-toolkit/web/kingpinflag"
 )
 
-type CmdArguments struct {
+// Arguments provides a structure for storing the cli parameters of the exporter.
+type Arguments struct {
 	ConfigFile           string
 	IsConfigCheck        bool
 	PromslogConfig       *promslog.Config
@@ -17,9 +18,10 @@ type CmdArguments struct {
 	MetricsPath          string
 }
 
-func ParseCmdArguments() (*kingpin.Application, *CmdArguments) {
+// ParseArguments parses the arguments of the conmad string into the CmdArguments structure.
+func ParseArguments() (*kingpin.Application, *Arguments) {
 	app := kingpin.New("389-ds-exporter", "389 Directory Server Prometheus exporter")
-	args := &CmdArguments{}
+	args := &Arguments{}
 
 	configFilePath := new(string)
 	checkConfig := app.Flag("config.check", "Validate the current configuration and print it to stdout").Bool()

@@ -15,16 +15,20 @@ import (
 )
 
 var (
-	ErrPoolClosed    = errors.New("pool closed")
+	// ErrPoolClosed means an attempt to use a closed pool.
+	ErrPoolClosed = errors.New("pool closed")
+	// ErrBadConnection means that the connection has been broken.
 	ErrBadConnection = errors.New("bad connection")
 )
 
-type Conn struct {
-	pool *LDAPPool
+// PoolConn is the type for the connection returned by the pool.
+type PoolConn struct {
+	pool *Pool
 	conn *pooledConn
 }
 
-func (c *Conn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
+// Search performs a search using a pool connection.
+func (c *PoolConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	res, err := c.conn.conn.Search(req)
 	if err != nil && isTransportError(err) {
 		c.conn.markBad()
@@ -32,14 +36,15 @@ func (c *Conn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	return res, err
 }
 
-func (c *Conn) Close() {
+// Close returns connection back to pool.
+func (c *PoolConn) Close() {
 	c.pool.putConn(c.conn)
 }
 
 type pooledConn struct {
-	pool       *LDAPPool
+	pool       *Pool
 	sync.Mutex // protects the following fields
-	conn       LdapConn
+	conn       Conn
 	closed     bool
 	bad        atomic.Bool
 	inUse      bool
@@ -92,16 +97,17 @@ func isTransportError(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled)
 }
 
-// LdapConn defines an interface for interacting with an LDAP server.
+// Conn defines an interface for interacting with an LDAP server.
 // It includes basic operations such as binding, searching, and unbinding.
-type LdapConn interface {
-	Bind(LDAPAuthConfig) error
+type Conn interface {
+	Bind(AuthConfig) error
 	Search(*ldap.SearchRequest) (*ldap.SearchResult, error)
 	Unbind() error
 	Close() error
 }
 
-type LDAPAuthConfig struct {
+// AuthConfig providers a structure for storing the pool LDAP authentication parameters.
+type AuthConfig struct {
 	URL           string
 	BindDN        string
 	BindPw        string
@@ -109,17 +115,19 @@ type LDAPAuthConfig struct {
 	DialTimeout   time.Duration
 }
 
-type LDAPPoolConfig struct {
-	Auth           LDAPAuthConfig
+// PoolConfig provides a structure for storing the pool configuration.
+type PoolConfig struct {
+	Auth           AuthConfig
 	MaxConnections int
 	MaxIdleTime    time.Duration
 	MaxLifeTime    time.Duration
 	DialTimeout    time.Duration
-	ConnFactory    func(*LDAPAuthConfig) (LdapConn, error)
+	ConnFactory    func(*AuthConfig) (Conn, error)
 }
 
-type LDAPPool struct {
-	cfg LDAPPoolConfig
+// Pool implements a pool of ldap connections.
+type Pool struct {
+	cfg PoolConfig
 
 	mu           sync.Mutex // protects the following fields
 	freeConns    []*pooledConn
@@ -137,10 +145,11 @@ type LDAPPool struct {
 	idleTimeClosedCount atomic.Int64 // number of connections closed by idle time expired
 	waitDuration        atomic.Int64
 
-	connFactory func(*LDAPAuthConfig) (LdapConn, error)
+	connFactory func(*AuthConfig) (Conn, error)
 }
 
-type LDAPPoolStat struct {
+// PoolStat provides a structure for storing pool metrics.
+type PoolStat struct {
 	Open           int
 	ClosedIdleTime int
 	ClosedLifeTime int
@@ -160,13 +169,9 @@ const (
 	cachedOrNewConn
 )
 
-// Deprecated: connection opener channel is not used.
-
-func NewLDAPPool(cfg LDAPPoolConfig) *LDAPPool {
-	_, cancel := context.WithCancel(context.Background())
-	_ = cancel // context cancel is not used currently
-
-	pool := &LDAPPool{
+// NewLDAPPool creates new LDAPPool instance.
+func NewLDAPPool(cfg PoolConfig) *Pool {
+	pool := &Pool{
 		cfg:         cfg,
 		connFactory: cfg.ConnFactory,
 		maxLifetime: cfg.MaxLifeTime,
@@ -184,8 +189,8 @@ func NewLDAPPool(cfg LDAPPoolConfig) *LDAPPool {
 // Queries run on the same Conn will be run in the same database session.
 //
 // Every Conn must be returned to the database pool after use by
-// calling [Conn.Close].
-func (pool *LDAPPool) Conn(ctx context.Context) (*Conn, error) {
+// calling [PoolConn.Close].
+func (pool *Pool) Conn(ctx context.Context) (*PoolConn, error) {
 	var pc *pooledConn
 	var err error
 
@@ -198,7 +203,7 @@ func (pool *LDAPPool) Conn(ctx context.Context) (*Conn, error) {
 		return nil, err
 	}
 
-	conn := &Conn{
+	conn := &PoolConn{
 		pool: pool,
 		conn: pc,
 	}
@@ -217,7 +222,7 @@ func (pool *LDAPPool) Conn(ctx context.Context) (*Conn, error) {
 // Close closes the pool, rejecting new acquisitions, waking waiters, and
 // closing all idle connections. Active connections will be closed when
 // returned via Conn.Close().
-func (pool *LDAPPool) Close() error {
+func (pool *Pool) Close() error {
 	pool.mu.Lock()
 	if pool.closed {
 		pool.mu.Unlock()
@@ -249,8 +254,8 @@ func (pool *LDAPPool) Close() error {
 }
 
 // Stat returns pool usage statistics.
-func (pool *LDAPPool) Stat() LDAPPoolStat {
-	stat := LDAPPoolStat{}
+func (pool *Pool) Stat() PoolStat {
+	stat := PoolStat{}
 
 	pool.mu.Lock()
 	stat.Open = pool.numOpen
@@ -265,7 +270,7 @@ func (pool *LDAPPool) Stat() LDAPPoolStat {
 }
 
 //nolint:gocognit,nestif
-func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*pooledConn, error) {
+func (pool *Pool) conn(strategy connReuseStrategy, ctx context.Context) (*pooledConn, error) {
 	pool.mu.Lock()
 	if pool.closed {
 		pool.mu.Unlock()
@@ -410,7 +415,7 @@ func (pool *LDAPPool) conn(strategy connReuseStrategy, ctx context.Context) (*po
 	return conn, nil
 }
 
-func (pool *LDAPPool) putConn(pc *pooledConn) {
+func (pool *Pool) putConn(pc *pooledConn) {
 	var err error
 	pool.mu.Lock()
 	if !pc.inUse {
@@ -456,7 +461,7 @@ func (pool *LDAPPool) putConn(pc *pooledConn) {
 // If err == nil, then dc must not equal nil.
 // If a connRequest was fulfilled or the *driverConn was placed in the
 // freeConn list, then true is returned, otherwise false is returned.
-func (pool *LDAPPool) putConnLocked(pc *pooledConn, err error) bool {
+func (pool *Pool) putConnLocked(pc *pooledConn, err error) bool {
 	if pool.closed {
 		return false
 	}
@@ -485,7 +490,7 @@ func (pool *LDAPPool) putConnLocked(pc *pooledConn, err error) bool {
 // connection to be opened.
 const maxBadConnRetries = 2
 
-func (pool *LDAPPool) retry(fn func(strategy connReuseStrategy) error) error {
+func (pool *Pool) retry(fn func(strategy connReuseStrategy) error) error {
 	for i := int64(0); i < maxBadConnRetries; i++ {
 		err := fn(cachedOrNewConn)
 		// retry if err is ErrBadConnection
@@ -497,7 +502,7 @@ func (pool *LDAPPool) retry(fn func(strategy connReuseStrategy) error) error {
 	return fn(alwaysNewConn)
 }
 
-func (pool *LDAPPool) shortestIdleTimeLocked() time.Duration {
+func (pool *Pool) shortestIdleTimeLocked() time.Duration {
 	if pool.maxIdleTime <= 0 {
 		return pool.maxLifetime
 	}
@@ -508,14 +513,14 @@ func (pool *LDAPPool) shortestIdleTimeLocked() time.Duration {
 }
 
 // startCleanerLocked starts connectionCleaner if needed.
-func (pool *LDAPPool) startCleanerLocked() {
+func (pool *Pool) startCleanerLocked() {
 	if (pool.maxLifetime > 0 || pool.maxIdleTime > 0) && pool.numOpen > 0 && pool.cleanerCh == nil {
 		pool.cleanerCh = make(chan struct{}, 1)
 		go pool.connectionCleaner(pool.shortestIdleTimeLocked())
 	}
 }
 
-func (pool *LDAPPool) connectionCleaner(d time.Duration) {
+func (pool *Pool) connectionCleaner(d time.Duration) {
 	const minInterval = time.Second
 
 	if d < minInterval {
@@ -565,7 +570,7 @@ func (pool *LDAPPool) connectionCleaner(d time.Duration) {
 // connectionCleanerRunLocked removes connections that should be closed from
 // freeConn and returns them along side an updated duration to the next check
 // if a quicker check is required to ensure connections are checked appropriately.
-func (pool *LDAPPool) connectionCleanerRunLocked(d time.Duration) (time.Duration, []*pooledConn) {
+func (pool *Pool) connectionCleanerRunLocked(d time.Duration) (time.Duration, []*pooledConn) {
 	var idleClosing int64
 	var closing []*pooledConn
 	if pool.maxIdleTime > 0 {

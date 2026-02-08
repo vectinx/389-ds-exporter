@@ -22,6 +22,7 @@ type DSCollector struct {
 	scrapeSuccessDesc  *prometheus.Desc
 }
 
+// NewDSCollector creates new DSCollector instance.
 func NewDSCollector() *DSCollector {
 	collector := DSCollector{
 		collectors: make(map[string]InternalCollector),
@@ -60,10 +61,12 @@ func (c *DSCollector) Collect(channel chan<- prometheus.Metric) {
 	wg.Wait()
 }
 
+// Register adds a child collector.
 func (c *DSCollector) Register(name string, collector InternalCollector) {
 	c.collectors[name] = collector
 }
 
+// scrape gets collector metrics by name and measures the time of the scrape.
 func (c *DSCollector) scrape(collector string, channel chan<- prometheus.Metric) {
 	start_time := time.Now()
 
@@ -77,7 +80,7 @@ func (c *DSCollector) scrape(collector string, channel chan<- prometheus.Metric)
 		collector)
 
 	if err != nil {
-		slog.Error("Colletor failed", "collector", collector, "err", err)
+		slog.Error("Collector failed", "collector", collector, "err", err)
 		channel <- prometheus.MustNewConstMetric(c.scrapeSuccessDesc, prometheus.GaugeValue, 0, collector)
 	} else {
 		channel <- prometheus.MustNewConstMetric(c.scrapeSuccessDesc, prometheus.GaugeValue, 1, collector)

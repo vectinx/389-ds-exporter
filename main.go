@@ -29,7 +29,7 @@ import (
 // appResources struct contains pointers to resources that must be closed when the program terminates.
 // Resources must be added to the structure as they are initialized.
 type appResources struct {
-	ConnPool   *expldap.LDAPPool
+	ConnPool   *expldap.Pool
 	HttpServer *http.Server
 }
 
@@ -81,7 +81,7 @@ func run() int {
 	var (
 		applicationResources = appResources{}
 		startTime            = time.Now()
-		cli, args            = cmd.ParseCmdArguments()
+		cli, args            = cmd.ParseArguments()
 		signalCh             = make(chan os.Signal, 1)
 		serverErrCh          = make(chan error)
 	)
@@ -134,8 +134,8 @@ func run() int {
 
 	slog.Info("LDAP server info", "url", cfg.LDAPServerURL, "bind_dn", cfg.LDAPBindDN)
 
-	ldapConnPoolConfig := expldap.LDAPPoolConfig{
-		Auth: expldap.LDAPAuthConfig{
+	ldapConnPoolConfig := expldap.PoolConfig{
+		Auth: expldap.AuthConfig{
 			URL:           cfg.LDAPServerURL,
 			BindDN:        cfg.LDAPBindDN,
 			BindPw:        cfg.LDAPBindPw,
