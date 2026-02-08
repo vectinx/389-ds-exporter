@@ -43,7 +43,7 @@ make docker
 docker pull vectinx/389-ds-exporter
 ```
 
-Подготавливаем конфигурационный файл согласно [документации](docs/config.md).
+Подготавливаем конфигурационный файл согласно [документации](docs/ru/config.md).
 Запускаем контейнер, передав ему сгенерированный конфиг:
 ```bash
 docker run -d --name 389-ds-exporter \

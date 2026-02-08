@@ -43,7 +43,7 @@ Pull the Docker image
 docker pull vectinx/389-ds-exporter
 ```
 
-Prepare the configuration file according to the [documentation](docs/config.md). Then run the container and pass it the generated config:
+Prepare the configuration file according to the [documentation](docs/en/config.md). Then run the container and pass it the generated config:
 ```bash
 docker run -d --name 389-ds-exporter \
     -v $PWD/config.yml:/etc/config.yml:ro \
