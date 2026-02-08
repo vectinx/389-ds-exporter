@@ -6,7 +6,7 @@ package metrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"389-ds-exporter/src/collectors"
+	"389-ds-exporter/internal/collectors"
 )
 
 // GetLdapBackendCaches function returns map of attributes defining specific ldap server backend metrics.

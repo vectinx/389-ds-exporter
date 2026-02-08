@@ -2,7 +2,7 @@
 extends: default
 
 ignore: |
-  src/config/testdata/no-valid-yml.yml
+  internal/config/testdata/no-valid-yml.yml
 
 rules:
   line-length:

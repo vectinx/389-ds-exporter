@@ -1,4 +1,4 @@
-package utils
+package ldap
 
 import (
 	"errors"
@@ -6,12 +6,10 @@ import (
 	"log/slog"
 
 	"github.com/go-ldap/ldap/v3"
-
-	connections "389-ds-exporter/src/ldap"
 )
 
 // GetLdapBackendType gets backend parameters from ldap and returns them as a BackendType.
-func GetLdapBackendType(conn *connections.PoolConn) (*string, error) {
+func GetLdapBackendType(conn *PoolConn) (*string, error) {
 	if conn == nil {
 		return nil, errors.New("connection is nil")
 	}
@@ -37,7 +35,7 @@ func GetLdapBackendType(conn *connections.PoolConn) (*string, error) {
 }
 
 // GetLdapBackendInstances gets backend instances from ldap and returns them as []string.
-func GetLdapBackendInstances(conn *connections.PoolConn) ([]string, error) {
+func GetLdapBackendInstances(conn *PoolConn) ([]string, error) {
 	if conn == nil {
 		return nil, errors.New("connection is nil")
 	}

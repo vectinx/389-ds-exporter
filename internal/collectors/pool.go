@@ -5,7 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	expldap "389-ds-exporter/src/ldap"
+	expldap "389-ds-exporter/internal/ldap"
 )
 
 // PoolCollector collects internal LDAP-pool metrics.

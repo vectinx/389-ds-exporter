@@ -15,7 +15,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus"
 
-	expldap "389-ds-exporter/src/ldap"
+	expldap "389-ds-exporter/internal/ldap"
 )
 
 /*

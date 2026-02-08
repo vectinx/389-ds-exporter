@@ -1,4 +1,4 @@
-package utils
+package http
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
-	expldap "389-ds-exporter/src/ldap"
+	expldap "389-ds-exporter/internal/ldap"
 )
 
 // HealthHttpResponse function performs exporter healcheck and returns its json result.
