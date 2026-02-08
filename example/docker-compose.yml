@@ -29,6 +29,13 @@ services:
       - ./ssl/389ds-exporter-mdb.pem:/etc/ssl/private/exporter.pem:ro
       - ./ssl/389ds-exporter-mdb.crt:/etc/ssl/certs/exporter.crt:ro
     command: ["--config.file", "/app/config-mdb.yml", "--web.config.file", "/app/web-config.yml"]
+    healthcheck:
+      # The authorization header is derived from the username and password (exporter:SecretPassword) in base64 format
+      test: ["CMD", "wget", "--spider", "--no-check-certificate", "--header", "Authorization: Basic ZXhwb3J0ZXI6U2VjcmV0UGFzc3dvcmQ=", "https://localhost:9389/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 3s
     depends_on:
       389ds-mdb:
         condition: service_healthy
@@ -62,6 +69,13 @@ services:
       - ./ssl/389ds-exporter-bdb.pem:/etc/ssl/private/exporter.pem:ro
       - ./ssl/389ds-exporter-bdb.crt:/etc/ssl/certs/exporter.crt:ro
     command: ["--config.file", "/app/config-bdb.yml", "--web.config.file", "/app/web-config.yml"]
+    healthcheck:
+      # The authorization header is derived from the username and password (exporter:SecretPassword) in base64 format
+      test: ["CMD", "wget", "--spider", "--no-check-certificate", "--header", "Authorization: Basic ZXhwb3J0ZXI6U2VjcmV0UGFzc3dvcmQ=", "https://localhost:9389/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 3s
     depends_on:
       389ds-bdb:
         condition: service_healthy
