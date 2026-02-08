@@ -19,11 +19,10 @@ import (
 
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 
-	"389-ds-exporter/src/cmd"
-	"389-ds-exporter/src/config"
-	expldap "389-ds-exporter/src/ldap"
-	"389-ds-exporter/src/metrics"
-	"389-ds-exporter/src/utils"
+	"389-ds-exporter/internal/config"
+	exphttp "389-ds-exporter/internal/http"
+	expldap "389-ds-exporter/internal/ldap"
+	"389-ds-exporter/internal/metrics"
 )
 
 // appResources struct contains pointers to resources that must be closed when the program terminates.
@@ -81,7 +80,7 @@ func run() int {
 	var (
 		applicationResources = appResources{}
 		startTime            = time.Now()
-		cli, args            = cmd.ParseArguments()
+		cli, args            = ParseArguments()
 		signalCh             = make(chan os.Signal, 1)
 		serverErrCh          = make(chan error)
 	)
@@ -191,7 +190,7 @@ func run() int {
 		http.Handle("/", landingPage)
 	}
 
-	http.HandleFunc("/health", utils.HealthHttpResponse(
+	http.HandleFunc("/health", exphttp.HealthHttpResponse(
 		applicationResources.ConnPool,
 		startTime,
 		time.Duration(cfg.LDAPPoolGetTimeout)*time.Second),

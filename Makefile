@@ -21,7 +21,8 @@ build:
 		-X github.com/prometheus/common/version.Branch=$(BRANCH) \
 		-X github.com/prometheus/common/version.BuildUser=$(BUILD_USER) \
 		-X github.com/prometheus/common/version.BuildDate=$(BUILD_DATE)" \
-   	-o $(BUILD_DIR)/389-ds-exporter
+   	-o $(BUILD_DIR)/389-ds-exporter \
+	./cmd/exporter
 
 docker: build
 	mkdir -p $(BUILD_DIR)

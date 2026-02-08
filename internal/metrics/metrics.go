@@ -9,10 +9,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"389-ds-exporter/src/collectors"
-	"389-ds-exporter/src/config"
-	expldap "389-ds-exporter/src/ldap"
-	"389-ds-exporter/src/utils"
+	"389-ds-exporter/internal/collectors"
+	"389-ds-exporter/internal/config"
+	expldap "389-ds-exporter/internal/ldap"
 )
 
 // standardCollectors returns list of standard enabled collectors.
@@ -125,7 +124,7 @@ func determineBackendInstances(cfg *config.ExporterConfig,
 
 		defer ldapConn.Close()
 
-		detectedInstances, err := utils.GetLdapBackendInstances(ldapConn)
+		detectedInstances, err := expldap.GetLdapBackendInstances(ldapConn)
 		if err != nil {
 			return nil, fmt.Errorf("backend instances detection error: %w", err)
 		}
@@ -156,7 +155,7 @@ func determineBackendType(cfg *config.ExporterConfig,
 
 		slog.Debug("Backend type not specified, detecting automatically")
 
-		detectedType, err := utils.GetLdapBackendType(ldapConn)
+		detectedType, err := expldap.GetLdapBackendType(ldapConn)
 		if err != nil {
 			return "", fmt.Errorf("backend type detection error: %w", err)
 		}
