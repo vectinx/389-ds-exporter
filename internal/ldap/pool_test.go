@@ -169,7 +169,7 @@ func TestMaxOpenFairnessBasic(t *testing.T) {
 	// spawn 5 waiters
 	const waiters = 5
 	done := make(chan struct{})
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		go func() {
 			c, err := p.Conn(ctx)
 			if err == nil {
@@ -183,7 +183,7 @@ func TestMaxOpenFairnessBasic(t *testing.T) {
 	c1.Close()
 	time.Sleep(5 * time.Millisecond)
 	c2.Close()
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		<-done
 	}
 }
@@ -298,10 +298,10 @@ func TestConcurrentAcquireRelease(t *testing.T) {
 	const iters = 100
 	done := make(chan struct{})
 
-	for i := 0; i < workers; i++ {
+	for range workers {
 		go func() {
 			defer func() { done <- struct{}{} }()
-			for j := 0; j < iters; j++ {
+			for range iters {
 				c, err := p.Conn(ctx)
 				if err != nil {
 					t.Errorf("conn: %v", err)
@@ -312,7 +312,7 @@ func TestConcurrentAcquireRelease(t *testing.T) {
 			}
 		}()
 	}
-	for i := 0; i < workers; i++ {
+	for range workers {
 		<-done
 	}
 	_ = p.Close()
@@ -333,7 +333,7 @@ func TestWaitersServedUnderContention(t *testing.T) {
 	var got int32
 	done := make(chan struct{})
 
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		go func() {
 			<-start
 			c, err := p.Conn(ctx)
@@ -353,7 +353,7 @@ func TestWaitersServedUnderContention(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	c2.Close()
 
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		<-done
 	}
 	if atomic.LoadInt32(&got) != waiters {
@@ -372,7 +372,7 @@ func TestCloseWhileWaiters(t *testing.T) {
 
 	const waiters = 10
 	errs := make(chan error, waiters)
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		go func() {
 			_, err := p.Conn(ctx)
 			errs <- err
@@ -382,7 +382,7 @@ func TestCloseWhileWaiters(t *testing.T) {
 	_ = p.Close()
 	c.Close()
 
-	for i := 0; i < waiters; i++ {
+	for range waiters {
 		<-errs
 	}
 }
@@ -401,10 +401,10 @@ func TestNoLeakOnBadConnUnderConcurrency(t *testing.T) {
 	const iters = 50
 	done := make(chan struct{})
 
-	for i := 0; i < workers; i++ {
+	for i := range workers {
 		go func(i int) {
 			defer func() { done <- struct{}{} }()
-			for j := 0; j < iters; j++ {
+			for j := range iters {
 				c, err := p.Conn(ctx)
 				if err != nil {
 					t.Errorf("conn: %v", err)
@@ -422,7 +422,7 @@ func TestNoLeakOnBadConnUnderConcurrency(t *testing.T) {
 			}
 		}(i)
 	}
-	for i := 0; i < workers; i++ {
+	for range workers {
 		<-done
 	}
 	_ = p.Close()

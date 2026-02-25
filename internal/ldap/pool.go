@@ -491,7 +491,7 @@ func (pool *Pool) putConnLocked(pc *pooledConn, err error) bool {
 const maxBadConnRetries = 2
 
 func (pool *Pool) retry(fn func(strategy connReuseStrategy) error) error {
-	for i := int64(0); i < maxBadConnRetries; i++ {
+	for range int64(maxBadConnRetries) {
 		err := fn(cachedOrNewConn)
 		// retry if err is ErrBadConnection
 		if err == nil || !errors.Is(err, ErrBadConnection) {

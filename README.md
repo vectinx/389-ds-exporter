@@ -21,7 +21,7 @@ A Prometheus exporter for 389-ds that collects metrics over the LDAP protocol
 
 Requirements:
 
-- Go >= 1.25.7
+- Go >= 1.26
 - make
 
 ```bash
