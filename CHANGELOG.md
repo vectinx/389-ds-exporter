@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## v2.0.6 (26.02.2026)
+
+### Features
+- Added the 'revive' linter
+- The code layout has been changed to a more idiomatic one for Go
+- Improved documentation layout
+
+### Seciruty
+- Updated the go version to 1.26
+- Updated dependency versions fixing CVE-2026-27141
+
 ## v2.0.5 (07.02.2026)
 
 ### Features
