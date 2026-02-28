@@ -2,32 +2,56 @@
 name: Testing and building of the exporter
 permissions:
   contents: read
+  checks: write
 
-on: # yamllint disable
+on: # yamllint disable-line
   push:
-    branches: [ master, develop ]
+    branches:
+      - master
+      - develop
   pull_request:
-    branches: [ master, develop ]
+    branches:
+      - master
+      - develop
 
 env:
   GO_VERSION: 1.26
-  GOSEC_VERSION: v2.22.11
+  GOSEC_VERSION: v2.24.0
 
 jobs:
-  # Checking various aspects related to lint and security
-  Lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache: true
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Run golangci linter
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Run yamllint
+        run: |
+          set -e
+          python3 -m pip install yamllint
+          yamllint .
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
 
       - name: Install Semgrep
         run: |
@@ -37,23 +61,11 @@ jobs:
       - name: Install Gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@${{ env.GOSEC_VERSION }}
 
-      - name: Run yamllint
-        run: |
-          set -e
-          python3 -m pip install yamllint
-          yamllint .
-
-      - name: Run golangci linter
-        uses: golangci/golangci-lint-action@v8.0.0
-        with:
-          version: latest
-          args: --timeout=5m
-
       - name: Run GoVulncheck
         uses: golang/govulncheck-action@v1
         with:
-           go-version-input: ${{ env.GO_VERSION }}
-           go-package: ./...
+          go-version-input: ${{ env.GO_VERSION }}
+          go-package: ./...
 
       - name: Run Semgrep
         run: semgrep ci --config p/default --config p/golang --config p/gosec --exclude example
@@ -61,23 +73,46 @@ jobs:
       - name: Run Gosec Security Scanner
         run: gosec ./...
 
-  Build:
+  test:
     runs-on: ubuntu-latest
-    needs: Lint
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache: true
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
       - name: Run tests
-        run: go test -v ./... -race
+        run: |
+          go test -v -race ./... 2>&1 | go-junit-report -set-exit-code > report.xml
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: go test results
+          path: report.xml
+          reporter: java-junit
+
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - security
+      - test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
 
       - name: Extract branch name
         shell: bash
