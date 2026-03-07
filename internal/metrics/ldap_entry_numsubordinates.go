@@ -10,12 +10,13 @@ import (
 )
 
 // GetEntryCountAttr function returns map of attributes defining specific ldap entry numsubordinates metric.
-func GetEntryCountAttr() map[string]collectors.LdapMonitoredAttribute {
-	return map[string]collectors.LdapMonitoredAttribute{
-		"count": {
-			LdapName: "numsubordinates",
-			Help:     "Indicates how many immediate subordinates an entry has.",
-			Type:     prometheus.GaugeValue,
+func GetEntryCountAttr() []collectors.LdapMetric {
+	return []collectors.LdapMetric{
+		{
+			MetricName: "count",
+			LdapName:   "numsubordinates",
+			Help:       "Indicates how many immediate subordinates an entry has.",
+			Type:       prometheus.GaugeValue,
 		},
 	}
 }

@@ -7,9 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"slices"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
@@ -18,41 +16,40 @@ import (
 	expldap "389-ds-exporter/internal/ldap"
 )
 
-/*
-LdapAttrValueType type defines the format
-in which the attribute value is stored in the LDAP and how it will be converted to float64.
-*/
-type LdapAttrValueType int
+const ldapTimestampLayout = "20060102150405Z"
 
-const dateTimeLayout string = "20060102150405Z"
+type Parser func(string) (float64, error)
 
-const (
-	_ LdapAttrValueType = iota
-	// NumericValue type corresponds a simple numeric value.
-	NumericValue
-	// Iso8601CompactString type corresponds a string containing the date and time in the 'YYYYMMDDThhmmssZ' format.
-	Iso8601CompactString
-	// StringLabel type corresponds ещ a string value that should be presented as a variable label.
-	StringLabel
-)
+func ParseFloat(value string) (float64, error) {
+	return strconv.ParseFloat(value, 64)
+}
 
-// LdapMonitoredAttribute implements a container for storing
+func ParseTimestamp(value string) (float64, error) {
+	parsedTime, err := time.Parse(ldapTimestampLayout, value)
+	if err != nil {
+		return 0, err
+	}
+	return float64(parsedTime.Unix()), nil
+}
+
+// LdapMetric implements a container for storing
 // the necessary information about an attribute used in metrics.
-type LdapMonitoredAttribute struct {
-	LdapName string
-	LdapType LdapAttrValueType
-	Help     string
-	Type     prometheus.ValueType
-	Labels   prometheus.Labels
+type LdapMetric struct {
+	MetricName string
+	LdapName   string
+	Help       string
+	Type       prometheus.ValueType
+	IsInfo     bool
+	Parser     Parser
+	//Labels    prometheus.Labels
 }
 
 // LdapEntryCollector collects 389-ds metrics.
 type LdapEntryCollector struct {
 	connectionPool *expldap.Pool
 	baseDn         string
-	attributes     map[string]LdapMonitoredAttribute
+	metrics        []LdapMetric
 	descriptors    map[string]*prometheus.Desc
-	mutex          sync.Mutex
 	poolGetTimeout time.Duration
 }
 
@@ -61,34 +58,39 @@ func NewLdapEntryCollector(
 	subsystem string,
 	connectionPool *expldap.Pool,
 	entryBaseDn string,
-	attributes map[string]LdapMonitoredAttribute,
+	metrics []LdapMetric,
 	labels prometheus.Labels,
 	poolGetTimeout time.Duration,
 ) *LdapEntryCollector {
 	metricsDescriptors := make(map[string]*prometheus.Desc)
 
-	for key, val := range attributes {
-		if val.LdapType == StringLabel {
-			metricsDescriptors[key] = prometheus.NewDesc(
-				prometheus.BuildFQName(exporterNamespace, subsystem, key),
-				val.Help,
-				[]string{key},
-				labels,
-			)
-		} else {
-			metricsDescriptors[key] = prometheus.NewDesc(
-				prometheus.BuildFQName(exporterNamespace, subsystem, key),
-				val.Help,
-				nil,
-				labels,
-			)
+	for idx, metric := range metrics {
+		if metric.MetricName == "" {
+			panic("LdapMetric.MetricName cannot be empty")
 		}
+
+		if metric.Parser == nil {
+			metrics[idx].Parser = ParseFloat
+		}
+
+		var labelNames []string
+
+		if metric.IsInfo {
+			labelNames = []string{"value"}
+		}
+
+		metricsDescriptors[metric.MetricName] = prometheus.NewDesc(
+			prometheus.BuildFQName(exporterNamespace, subsystem, metric.MetricName),
+			metric.Help,
+			labelNames,
+			labels,
+		)
 	}
 
 	return &LdapEntryCollector{
 		connectionPool: connectionPool,
 		baseDn:         entryBaseDn,
-		attributes:     attributes,
+		metrics:        metrics,
 		descriptors:    metricsDescriptors,
 		poolGetTimeout: poolGetTimeout,
 	}
@@ -96,85 +98,52 @@ func NewLdapEntryCollector(
 
 // Get function fetches metrics from LDAP and sends them to the provided channel.
 func (c *LdapEntryCollector) Get(channel chan<- prometheus.Metric) error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
 
 	ldapEntries, err := c.getLdapEntryAttributes()
 	if err != nil {
 		return fmt.Errorf("error getting attrs from LDAP: %w", err)
 	}
-	var result error = nil
 
-	for key, value := range c.attributes {
+	var result error
 
-		attributeValues, ok := ldapEntries[value.LdapName]
-		var labelValues = []string{}
+	for _, metric := range c.metrics {
 
+		raw, ok := ldapEntries[metric.LdapName]
 		if !ok {
-			slog.Debug("Attribute was not found in LDAP response. ", "attr_name", value.LdapName)
-
+			slog.Debug("Attribute not found in LDAP response", "attr", metric.LdapName)
 			continue
 		}
 
-		if len(attributeValues) > 1 {
-			slog.Debug("Attribute has more than one value, the first one will be used", "attr_name", key)
+		desc := c.descriptors[metric.MetricName]
+
+		if metric.IsInfo {
+			channel <- prometheus.MustNewConstMetric(desc, metric.Type, 1, raw)
+			continue
 		}
 
-		var converted float64
-
-		if value.LdapType == Iso8601CompactString {
-			parsedTime, err := time.Parse(dateTimeLayout, attributeValues[0])
-			if err != nil {
-				slog.Debug(
-					"Error converting date to type float64",
-					"attr_name",
-					key,
-					"attr_value",
-					attributeValues[0],
-					"err",
-					err,
-				)
-
-				result = fmt.Errorf(
-					"error converting attribute value to float64: %w",
-					err,
-				)
-				continue
-			}
-
-			converted = float64(parsedTime.Unix())
-		} else if value.LdapType == StringLabel {
-			converted = 1
-			labelValues = append(labelValues, attributeValues[0])
-		} else {
-			converted, err = strconv.ParseFloat(ldapEntries[value.LdapName][0], 64)
-			if err != nil {
-				slog.Debug(
-					"Error converting attribute value to type float64",
-					"attr_name",
-					key,
-					"attr_value",
-					ldapEntries[value.LdapName],
-				)
-				result = fmt.Errorf(
-					"error converting attribute value to float64: %w",
-					err,
-				)
-				continue
-			}
+		value, err := metric.Parser(raw)
+		if err != nil {
+			slog.Debug(
+				"Metric parsing failed",
+				"attr", metric.LdapName,
+				"value", raw,
+				"err", err,
+			)
+			result = fmt.Errorf("metric parsing error: %w", err)
+			continue
 		}
 
-		channel <- prometheus.MustNewConstMetric(c.descriptors[key],
-			c.attributes[key].Type, converted, labelValues...)
+		channel <- prometheus.MustNewConstMetric(desc, metric.Type, value)
 	}
+
 	return result
 }
 
-// getLdapEntryAttributes returs the record attributes specified in the LdapEntryCollector from the ldap.
-func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, error) {
-	attributeList := make([]string, 0, len(c.attributes))
+// getLdapEntryAttributes returns the record attributes specified in the LdapEntryCollector from the ldap.
+func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string]string, error) {
+	attributeList := make([]string, 0, len(c.metrics))
 
-	for _, monitoredAttr := range c.attributes {
+	for _, monitoredAttr := range c.metrics {
 		attributeList = append(attributeList, monitoredAttr.LdapName)
 	}
 
@@ -209,22 +178,21 @@ func (c *LdapEntryCollector) getLdapEntryAttributes() (map[string][]string, erro
 		)
 	}
 
-	returnValue := make(map[string][]string)
+	attrs := make(map[string]string)
 
 	if len(searchResult.Entries) < 1 {
 		slog.Warn("LDAP request returned no entries. The configuration may be incorrect or the user may not have permissions",
 			"req_dn", searchAttributesRequest.BaseDN,
 			"req_attrs", searchAttributesRequest.Attributes)
-		return returnValue, nil
+		return attrs, nil
 	}
 
 	for _, attr := range searchResult.Entries[0].Attributes {
-		if !slices.Contains(attributeList, attr.Name) {
-			continue
+		if len(attr.Values) > 1 {
+			slog.Debug("Attribute has multiple values, using first", "attr", attr.Name)
 		}
-
-		returnValue[attr.Name] = attr.Values
+		attrs[attr.Name] = attr.Values[0]
 	}
 
-	return returnValue, nil
+	return attrs, nil
 }

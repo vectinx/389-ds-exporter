@@ -5,12 +5,20 @@
 # - `none`: disables all collectors by default.
 # - `standard`: enables standard set of collectors.
 #
-# collectors_default: standard
+collectors_default: all
 
 # Enable specific collector.
 # Specifying it together with `collectors_default: all` does not make sense, since all collectors are already enabled.
 #
 # collectors_enabled: []
+
+custom_collectors:
+  - name: Admin password expiration collector
+    dn: uid=admin,dc=example,dc=com
+    attrs:
+      - name: krbLastPwdChange
+        info: false
+        parser: timestamp
 
 # Database type.
 # If the type is not specified, the exporter will attempt to detect it automatically.
@@ -46,7 +54,7 @@
 # LDAP server URL in RFC-2255 format. For example:
 # "ldap://localhost:389" or "ldaps://remote-server"
 #
-ldap_server_url: "ldap://localhost:389"
+ldap_server_url: "ldap://localhost:3389"
 
 # DN of the account used to authenticate with the LDAP server.
 #
