@@ -29,7 +29,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"cache_region_wait_total": {
 			LdapName: "nsslapd-db-cache-region-wait-rate",
-			Help:     "Number of times that a thread of control was forced to wait before obtaining the region lock.",
+			Help:     "The number of times a thread had to wait to acquire a cache region lock.",
 			Type:     prometheus.GaugeValue,
 		},
 		"cache_pages_clean": {
@@ -74,7 +74,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"lock_region_wait_total": {
 			LdapName: "nsslapd-db-lock-region-wait-rate",
-			Help:     "Number of times that a thread of control was forced to wait before obtaining the region lock.",
+			Help:     "The number of region lock wait cases.",
 			Type:     prometheus.GaugeValue,
 		},
 		"lock_request_total": {
@@ -104,7 +104,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"log_region_wait_total": {
 			LdapName: "nsslapd-db-log-region-wait-rate",
-			Help:     "Number of times that a thread of control was forced to wait before obtaining the region lock.",
+			Help:     "The number of waits for transaction log region locks.",
 			Type:     prometheus.CounterValue,
 		},
 		"log_write_bytes_total": {
@@ -154,7 +154,7 @@ func GetLdapBDBDatabaseLDBM() map[string]collectors.LdapMonitoredAttribute {
 		},
 		"txn_region_wait_total": {
 			LdapName: "nsslapd-db-txn-region-wait-rate",
-			Help:     "Number of times that a thread of control was force to wait before obtaining the region lock.",
+			Help:     "The number of waits for transaction region locks.",
 			Type:     prometheus.CounterValue,
 		},
 		"lock_objects_current": {
