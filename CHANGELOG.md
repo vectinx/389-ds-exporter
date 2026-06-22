@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## v2.0.7 (22.06.2026)
+
+### Features
+- Added parallel execution of linters, security checks, and tests to reduce pipeline runtime
+- Implemented test report uploading — test results are now available in the CI/CD system interface for detailed analysis
+
+### Security
+- Upgraded Go version from 1.26.0 to 1.26.4
+- Updated various Go dependencies to their latest versions
+- Enhanced the security of the Docker container
+
 ## v2.0.6 (26.02.2026)
 
 ### Features
