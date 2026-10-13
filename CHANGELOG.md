@@ -1,5 +1,9 @@
 # CHANGELOG.md
 
+## v2.0.8 (14.10.2026)
+
+- Upgraded Go version from 1.26.4 to 1.27.2
+
 ## v2.0.7 (22.06.2026)
 
 ### Features
