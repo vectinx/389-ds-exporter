@@ -9,8 +9,18 @@ BUILD_DATE := $(shell date -u +%Y-%m-%d)
 DOCKER_REGISTRY ?= docker.io/vectinx/389-ds-exporter
 DOCKER_TAG ?= $(VERSION)
 BUILD_DIR := build
+BINARY := $(BUILD_DIR)/389-ds-exporter
 
-build:
+GO_SOURCES := $(shell find . -type f -name '*.go' \
+	-not -path './vendor/*' \
+	-not -path './.git/*')
+
+.PHONY: all docker clean
+
+all: $(BINARY)
+
+$(BINARY): $(GO_SOURCES) go.mod go.sum VERSION
+	mkdir -p $(BUILD_DIR)
 	GOOS=linux \
 	GOARCH=amd64 \
 	CGO_ENABLED=0 \
@@ -21,11 +31,12 @@ build:
 		-X github.com/prometheus/common/version.Branch=$(BRANCH) \
 		-X github.com/prometheus/common/version.BuildUser=$(BUILD_USER) \
 		-X github.com/prometheus/common/version.BuildDate=$(BUILD_DATE)" \
-   	-o $(BUILD_DIR)/389-ds-exporter \
-	./cmd/exporter
+		-o $(BINARY) \
+		./cmd/exporter
+
+build: $(BINARY)
 
 docker: build
-	mkdir -p $(BUILD_DIR)
 	cp -rf docker/* $(BUILD_DIR)
 	cd $(BUILD_DIR) && docker build . -t $(DOCKER_REGISTRY):$(DOCKER_TAG)
 
