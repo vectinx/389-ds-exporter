@@ -15,8 +15,7 @@ on: # yamllint disable-line
       - develop
 
 env:
-  GO_VERSION: 1.26.4
-  GOSEC_VERSION: v2.27.1
+  GO_VERSION: 1.27.2
 
 jobs:
   lint:
@@ -59,7 +58,7 @@ jobs:
           pip install semgrep
 
       - name: Install Gosec
-        run: go install github.com/securego/gosec/v2/cmd/gosec@${{ env.GOSEC_VERSION }}
+        run: go install github.com/securego/gosec/v2/cmd/gosec@master
 
       - name: Run GoVulncheck
         uses: golang/govulncheck-action@v1
